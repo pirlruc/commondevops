@@ -1,0 +1,138 @@
+# Authored backlog for commondevops.
+#
+# Schema: https://github.com/pirlruc/github-scaffold/blob/main/docs/issues-schema.md
+# Methodology: https://github.com/pirlruc/methodologies/tree/1.1.0/github-issue-adr
+
+milestones:
+  - name: Phase 1 — Foundation
+    epics:
+      - id: CMN-001
+        status: open
+        title: Reusable common-* workflows (infra lint, secrets/SAST, supply-chain, scorecard, release)
+        overview:
+          problem: Language devops repos duplicate gitleaks/semgrep/SBOM/Scorecard/release wiring.
+          goal: Ship pinned reusable workflows with CI-024/CI-025 contracts and scripts_ref checkout.
+        architecture:
+          target: .github/workflows/common-*.yml
+          modules:
+            - .github/workflows/common-infra-lint.yml
+            - .github/workflows/common-secrets-sast.yml
+            - .github/workflows/common-supply-chain.yml
+            - .github/workflows/common-scorecard.yml
+            - .github/workflows/common-release.yml
+            - scripts/license_gate.py
+            - scripts/install-common-tools.sh
+        acceptance_criteria:
+          - Callers pin SHA and pass scripts_ref + checkout_token for private cross-repo use
+          - blocking=false is advisory (continue-on-error); Dependabot actor skips secret jobs
+          - Top-level permissions default-deny; checkout persist-credentials false
+        guardrail_refs:
+          - CI-024
+          - CI-025
+          - SC-SBOM-001
+          - SC-LIC-001
+        tasks:
+          - id: CMN-001-T1
+            status: open
+            title: Land common-* reusable workflows and install/license scripts
+            instructions:
+              files:
+                - .github/workflows/
+                - scripts/
+            verification:
+              - actionlint .github/workflows/common-infra-lint.yml
+              - python3 scripts/license_gate.py
+            guardrail_refs:
+              - CI-025
+
+      - id: CMN-002
+        status: open
+        title: ci-base image (DHI-first tool assembly) and publish caller
+        overview:
+          problem: Host runners reinstall syft/grype/trivy/hadolint per job; no shared CI image.
+          goal: Digest-pinned docker/ci-base published to ghcr.io/pirlruc/ci-base via containerdevops.
+        architecture:
+          target: docker/ci-base + ci-base-image.yml
+          modules:
+            - docker/ci-base/Dockerfile
+            - docker/ci-base/container-structure-test.yml
+            - .github/workflows/ci-base-image.yml
+            - scripts/pin-dhi-digests.sh
+        acceptance_criteria:
+          - DHI COPY --from for syft/grype/trivy/shellcheck; Hub for hadolint/actionlint; uv for Python CLIs
+          - structure-test covers binaries; dhi_login true on build/publish
+        guardrail_refs:
+          - DOCKER-BUILD-003
+          - DOCKER-LINT-001
+          - DOCKER-TEST-001
+        tasks:
+          - id: CMN-002-T1
+            status: open
+            title: Author Dockerfile structure-test and containerdevops thin caller
+            instructions:
+              files:
+                - docker/ci-base/
+                - .github/workflows/ci-base-image.yml
+            verification:
+              - hadolint docker/ci-base/Dockerfile
+            guardrail_refs:
+              - DOCKER-BUILD-003
+
+      - id: CMN-003
+        status: open
+        title: Dependabot multi-ecosystem groups (SC-DEP)
+        overview:
+          problem: Actions and docker/ci-base base images need monthly grouped updates.
+          goal: Seed .github/dependabot.yml with multi-ecosystem-groups all-dependencies.
+        architecture:
+          target: .github/dependabot.yml
+          modules:
+            - .github/dependabot.yml
+        acceptance_criteria:
+          - Ecosystems github-actions and docker (/docker/ci-base)
+          - Commented dhi registry block retained for Dependabot secrets
+        guardrail_refs:
+          - SC-DEP-001
+          - SC-DEP-002
+          - SC-DEP-003
+        tasks:
+          - id: CMN-003-T1
+            status: open
+            title: Author dependabot.yml for actions and ci-base docker
+            instructions:
+              files:
+                - .github/dependabot.yml
+            verification:
+              - test -f .github/dependabot.yml
+            guardrail_refs:
+              - SC-DEP-003
+
+      - id: CMN-004
+        status: open
+        title: ai-reviewer continuous-improvement prompt (CMN-* prefixes)
+        overview:
+          problem: No Automation prompt for ongoing commondevops review.
+          goal: docs/continuous-improvement.md with seven-section skeleton and CMN-* id prefixes.
+        architecture:
+          target: docs/continuous-improvement.md
+          modules:
+            - docs/continuous-improvement.md
+        acceptance_criteria:
+          - Prompt invents no baked file trees; output is docs/issues.yml PR only
+          - Id prefixes documented (CMN-WF, CMN-IMG, CMN-DOC, …)
+        guardrail_refs:
+          - CI-008
+        tasks:
+          - id: CMN-004-T1
+            status: open
+            title: Author continuous-improvement.md for GitHub Agents Automations
+            instructions:
+              files:
+                - docs/continuous-improvement.md
+            verification:
+              - test -f docs/continuous-improvement.md
+            guardrail_refs:
+              - CI-008
+
+  - name: Continuous improvement
+    epics: []

@@ -1,0 +1,5 @@
+# Guardrail deviations for commondevops.
+# Schema: https://github.com/pirlruc/guardrails#deviation-rule
+# Process: https://github.com/pirlruc/methodologies/blob/1.1.0/github-issue-adr/docs/process/guardrail-compliance.md
+
+deviations: []

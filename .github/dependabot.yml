@@ -1,0 +1,45 @@
+# Org-default Dependabot (SC-DEP-001/002/003) for commondevops.
+# Cadence: docs/guardrails/supply-chain/profile.thresholds.yml
+# Multi-ecosystem docs:
+# https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/configuring-multi-ecosystem-updates
+# Process: https://github.com/pirlruc/methodologies/blob/main/github-issue-adr/docs/process/dependency-updates.md
+#
+# Personal-account private git (uncomment and set Dependabot secrets — not Actions):
+# registries:
+#   github-private:
+#     type: git
+#     url: https://github.com
+#     username: x-access-token
+#     password: ${{secrets.DEPENDABOT_GITHUB_TOKEN}}
+#   dhi:
+#     type: docker-registry
+#     url: https://dhi.io
+#     username: ${{secrets.DOCKERHUB_USERNAME}}
+#     password: ${{secrets.DOCKERHUB_TOKEN}}
+# Then add `registries: [github-private]` (and/or dhi) under each updates entry that needs them.
+# PAT must cover private submodules and reusable-workflow hosts, not only package deps.
+# When migrating from per-ecosystem configs, close stale Dependabot PRs before expecting
+# the grouped all-dependencies PR (open-PR limit otherwise blocks creation).
+
+version: 2
+
+multi-ecosystem-groups:
+  all-dependencies:
+    schedule:
+      interval: monthly
+      time: "06:00"
+      timezone: Europe/Lisbon
+    commit-message:
+      prefix: build
+      include: scope
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    patterns: ["*"]
+    multi-ecosystem-group: all-dependencies
+
+  - package-ecosystem: docker
+    directory: /docker/ci-base
+    patterns: ["*"]
+    multi-ecosystem-group: all-dependencies

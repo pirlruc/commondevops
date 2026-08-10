@@ -1,0 +1,98 @@
+name: Common Release (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: Git tag to release (e.g. v1.2.3)
+        required: true
+        type: string
+      attach_sbom:
+        description: Attach SBOM artifacts from a prior common-supply-chain run if present
+        required: false
+        type: boolean
+        default: false
+      sign:
+        description: Note/attempt keyless cosign (needs public repo or GHEC; private Free-plan may fail)
+        required: false
+        type: boolean
+        default: false
+      sbom_artifact:
+        description: Artifact name containing SBOM files when attach_sbom is true
+        required: false
+        type: string
+        default: common-supply-chain-results
+  workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+        required: true
+      attach_sbom:
+        type: boolean
+        default: false
+      sign:
+        type: boolean
+        default: false
+      sbom_artifact:
+        type: string
+        default: common-supply-chain-results
+
+permissions: {}
+
+jobs:
+  release:
+    # CI-024
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      # Requested when sign=true (keyless cosign / attest); unused otherwise.
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ inputs.tag }}
+
+      - name: Validate tag
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          if [[ ! "${TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-].*)?$ ]]; then
+            echo "::error::Tag '${TAG}' must match semver-ish vMAJOR.MINOR.PATCH"
+            exit 1
+          fi
+          if ! git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+            echo "::error::Tag '${TAG}' not found in this repository"
+            exit 1
+          fi
+          echo "Tag ${TAG} OK → $(git rev-list -n1 "${TAG}")"
+
+      - name: Download SBOM artifact
+        if: inputs.attach_sbom
+        continue-on-error: true
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: ${{ inputs.sbom_artifact }}
+          path: sbom-attach
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
+        with:
+          tag_name: ${{ inputs.tag }}
+          generate_release_notes: true
+          files: |
+            sbom-attach/*
+
+      - name: Cosign note
+        if: inputs.sign
+        run: |
+          cat <<'EOF'
+          sign=true requested. Keyless cosign (SC-SIGN-001) requires a public repository
+          or GitHub Enterprise Cloud artifact attestations. Private Free-plan repos should
+          record a guardrail deviation and leave sign=false until the platform supports it.
+          Wire cosign sign / attest-build-provenance in the consuming release caller when ready.
+          EOF

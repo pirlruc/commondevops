@@ -1,0 +1,139 @@
+name: Common Supply Chain (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      blocking:
+        description: When false, failures are advisory only
+        required: false
+        type: boolean
+        default: false
+      working_directory:
+        description: Directory to scan (Syft dir source)
+        required: false
+        type: string
+        default: .
+      license_deny_list:
+        description: JSON array of SPDX license substrings to deny (empty → guardrails thresholds)
+        required: false
+        type: string
+        default: "[]"
+      scripts_ref:
+        description: "Commit/tag/branch of commondevops to checkout for scripts (must match uses: pin)"
+        required: false
+        type: string
+        default: ""
+    secrets:
+      checkout_token:
+        required: false
+  workflow_dispatch:
+    inputs:
+      blocking:
+        type: boolean
+        default: false
+      working_directory:
+        type: string
+        default: .
+      license_deny_list:
+        type: string
+        default: "[]"
+      scripts_ref:
+        type: string
+        default: ""
+
+permissions: {}
+
+env:
+  ADVISORY: ${{ inputs.blocking == false }}
+
+jobs:
+  supply-chain:
+    # CI-024
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_directory }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Checkout commondevops scripts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pirlruc/commondevops
+          ref: ${{ inputs.scripts_ref || github.sha }}
+          token: ${{ secrets.checkout_token || github.token }}
+          persist-credentials: false
+          path: _commondevops
+          sparse-checkout: |
+            scripts
+          sparse-checkout-cone-mode: false
+
+      - name: Install tooling
+        working-directory: ${{ github.workspace }}
+        env:
+          INSTALL_ONLY: syft,grype,trivy
+        run: bash _commondevops/scripts/install-common-tools.sh
+
+      - name: Syft SBOM (CycloneDX + SPDX)
+        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        run: |
+          mkdir -p scan-results
+          syft dir:. \
+            -o cyclonedx-json=scan-results/sbom-cdx.json \
+            -o spdx-json=scan-results/sbom-spdx.json
+
+      - name: Grype (SBOM)
+        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        run: |
+          CFG=()
+          [[ -f .grype.yaml ]] && CFG=(--config .grype.yaml)
+          if [[ -f scan-results/sbom-cdx.json ]]; then
+            grype "sbom:scan-results/sbom-cdx.json" "${CFG[@]}" --fail-on high \
+              -o json=scan-results/grype.json
+          else
+            grype dir:. "${CFG[@]}" --fail-on high -o json=scan-results/grype.json
+          fi
+
+      - name: Trivy filesystem
+        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        run: |
+          mkdir -p scan-results
+          CFG=()
+          [[ -f trivy.yaml ]] && CFG=(--config trivy.yaml)
+          trivy fs --scanners vuln --severity HIGH,CRITICAL \
+            --format sarif --output scan-results/trivy.sarif \
+            "${CFG[@]}" .
+          trivy fs --scanners vuln --severity HIGH,CRITICAL \
+            --exit-code 1 "${CFG[@]}" .
+
+      - name: License gate
+        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        env:
+          SPDX_SBOM_PATH: scan-results/sbom-spdx.json
+          LICENSE_DENY_LIST: ${{ inputs.license_deny_list }}
+          THRESHOLDS_PATH: ${{ github.workspace }}/docs/guardrails/supply-chain/profile.thresholds.yml
+        run: python3 "${{ github.workspace }}/_commondevops/scripts/license_gate.py"
+
+      - name: Upload scan results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: common-supply-chain-results
+          path: ${{ inputs.working_directory }}/scan-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload Trivy SARIF
+        if: always() && hashFiles(format('{0}/scan-results/trivy.sarif', inputs.working_directory)) != ''
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4.37.3
+        with:
+          sarif_file: ${{ inputs.working_directory }}/scan-results/trivy.sarif
+          category: trivy-fs

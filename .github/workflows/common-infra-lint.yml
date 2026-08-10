@@ -1,0 +1,156 @@
+name: Common Infra Lint (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      blocking:
+        description: When false, failures are advisory only
+        required: false
+        type: boolean
+        default: false
+      working_directory:
+        description: Repo subdirectory to lint
+        required: false
+        type: string
+        default: .
+      shell_scripts:
+        description: Glob or space-separated scripts for shellcheck (empty → scripts/*.sh)
+        required: false
+        type: string
+        default: ""
+      dockerfiles:
+        description: Glob or space-separated Dockerfiles for hadolint (empty → docker/**/Dockerfile)
+        required: false
+        type: string
+        default: ""
+      scripts_ref:
+        description: "Commit/tag/branch of commondevops to checkout for scripts (must match uses: pin)"
+        required: false
+        type: string
+        default: ""
+    secrets:
+      # Required when the caller is a different private repo: GITHUB_TOKEN cannot
+      # read pirlruc/commondevops. Pass a PAT/fine-grained token with contents:read.
+      checkout_token:
+        required: false
+  workflow_dispatch:
+    inputs:
+      blocking:
+        type: boolean
+        default: false
+      working_directory:
+        type: string
+        default: .
+      shell_scripts:
+        type: string
+        default: ""
+      dockerfiles:
+        type: string
+        default: ""
+      scripts_ref:
+        type: string
+        default: ""
+
+# CI-025: default-deny; jobs grant the minimum they need.
+permissions: {}
+
+env:
+  ADVISORY: ${{ inputs.blocking == false }}
+
+jobs:
+  lint:
+    # CI-024: Dependabot PRs cannot use Actions secrets for private reusable workflows.
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_directory }}
+    # Prefer ghcr.io/pirlruc/ci-base:latest once published (image may not exist yet).
+    # v1: bare ubuntu-24.04 + install-common-tools.sh from this repo.
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Checkout commondevops scripts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pirlruc/commondevops
+          # github.workflow_sha is the *caller* workflow; pass scripts_ref matching uses: @pin.
+          ref: ${{ inputs.scripts_ref || github.sha }}
+          token: ${{ secrets.checkout_token || github.token }}
+          persist-credentials: false
+          path: _commondevops
+          sparse-checkout: |
+            scripts
+          sparse-checkout-cone-mode: false
+
+      - name: Install tooling
+        working-directory: ${{ github.workspace }}
+        env:
+          INSTALL_ONLY: actionlint,hadolint,shellcheck
+        run: bash _commondevops/scripts/install-common-tools.sh
+
+      - name: Install zizmor
+        working-directory: ${{ github.workspace }}
+        run: |
+          pipx install 'zizmor>=1.0' || pip install --user 'zizmor>=1.0'
+          echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
+
+      - name: actionlint
+        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        working-directory: ${{ github.workspace }}
+        run: |
+          mapfile -t WFS < <(find .github/workflows -name '*.yml' -o -name '*.yaml' 2>/dev/null | head -40)
+          if [[ ${#WFS[@]} -eq 0 ]]; then
+            echo "No workflows to lint"
+            exit 0
+          fi
+          actionlint "${WFS[@]}"
+
+      - name: shellcheck
+        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        env:
+          SHELL_SCRIPTS: ${{ inputs.shell_scripts }}
+        run: |
+          if [[ -n "${SHELL_SCRIPTS}" ]]; then
+            # shellcheck disable=SC2086
+            shellcheck ${SHELL_SCRIPTS}
+          else
+            mapfile -t SHS < <(find scripts -name '*.sh' 2>/dev/null || true)
+            if [[ ${#SHS[@]} -eq 0 ]]; then
+              echo "No shell scripts"
+              exit 0
+            fi
+            shellcheck "${SHS[@]}"
+          fi
+
+      - name: hadolint
+        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        env:
+          DOCKERFILES: ${{ inputs.dockerfiles }}
+        run: |
+          if [[ -n "${DOCKERFILES}" ]]; then
+            # shellcheck disable=SC2086
+            hadolint ${DOCKERFILES}
+          else
+            mapfile -t DFS < <(find docker -name 'Dockerfile' 2>/dev/null || true)
+            if [[ ${#DFS[@]} -eq 0 ]]; then
+              echo "No Dockerfiles"
+              exit 0
+            fi
+            hadolint "${DFS[@]}"
+          fi
+
+      - name: zizmor
+        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        working-directory: ${{ github.workspace }}
+        run: |
+          if [[ -d .github/workflows ]]; then
+            zizmor .github/workflows
+          else
+            echo "No workflows for zizmor"
+          fi

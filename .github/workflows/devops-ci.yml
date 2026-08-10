@@ -1,0 +1,50 @@
+name: DevOps CI (self)
+
+on:
+  workflow_dispatch:
+    inputs:
+      blocking:
+        description: Fail jobs on gate errors
+        type: boolean
+        default: false
+
+# CI-025 default-deny; reusable callees declare their own job permissions.
+permissions: {}
+
+jobs:
+  infra-lint:
+    if: github.actor != 'dependabot[bot]'
+    uses: ./.github/workflows/common-infra-lint.yml
+    with:
+      blocking: ${{ inputs.blocking }}
+      working_directory: .
+      shell_scripts: scripts/*.sh
+      dockerfiles: docker/ci-base/Dockerfile
+      # Same-repo call: github.sha is this repo; scripts_ref optional.
+      scripts_ref: ${{ github.sha }}
+
+  secrets-sast:
+    if: github.actor != 'dependabot[bot]'
+    uses: ./.github/workflows/common-secrets-sast.yml
+    with:
+      blocking: ${{ inputs.blocking }}
+      working_directory: .
+      scripts_ref: ${{ github.sha }}
+
+  supply-chain:
+    if: github.actor != 'dependabot[bot]'
+    uses: ./.github/workflows/common-supply-chain.yml
+    with:
+      blocking: ${{ inputs.blocking }}
+      working_directory: .
+      license_deny_list: "[]"
+      scripts_ref: ${{ github.sha }}
+
+  scorecard:
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      github.event.repository.fork == false
+    uses: ./.github/workflows/common-scorecard.yml
+    with:
+      blocking: ${{ inputs.blocking }}
+      publish_results: false
