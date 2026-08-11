@@ -1,5 +1,5 @@
-# Make a GHCR package public using GITHUB_TOKEN (packages: write).
-# Local `gh` often lacks packages scopes; run via workflow_dispatch.
+# GHCR package visibility cannot be changed via API with GITHUB_TOKEN (PATCH → 404).
+# There is also no API to grant "Manage Actions access". Print UI steps and fail.
 name: GHCR Package Visibility
 
 on:
@@ -10,48 +10,34 @@ on:
         type: string
         required: true
         default: ci-base
-      visibility:
-        description: public or private
-        type: choice
-        options:
-          - public
-          - private
-        default: public
 
 permissions:
   contents: read
 
 jobs:
-  set-visibility:
+  instruct:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
-    permissions:
-      packages: write
     steps:
-      - name: Set package visibility
+      - name: Print manual UI steps (API cannot set visibility)
         env:
-          GH_TOKEN: ${{ github.token }}
           OWNER: ${{ github.repository_owner }}
           PACKAGE: ${{ inputs.package_name }}
-          VISIBILITY: ${{ inputs.visibility }}
         run: |
           set -euo pipefail
-          echo "Setting ghcr.io/${OWNER}/${PACKAGE} visibility=${VISIBILITY}"
-          # GITHUB_TOKEN is repo-scoped, not a user PAT — use /users or /orgs, not /user.
-          OWNER_TYPE="$(gh api "users/${OWNER}" --jq .type)"
-          echo "owner_type=${OWNER_TYPE}"
-          if [[ "${OWNER_TYPE}" == "Organization" ]]; then
-            API="orgs/${OWNER}/packages/container/${PACKAGE}"
-          else
-            API="users/${OWNER}/packages/container/${PACKAGE}"
-          fi
-          echo "GET ${API}"
-          gh api -H "Accept: application/vnd.github+json" "${API}" \
-            --jq '{name,visibility,package_type,html_url}'
-          echo "PATCH visibility=${VISIBILITY}"
-          gh api --method PATCH \
-            -H "Accept: application/vnd.github+json" \
-            "${API}" \
-            -f visibility="${VISIBILITY}" \
-            --jq '{name,visibility}'
-          echo "Updated ${API} → visibility=${VISIBILITY}"
+          {
+            echo "::error title=GHCR visibility is manual::API PATCH returns 404 for GITHUB_TOKEN; use the package settings UI."
+            echo ""
+            echo "Package: ghcr.io/${OWNER}/${PACKAGE}"
+            echo "Settings: https://github.com/users/${OWNER}/packages/container/package/${PACKAGE}"
+            echo ""
+            echo "Make public:"
+            echo "  1. Open Package settings → Change visibility → Public"
+            echo ""
+            echo "Or keep private and grant Actions pull access:"
+            echo "  1. Package settings → Manage Actions access → Add repository"
+            echo "  2. Add the consuming repo (e.g. ${OWNER}/containerdevops) with Read"
+            echo ""
+            echo "There is no REST API to change visibility or Actions access for user packages."
+          } >&2
+          exit 1
