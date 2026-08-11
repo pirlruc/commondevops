@@ -16,12 +16,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# CI-025 default-deny; reusable callees declare their own job permissions.
+# CI-025 — caller grants the max scopes callees may request.
 permissions: {}
 
 jobs:
   infra-lint:
     if: github.actor != 'dependabot[bot]'
+    permissions:
+      contents: read
     uses: ./.github/workflows/common-infra-lint.yml
     with:
       # Push/PR are blocking; workflow_dispatch honours the input.
@@ -29,11 +31,13 @@ jobs:
       working_directory: .
       shell_scripts: scripts/*.sh
       dockerfiles: docker/ci-base/Dockerfile
-      # Same-repo call: github.sha is this repo; scripts_ref optional.
       scripts_ref: ${{ github.sha }}
 
   secrets-sast:
     if: github.actor != 'dependabot[bot]'
+    permissions:
+      contents: read
+      security-events: write
     uses: ./.github/workflows/common-secrets-sast.yml
     with:
       blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
@@ -42,6 +46,9 @@ jobs:
 
   supply-chain:
     if: github.actor != 'dependabot[bot]'
+    permissions:
+      contents: read
+      security-events: write
     uses: ./.github/workflows/common-supply-chain.yml
     with:
       blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
@@ -53,6 +60,10 @@ jobs:
     if: >-
       github.actor != 'dependabot[bot]' &&
       github.event.repository.fork == false
+    permissions:
+      contents: read
+      security-events: write
+      id-token: write
     uses: ./.github/workflows/common-scorecard.yml
     with:
       blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
