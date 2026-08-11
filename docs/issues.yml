@@ -326,3 +326,47 @@ milestones:
               - grep -q 'DOCKER-PERF-001' docs/guardrail-deviations.yml
             guardrail_refs:
               - DOCKER-PERF-001
+
+      - id: CMN-011
+        status: in_progress
+        title: Time-boxed Trivy ignores for vendor-static ci-base donor binaries
+        overview:
+          problem: >
+            HIGH/CRITICAL CVEs embedded in upstream static donor binaries (syft/grype/trivy/grant/actionlint)
+            fail DOCKER-SEC-001 image scan even after PyJWT/mcp upgrades and actionlint 1.7.12.
+          goal: >
+            Path-scoped .trivyignore.yaml (review 2026-11-11) plus containerdevops ignorefile support;
+            refresh donor digests when upstream ships fixes.
+        architecture:
+          target: ci-base scan ignore path
+          modules:
+            - .trivyignore.yaml
+            - docker/ci-base/Dockerfile
+            - .github/workflows/ci-base-image.yml
+        acceptance_criteria:
+          - .trivyignore.yaml covers remaining donor-binary HIGH/CRITICAL with path + statement
+          - PyJWT 2.13 via semgrep 1.172.0; mcp==1.29.0 via uv override (not ignored; mcp 2.x breaks semgrep FastMCP)
+
+          - Local and CI Trivy --severity HIGH,CRITICAL --exit-code 1 passes with ignorefile
+          - containerdevops pin includes ignorefile-aware container-scan.yml
+        guardrail_refs:
+          - DOCKER-SEC-001
+        tasks:
+          - id: CMN-011-T1
+            status: in_progress
+            title: Author ignorefile, bump actionlint/PyJWT/mcp, pin containerdevops
+            instructions:
+              files:
+                - .trivyignore.yaml
+                - docker/ci-base/Dockerfile
+                - .github/workflows/ci-base-image.yml
+                - docs/issues.yml
+            verification:
+              - docker build -t ci-base:ci -f docker/ci-base/Dockerfile docker/ci-base
+              - >
+                docker run --rm -v /var/run/docker.sock:/var/run/docker.sock
+                -v $PWD/.trivyignore.yaml:/tmp/.trivyignore.yaml:ro
+                aquasec/trivy:0.73.0 image --severity HIGH,CRITICAL --exit-code 1
+                --pkg-types library --scanners vuln --ignorefile /tmp/.trivyignore.yaml ci-base:ci
+            guardrail_refs:
+              - DOCKER-SEC-001

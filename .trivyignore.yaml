@@ -1,0 +1,80 @@
+# Vendor-static toolchain binaries — refresh digests when upstream ships fixes.
+# Review: 2026-11-11 (CMN-011)
+vulnerabilities:
+  # actionlint 1.7.12 still embeds Go stdlib v1.26.1 HIGH CVEs
+  - id: CVE-2026-27145
+    paths:
+      - "**/actionlint"
+    statement: Go stdlib embedded in rhysd/actionlint donor; no newer digest yet.
+  - id: CVE-2026-32280
+    paths:
+      - "**/actionlint"
+    statement: Go stdlib embedded in rhysd/actionlint donor; no newer digest yet.
+  - id: CVE-2026-32281
+    paths:
+      - "**/actionlint"
+    statement: Go stdlib embedded in rhysd/actionlint donor; no newer digest yet.
+  - id: CVE-2026-32283
+    paths:
+      - "**/actionlint"
+    statement: Go stdlib embedded in rhysd/actionlint donor; no newer digest yet.
+  - id: CVE-2026-33810
+    paths:
+      - "**/actionlint"
+    statement: Go stdlib embedded in rhysd/actionlint donor; no newer digest yet.
+  - id: CVE-2026-33811
+    paths:
+      - "**/actionlint"
+    statement: Go stdlib embedded in rhysd/actionlint donor; no newer digest yet.
+  - id: CVE-2026-33814
+    paths:
+      - "**/actionlint"
+    statement: Go stdlib embedded in rhysd/actionlint donor; no newer digest yet.
+  - id: CVE-2026-39820
+    paths:
+      - "**/actionlint"
+    statement: Go stdlib embedded in rhysd/actionlint donor; no newer digest yet.
+  - id: CVE-2026-39822
+    paths:
+      - "**/actionlint"
+    statement: Go stdlib embedded in rhysd/actionlint donor; no newer digest yet.
+  - id: CVE-2026-39836
+    paths:
+      - "**/actionlint"
+    statement: Go stdlib embedded in rhysd/actionlint donor; no newer digest yet.
+  - id: CVE-2026-42499
+    paths:
+      - "**/actionlint"
+    statement: Go stdlib embedded in rhysd/actionlint donor; no newer digest yet.
+  - id: CVE-2026-42504
+    paths:
+      - "**/actionlint"
+    statement: Go stdlib embedded in rhysd/actionlint donor; no newer digest yet.
+
+  - id: CVE-2026-71556
+    paths:
+      - "**/syft"
+      - "**/grype"
+      - "**/trivy"
+      - "**/grant"
+    statement: Embedded go-git in DHI/Anchore donor binaries; no newer floating tag yet.
+  - id: CVE-2026-34040
+    paths:
+      - "**/grype"
+    statement: Embedded moby client in grype donor binary.
+  - id: CVE-2026-41567
+    paths:
+      - "**/grype"
+    statement: Embedded moby client in grype donor binary.
+  - id: CVE-2026-42306
+    paths:
+      - "**/grype"
+    statement: Embedded moby client in grype donor binary.
+  - id: CVE-2026-56852
+    paths:
+      - "**/grant"
+    statement: Embedded golang.org/x/text in grant donor binary.
+  - id: GHSA-hrxh-6v49-42gf
+    paths:
+      - "**/grant"
+    statement: Embedded gRPC-Go in grant donor binary.
