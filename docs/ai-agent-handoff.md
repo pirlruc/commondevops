@@ -75,7 +75,18 @@ python3 .github/scaffold/scripts/issues-sync.py \
   Callers pass optional `SCORECARD_TOKEN` (classic PAT, `repo` scope). Without it,
   Scorecard is **advisory** when `repository.private` is true (PR #10).
 
+## Known pitfalls (GHCR)
+
+- **No API to make packages public.** UI only:
+  https://github.com/users/pirlruc/packages/container/package/ci-base
+  → Package settings → Change visibility → Public.
+  Grant Actions Read to `pirlruc/containerdevops` if keeping private.
+
 ## Suggested next work
+
+1. Make `ci-base` public in GHCR UI (blocks ci-container publish).
+2. Re-run containerdevops CI Container Image publish / finish `1.0.0`.
+3. Re-pin this repo to containerdevops `@1.0.0` SHA.
 
 1. Make `ghcr.io/pirlruc/ci-base` package public; verify unauthenticated pull.
 2. Cut containerdevops `1.0.0`; make `ci-container` public; re-pin this repo to that tag.
