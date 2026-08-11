@@ -294,3 +294,35 @@ milestones:
               - test -f .grant.yaml
             guardrail_refs:
               - SC-LIC-002
+
+      - id: CMN-010
+        status: in_progress
+        title: DOCKER-PERF-001 size deviation for ci-base toolchain image
+        overview:
+          problem: Org image_max_size_mb=300 fits product images; ci-base bundles scanners and exceeds ~1.2GB uncompressed on GHA.
+          goal: Document approved repo_value=1500 and pass image_max_size_mb override into container-build.
+        architecture:
+          target: ci-base size gate
+          modules:
+            - docs/guardrail-deviations.yml
+            - .github/workflows/ci-base-image.yml
+        acceptance_criteria:
+          - Deviation recorded for DOCKER-PERF-001 image_max_size_mb with epic CMN-010
+          - ci-base-image.yml passes image_max_size_mb matching repo_value
+          - CI Base Image build size gate passes on PRs
+        guardrail_refs:
+          - DOCKER-PERF-001
+        tasks:
+          - id: CMN-010-T1
+            status: in_progress
+            title: Wire size override and record deviation
+            instructions:
+              files:
+                - docs/guardrail-deviations.yml
+                - .github/workflows/ci-base-image.yml
+                - docs/issues.yml
+            verification:
+              - grep -q 'image_max_size_mb: \"1500\"' .github/workflows/ci-base-image.yml
+              - grep -q 'DOCKER-PERF-001' docs/guardrail-deviations.yml
+            guardrail_refs:
+              - DOCKER-PERF-001
