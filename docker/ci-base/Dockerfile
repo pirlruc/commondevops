@@ -57,12 +57,13 @@ RUN uv pip install --system --no-cache \
 
 WORKDIR /workspace
 
-# Non-root default user (semgrep dockerfile.security.missing-user*). Tools are
-# world-executable under /usr/local/bin; Actions job containers still get a
-# writable workspace bind-mount.
-RUN useradd --create-home --uid 1000 --shell /bin/bash ci \
- && chown -R ci:ci /workspace
-USER ci
+# Non-root default user (semgrep dockerfile.security.missing-user*).
+# DHI images have no useradd/adduser; write passwd/group entries directly.
+RUN printf 'ci:x:1000:1000::/home/ci:/bin/bash\n' >> /etc/passwd \
+ && printf 'ci:x:1000:\n' >> /etc/group \
+ && mkdir -p /home/ci \
+ && chown -R 1000:1000 /home/ci /workspace
+USER 1000:1000
 
 ENTRYPOINT []
 CMD ["bash"]
