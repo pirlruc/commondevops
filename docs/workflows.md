@@ -20,7 +20,8 @@ Shared inputs:
 ## `common-infra-lint.yml`
 
 Runs **actionlint**, **shellcheck**, **hadolint**, **zizmor** on `ubuntu-24.04`
-via `scripts/install-common-tools.sh` (v1; prefer `ghcr.io/pirlruc/ci-base` later).
+via `scripts/install-common-tools.sh` (host path). Prefer running the same
+commands inside `ghcr.io/pirlruc/ci-lint` for version lockstep.
 
 | Input | Default | Notes |
 |-------|---------|-------|
@@ -34,10 +35,10 @@ via `scripts/install-common-tools.sh` (v1; prefer `ghcr.io/pirlruc/ci-base` late
 | Step | Tool |
 |------|------|
 | Secrets | gitleaks (`--config .gitleaks.toml` when present) |
-| SAST | semgrep (`--config auto`, plus `.semgrep.yml` when present) |
+| SAST | semgrep `1.172.0` (`--config auto`, plus `.semgrep.yml` when present) |
 
 Needs `contents: read` + `security-events: write`. Full history checkout for
-gitleaks ranges.
+gitleaks ranges. Prefer `ghcr.io/pirlruc/ci-lint` for the same toolset.
 
 ---
 
@@ -48,13 +49,18 @@ gitleaks ranges.
 | Syft | `scan-results/sbom-cdx.json` + `sbom-spdx.json` |
 | Grype | Fail on high (advisory when `blocking: false`) |
 | Trivy fs | HIGH/CRITICAL + SARIF upload |
-| License | `scripts/license_gate.py` with `SPDX_SBOM_PATH` + `LICENSE_DENY_LIST` |
+| License | **grant** (default) or `scripts/license_gate.py` (`license_engine`) |
 
 | Input | Default | Notes |
 |-------|---------|-------|
-| `license_deny_list` | `"[]"` | JSON array string; empty/`[]` → `docs/guardrails/supply-chain/profile.thresholds.yml` |
+| `license_deny_list` | `"[]"` | JSON array string |
+| `license_engine` | `grant` | `grant` or `spdx-deny` |
+
+Thresholds are **vendored** at `scripts/supply-chain.profile.thresholds.yml`
+(not `docs/guardrails/…` — the submodule is often deinitialized for consumers).
 
 Guardrail IDs: SC-SBOM-*, SC-LIC-*, language-local SEC for Trivy/Grype as applicable.
+Prefer `ghcr.io/pirlruc/ci-supply-chain` for the scanner binaries.
 
 ---
 
@@ -66,6 +72,9 @@ Permissions: `security-events: write`, `id-token: write`.
 | Input | Default |
 |-------|---------|
 | `publish_results` | `true` |
+
+Private Free-plan repos: pass optional `SCORECARD_TOKEN` (classic PAT, `repo`
+scope) or Scorecard stays advisory when `repository.private` is true.
 
 ---
 
@@ -83,15 +92,23 @@ Permissions: `contents: write`; `id-token: write` when signing is requested
 
 ---
 
-## `ci-base-image.yml` (caller)
+## `ci-lint-image.yml` / `ci-supply-chain-image.yml` (callers)
 
-Thin caller into containerdevops@`09dded47` for lint/build/scan/publish of
-`docker/ci-base`. Secrets: `CONTAINERDEVOPS_READ_TOKEN`, `DOCKERHUB_USERNAME`,
-`DOCKERHUB_TOKEN`. `dhi_login: true`.
+Thin callers into containerdevops for lint/build/scan/publish of
+`docker/ci-lint` and `docker/ci-supply-chain`. Secrets:
+`CONTAINERDEVOPS_READ_TOKEN`, `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`.
+`dhi_login: true`. `image_max_size_mb: "700"` (rootfs via `du -sxm /`).
+Optional Hub push via `dockerhub_image`. Caller must grant `packages: read` on
+the build job (container-build declares it).
+
+Public package pages: [docker-hub-ci-lint.md](docker-hub-ci-lint.md),
+[docker-hub-ci-supply-chain.md](docker-hub-ci-supply-chain.md).
+
+`docker/ci-base/` and the former `ci-base-image.yml` are deprecated (2.0.0).
 
 ---
 
 ## `devops-ci.yml` (self)
 
-`workflow_dispatch` that calls the `common-*` reusables against this repository
-for smoke verification.
+`push` / `pull_request` on `main` plus `workflow_dispatch`. Calls the `common-*`
+reusables against this repository (`scripts_ref: ${{ github.sha }}`).

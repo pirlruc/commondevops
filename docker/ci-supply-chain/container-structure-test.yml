@@ -1,0 +1,46 @@
+schemaVersion: "2.0.0"
+metadataTest:
+  envVars:
+    - key: PYTHONDONTWRITEBYTECODE
+      value: "1"
+    - key: PYTHONUNBUFFERED
+      value: "1"
+commandTests:
+  - name: syft
+    command: "syft"
+    args: ["version"]
+    exitCode: 0
+  - name: grype
+    command: "grype"
+    args: ["version"]
+    exitCode: 0
+  - name: trivy
+    command: "trivy"
+    args: ["--version"]
+    exitCode: 0
+  - name: grant
+    command: "grant"
+    args: ["version"]
+    exitCode: 0
+fileExistenceTests:
+  - name: syft binary
+    path: "/usr/local/bin/syft"
+    shouldExist: true
+  - name: grype binary
+    path: "/usr/local/bin/grype"
+    shouldExist: true
+  - name: trivy binary
+    path: "/usr/local/bin/trivy"
+    shouldExist: true
+  - name: grant binary
+    path: "/usr/local/bin/grant"
+    shouldExist: true
+  - name: cosign absent
+    path: "/usr/local/bin/cosign"
+    shouldExist: false
+  - name: semgrep absent
+    path: "/usr/bin/semgrep"
+    shouldExist: false
+  - name: uv absent
+    path: "/usr/local/bin/uv"
+    shouldExist: false

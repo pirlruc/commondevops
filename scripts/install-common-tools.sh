@@ -2,16 +2,17 @@
 # Install pinned common CI tooling into $HOME/.local/bin when not present.
 # Optional: INSTALL_ONLY=actionlint,hadolint,shellcheck  (comma-separated).
 #
-# DHI-sourced tools (syft, grype, trivy, shellcheck in ci-base) are expected from
-# ghcr.io/pirlruc/ci-base:latest — this script covers runner-host installs for
-# workflows that do not yet run inside that image.
+# DHI-sourced tools (syft, grype, trivy, shellcheck in ci-supply-chain / ci-lint)
+# are expected from ghcr.io/pirlruc/ci-supply-chain and ghcr.io/pirlruc/ci-lint —
+# this script covers runner-host installs for workflows that do not yet run
+# inside those images.
 set -euo pipefail
 DEST="${HOME}/.local/bin"
 mkdir -p "${DEST}"
 export PATH="${DEST}:${PATH}"
 
 HADOLINT_VERSION="${HADOLINT_VERSION:-2.12.0}"
-ACTIONLINT_VERSION="${ACTIONLINT_VERSION:-1.7.7}"
+ACTIONLINT_VERSION="${ACTIONLINT_VERSION:-1.7.12}"
 SHELLCHECK_VERSION="${SHELLCHECK_VERSION:-0.10.0}"
 GITLEAKS_VERSION="${GITLEAKS_VERSION:-8.21.2}"
 TRIVY_VERSION="${TRIVY_VERSION:-0.73.0}"

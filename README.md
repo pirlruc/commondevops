@@ -1,13 +1,14 @@
 # commondevops
 
-Reusable GitHub Actions, scripts, and the shared `ci-base` image for org-wide
-infra lint, secrets/SAST, supply-chain, Scorecard, and release gates.
+Reusable GitHub Actions, scripts, and shared CI toolchain images (`ci-lint`,
+`ci-supply-chain`) for org-wide infra lint, secrets/SAST, supply-chain,
+Scorecard, and release gates.
 
 | | |
 |---|---|
 | **Remote** | https://github.com/pirlruc/commondevops |
 | **Role** | Cross-language CI infrastructure (pairs with [containerdevops](https://github.com/pirlruc/containerdevops) and [pydevops](https://github.com/pirlruc/pydevops)) |
-| **Guardrails** | Pinned at `docs/guardrails/` ([pirlruc/guardrails](https://github.com/pirlruc/guardrails) tag `1.0.0`) |
+| **Guardrails** | Pinned at `docs/guardrails/` ([pirlruc/guardrails](https://github.com/pirlruc/guardrails) tag `1.1.0`) |
 
 ## Reusable workflows
 
@@ -43,22 +44,28 @@ jobs:
 
 ```bash
 bash scripts/check-ci-local.sh
-# Missing host tools → scripts/check-ci-docker.sh (ghcr.io/pirlruc/ci-base:latest)
+# Missing host tools → scripts/check-ci-docker.sh
+# Prefer: docker run --rm -v "$PWD:/workspace" -w /workspace ghcr.io/pirlruc/ci-lint:<tag> …
 ```
 
-## ci-base image
+## Toolchain images
 
-[`docker/ci-base/`](docker/ci-base/) assembles DHI-pinned syft/grype/trivy/shellcheck
-plus hadolint, actionlint, and uv-installed zizmor/yamllint/semgrep. Built and
-published by [`.github/workflows/ci-base-image.yml`](.github/workflows/ci-base-image.yml)
-via [containerdevops](https://github.com/pirlruc/containerdevops)@`09dded47`.
+| Image | Contents | Docs |
+|-------|----------|------|
+| `ghcr.io/pirlruc/ci-lint` | actionlint, hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep | [docker-hub-ci-lint.md](docs/docker-hub-ci-lint.md) |
+| `ghcr.io/pirlruc/ci-supply-chain` | syft, grype, trivy, grant | [docker-hub-ci-supply-chain.md](docs/docker-hub-ci-supply-chain.md) |
+
+Built via [`ci-lint-image.yml`](.github/workflows/ci-lint-image.yml) and
+[`ci-supply-chain-image.yml`](.github/workflows/ci-supply-chain-image.yml)
+using [containerdevops](https://github.com/pirlruc/containerdevops).
+`docker/ci-base/` is deprecated (replaced in 2.0.0).
 
 ## Submodules
 
 | Path | Remote | Pin |
 |------|--------|-----|
-| `docs/guardrails` | https://github.com/pirlruc/guardrails.git | tag `1.0.0` → commit `925b9f3…` |
-| `.github/scaffold` | https://github.com/pirlruc/github-scaffold.git | `0db5890…` |
+| `docs/guardrails` | https://github.com/pirlruc/guardrails.git | tag `1.1.0` → commit `6fe580c…` |
+| `.github/scaffold` | https://github.com/pirlruc/github-scaffold.git | `f8a6ba1…` |
 
 ```bash
 git submodule update --init --recursive

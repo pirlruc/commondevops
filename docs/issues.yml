@@ -296,7 +296,7 @@ milestones:
               - SC-LIC-002
 
       - id: CMN-010
-        status: in_progress
+        status: done
         title: DOCKER-PERF-001 size deviation for ci-base toolchain image
         overview:
           problem: Org image_max_size_mb=300 fits product images; ci-base bundles scanners and exceeds ~1.2GB uncompressed on GHA.
@@ -314,7 +314,7 @@ milestones:
           - DOCKER-PERF-001
         tasks:
           - id: CMN-010-T1
-            status: in_progress
+            status: done
             title: Wire size override and record deviation
             instructions:
               files:
@@ -328,7 +328,7 @@ milestones:
               - DOCKER-PERF-001
 
       - id: CMN-011
-        status: in_progress
+        status: done
         title: Time-boxed Trivy ignores for vendor-static ci-base donor binaries
         overview:
           problem: >
@@ -353,7 +353,7 @@ milestones:
           - DOCKER-SEC-001
         tasks:
           - id: CMN-011-T1
-            status: in_progress
+            status: done
             title: Author ignorefile, bump actionlint/PyJWT/mcp, pin containerdevops
             instructions:
               files:

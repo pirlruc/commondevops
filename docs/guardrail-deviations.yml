@@ -1,15 +1,34 @@
-# Guardrail deviations for commondevops.
-# Schema: https://github.com/pirlruc/guardrails#deviation-rule
-# Process: https://github.com/pirlruc/methodologies/blob/1.1.0/github-issue-adr/docs/process/guardrail-compliance.md
+# Recorded departures from the guardrails pinned at docs/guardrails/.
+#
+# Field definitions: https://github.com/pirlruc/guardrails#deviation-rule
+# Approval flow:     https://github.com/pirlruc/methodologies/blob/1.1.0/github-issue-adr/docs/process/guardrail-compliance.md
+#
+# Size is measured as uncompressed rootfs via `du -sxm /` inside the image
+# (scripts/check-image-size.sh in containerdevops). Do not use docker inspect
+# .Size — that field is store-dependent.
 
 deviations:
   - id: DOCKER-PERF-001
     key: image_max_size_mb
     org_default: 300
-    repo_value: 1500
+    repo_value: 700
     why: >
-      ci-base is a shared CI toolchain image (syft/grype/trivy/cosign/semgrep/grant),
-      not a product runtime image; uncompressed size on GHA is ~1.2GB.
+      ci-lint is a shared CI toolchain image (shellcheck/hadolint/actionlint/
+      gitleaks/semgrep/zizmor/yamllint), not a product runtime image.
+      Measured rootfs ~545 MB after split from ci-base and purge of -dev packages.
+    epic: CMN-010
+    owner: pirlruc
+    approved_by: Engineering Lead
+    review: 2026-12-31
+  - id: DOCKER-PERF-001
+    key: image_max_size_mb
+    org_default: 300
+    repo_value: 700
+    why: >
+      ci-supply-chain is a shared CI toolchain image (syft/grype/trivy/grant),
+      not a product runtime image. Measured rootfs ~575 MB after split from
+      ci-base (cosign omitted — installed on the publish runner) and purge of
+      -dev packages.
     epic: CMN-010
     owner: pirlruc
     approved_by: Engineering Lead

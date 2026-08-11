@@ -1,0 +1,150 @@
+---
+# Thin caller — publishes ghcr.io/pirlruc/ci-lint (+ Docker Hub when secrets set).
+# CONTAINERDEVOPS_PIN: replaced after containerdevops hygiene lands (placeholder below).
+name: CI Lint Image
+
+on:
+  release:
+    types: [published]
+  schedule:
+    - cron: "17 5 15 * *"
+  pull_request:
+    branches: [main]
+    paths:
+      - "docker/ci-lint/**"
+      - ".github/workflows/ci-lint-image.yml"
+  workflow_dispatch:
+    inputs:
+      blocking:
+        description: Fail the job on gate errors
+        type: boolean
+        default: false
+      publish:
+        description: Publish to GHCR/Hub (break-glass; also runs on release / schedule)
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Bump when re-pinning containerdevops after hygiene merge.
+  CONTAINERDEVOPS_PIN: e673165fb4ed31e30f8110db66709f36f9a6855a
+
+jobs:
+  lint:
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    permissions:
+      contents: read
+      security-events: write
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@e673165fb4ed31e30f8110db66709f36f9a6855a
+    with:
+      dockerfile: docker/ci-lint/Dockerfile
+      working_directory: .
+      scripts_ref: e673165fb4ed31e30f8110db66709f36f9a6855a
+      runner_image: ""
+      run_infra_lint: false
+      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
+    secrets:
+      checkout_token: ${{ github.token }}
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  build:
+    needs: lint
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    permissions:
+      contents: read
+      packages: read
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@e673165fb4ed31e30f8110db66709f36f9a6855a
+    with:
+      context: docker/ci-lint
+      dockerfile: docker/ci-lint/Dockerfile
+      image_name: ci-lint:ci
+      structure_test_config: docker/ci-lint/container-structure-test.yml
+      scripts_ref: e673165fb4ed31e30f8110db66709f36f9a6855a
+      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
+      # Rootfs ~545 MB measured via du -sxm /; headroom for base churn.
+      image_max_size_mb: "700"
+      dhi_login: true
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  scan:
+    needs: build
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    permissions:
+      contents: read
+      security-events: write
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@e673165fb4ed31e30f8110db66709f36f9a6855a
+    with:
+      image: ci-lint:ci
+      image_artifact: container-image
+      scripts_ref: e673165fb4ed31e30f8110db66709f36f9a6855a
+      pkg_types: library
+      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
+    secrets:
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  # Advisory posture scan (os+library, no ignorefile) — does not block publish.
+  scan-posture:
+    needs: build
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    permissions:
+      contents: read
+      security-events: write
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@e673165fb4ed31e30f8110db66709f36f9a6855a
+    with:
+      image: ci-lint:ci
+      image_artifact: container-image
+      scripts_ref: e673165fb4ed31e30f8110db66709f36f9a6855a
+      pkg_types: os,library
+      blocking: false
+    secrets:
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  publish:
+    needs: [build, scan]
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name == 'release' ||
+       github.event_name == 'schedule' ||
+       (github.event_name == 'workflow_dispatch' && inputs.publish))
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@e673165fb4ed31e30f8110db66709f36f9a6855a
+    with:
+      context: docker/ci-lint
+      dockerfile: docker/ci-lint/Dockerfile
+      image_name: ci-lint
+      dockerhub_image: pirlruc/ci-lint
+      scripts_ref: e673165fb4ed31e30f8110db66709f36f9a6855a
+      platforms: linux/amd64
+      sign: ${{ github.event.repository.visibility == 'public' }}
+      blocking: true
+      dhi_login: true
+      tag_latest: ${{ github.event_name != 'release' || github.event.release.prerelease == false }}
+      verify_command: /bin/true
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
