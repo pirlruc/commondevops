@@ -44,6 +44,7 @@ run_host() {
 }
 
 echo "==> actionlint"
+# shellcheck disable=SC2016  # intentional: run_host body must not expand on the host
 run_host actionlint bash -c '
   mapfile -t WFS < <(find .github/workflows -name "*.yml" -o -name "*.yaml" 2>/dev/null | head -40)
   if [[ ${#WFS[@]} -eq 0 ]]; then
@@ -54,6 +55,7 @@ run_host actionlint bash -c '
 '
 
 echo "==> shellcheck"
+# shellcheck disable=SC2016  # intentional: run_host body must not expand on the host
 run_host shellcheck bash -c '
   mapfile -t SHS < <(find scripts -name "*.sh" 2>/dev/null)
   if [[ ${#SHS[@]} -eq 0 ]]; then
