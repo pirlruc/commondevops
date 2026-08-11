@@ -23,7 +23,7 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops).
 | Phase / epic | Status |
 |--------------|--------|
 | CMN-001 — reusable workflows | Done |
-| CMN-002 — ci-base image | Done (awaiting first release publish) |
+| CMN-002 — ci-base image | Done (release `1.0.0` published) |
 | CMN-003 — Dependabot SC-DEP | Done (private registry secrets still needed) |
 | CMN-004 — ai-reviewer prompt | Done |
 | CMN-005 — self-CI + security schedule | Done |
@@ -31,8 +31,8 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops).
 | CMN-007 — CI-026 digest pins + grant | Done |
 | CMN-008 — vendored thresholds fail-closed | Done |
 | CMN-009 — grant license gate | Done |
-| CMN-010 — DOCKER-PERF-001 size deviation | In progress (on PR) |
-| CMN-011 — Trivy ignores for donor binaries | In progress (on PR) |
+| CMN-010 — DOCKER-PERF-001 size deviation | Done |
+| CMN-011 — Trivy ignores for donor binaries | Done |
 
 ## Pins
 
@@ -40,7 +40,7 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops).
 |-----------|-----|
 | guardrails submodule | tag `1.1.0` → `6fe580c…` (deinit'd) |
 | github-scaffold submodule | `f8a6ba1…` (deinit'd) |
-| containerdevops (ci-base caller) | `304cd8f1…` (PR #32 ignorefile + rescan probe) |
+| containerdevops (ci-base caller) | `cc66d44f…` (PR #33 single-platform verify) |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 
 ## Commands
@@ -69,23 +69,28 @@ python3 .github/scaffold/scripts/issues-sync.py \
   (review 2026-11-11, CMN-011). Do not ignore PyJWT/mcp — bump via Dockerfile.
   mcp must stay on 1.x (`==1.29.0`); mcp 2.x drops FastMCP and breaks semgrep.
 - **container-scan ignorefile** requires containerdevops ≥ `304cd8f1…`.
+- **Publish verify** requires containerdevops ≥ `cc66d44f…` (single-platform
+  image manifests are not OCI indexes).
+- **Private Scorecard:** `GITHUB_TOKEN` cannot `ListCommits` on default-branch analysis.
+  Callers pass optional `SCORECARD_TOKEN` (classic PAT, `repo` scope). Without it,
+  Scorecard is **advisory** when `repository.private` is true (PR #10).
 
 ## Suggested next work
 
-1. Merge this PR; cut annotated tag + GitHub Release `1.0.0` (PAT) to publish ci-base.
-2. Make `ghcr.io/pirlruc/ci-base` package public; verify unauthenticated pull.
-3. Cut containerdevops `1.0.0`; make `ci-container` public; re-pin this repo to that tag.
+1. Make `ghcr.io/pirlruc/ci-base` package public; verify unauthenticated pull.
+2. Cut containerdevops `1.0.0`; make `ci-container` public; re-pin this repo to that tag.
+3. Optionally set repo secret `SCORECARD_TOKEN` to restore blocking Scorecard on private main.
 4. Sync issues (`--update`) to close CMN-001…011 on GitHub; enable Dependabot private registries.
 5. Refresh donor digests / drop `.trivyignore.yaml` entries when upstream ships fixes (before 2026-11-11).
 
 ## Recent history
 
+- 2026-08-11: release `1.0.0`; Scorecard advisory-on-private + optional `SCORECARD_TOKEN`
+  (PR #10, merge `3893494`); pin containerdevops `cc66d44f…` (PR #33) for publish verify.
 - 2026-08-11: actionlint 1.7.12, semgrep 1.172.0 + mcp==1.29.0 override, `.trivyignore.yaml`
   (CMN-011); pin containerdevops `304cd8f1…` (PR #32 ignorefile support).
 - 2026-08-11: CONTAINERDEVOPS_PIN → `c3851646…` (PR #29); pass `scripts_token` +
   `checkout_token: github.token` for cross-repo reusable calls.
-- 2026-08-11: restored self-CI triggers; earlier pin `5117142…` (PR #21 merge);
-  enabled `runner_image: ""`, `tag_latest`, `verify_command`.
 - 2026-08-11: grant license engine, fail-closed thresholds, CI-026 pins, release-gated
   ci-base publish, devops-ci/security triggers, submodule bump to guardrails 1.1.0.
 
