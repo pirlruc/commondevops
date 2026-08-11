@@ -1,5 +1,5 @@
 ---
-# Thin caller — CONTAINERDEVOPS_PIN: cc66d44fafc8b94f25ac57bbec0392de85da11e6
+# Thin caller — CONTAINERDEVOPS_PIN: e673165fb4ed31e30f8110db66709f36f9a6855a (release 1.0.1)
 # PR #33 merge (single-platform DOCKER-TEST-002 verify)
 # 1.0.0 after that release (PR3).
 name: CI Base Image
@@ -45,11 +45,11 @@ jobs:
       contents: read
       # Nested container-lint → common-secrets-sast needs security-events: write.
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@cc66d44fafc8b94f25ac57bbec0392de85da11e6
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@e673165fb4ed31e30f8110db66709f36f9a6855a
     with:
       dockerfile: docker/ci-base/Dockerfile
       working_directory: .
-      scripts_ref: cc66d44fafc8b94f25ac57bbec0392de85da11e6
+      scripts_ref: e673165fb4ed31e30f8110db66709f36f9a6855a
       # Bootstrap: no ci-container yet; host install path.
       runner_image: ""
       # Nested infra uses commondevops@74695e83 (pre --min-severity); devops-ci covers infra.
@@ -69,13 +69,13 @@ jobs:
        github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@cc66d44fafc8b94f25ac57bbec0392de85da11e6
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@e673165fb4ed31e30f8110db66709f36f9a6855a
     with:
       context: docker/ci-base
       dockerfile: docker/ci-base/Dockerfile
       image_name: ci-base:ci
       structure_test_config: docker/ci-base/container-structure-test.yml
-      scripts_ref: cc66d44fafc8b94f25ac57bbec0392de85da11e6
+      scripts_ref: e673165fb4ed31e30f8110db66709f36f9a6855a
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
       image_max_size_mb: "1500"
       dhi_login: true
@@ -93,11 +93,11 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@cc66d44fafc8b94f25ac57bbec0392de85da11e6
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@e673165fb4ed31e30f8110db66709f36f9a6855a
     with:
       image: ci-base:ci
       image_artifact: container-image
-      scripts_ref: cc66d44fafc8b94f25ac57bbec0392de85da11e6
+      scripts_ref: e673165fb4ed31e30f8110db66709f36f9a6855a
       pkg_types: library
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
     secrets:
@@ -115,12 +115,12 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@cc66d44fafc8b94f25ac57bbec0392de85da11e6
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@e673165fb4ed31e30f8110db66709f36f9a6855a
     with:
       context: docker/ci-base
       dockerfile: docker/ci-base/Dockerfile
       image_name: ci-base
-      scripts_ref: cc66d44fafc8b94f25ac57bbec0392de85da11e6
+      scripts_ref: e673165fb4ed31e30f8110db66709f36f9a6855a
       platforms: linux/amd64
       # Private Free-plan repos cannot use artifact attestations; enable when public.
       sign: ${{ github.event.repository.visibility == 'public' }}
