@@ -1,0 +1,88 @@
+# syntax=docker/dockerfile:1
+# Org CI lint image — workflow linters + secrets/SAST CLIs for commondevops.
+# Refresh digests: docker login dhi.io && bash scripts/pin-dhi-digests.sh docker/ci-lint/Dockerfile
+#
+# Binary path discoveries (2026-08-10):
+#   dhi.io/shellcheck:0-debian13 → /usr/local/bin/shellcheck
+#   dhi.io/gitleaks:8-debian13   → /usr/local/bin/gitleaks
+#   hadolint/hadolint:2.12.0-alpine → /bin/hadolint
+#   rhysd/actionlint:1.7.12      → /usr/local/bin/actionlint
+#   ghcr.io/astral-sh/uv:0.12.0  → /uv (build stage only)
+#
+# No HEALTHCHECK: short-lived CI toolchain (CLI job container), not a supervised
+# service (DOCKER-RUN-002 / DOCKER-RUN-006).
+
+ARG BASE=dhi.io/python:3.13-debian13-dev@sha256:5985b54ea3f145c9106890612792a0eb17c99e742e11fd9c391658f1946e1777
+
+# ---------------------------------------------------------------------------
+# pybuild — install Python CLIs; uv stays out of the final image (~53 MB).
+# ---------------------------------------------------------------------------
+# hadolint ignore=DL3006
+FROM ${BASE} AS pybuild
+COPY --from=ghcr.io/astral-sh/uv:0.12.0@sha256:606e70c71c852d03f611b1e56a195d08648507018a7057fab82c4974c4eae105 \
+  /uv /usr/local/bin/uv
+ENV UV_SYSTEM_PYTHON=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+# semgrep>=1.168 brings PyJWT~=2.13; it still pins mcp==1.23.3. Override to mcp 1.29.0
+# (CVE floor >=1.28.1) — mcp 2.x drops FastMCP and breaks semgrep's MCP command.
+RUN printf 'mcp==1.29.0\n' > /tmp/uv-overrides.txt \
+ && uv pip install --system --no-cache --override /tmp/uv-overrides.txt \
+      'zizmor>=1.0' \
+      'yamllint>=1.35' \
+      'semgrep==1.172.0' \
+      'mcp==1.29.0' \
+ && rm -f /tmp/uv-overrides.txt
+
+# ---------------------------------------------------------------------------
+# Final image
+# ---------------------------------------------------------------------------
+# hadolint ignore=DL3006
+FROM ${BASE}
+
+LABEL org.opencontainers.image.title="ci-lint" \
+      org.opencontainers.image.description="Lint and secrets/SAST tooling for pirlruc/commondevops" \
+      org.opencontainers.image.source="https://github.com/pirlruc/commondevops" \
+      org.opencontainers.image.licenses="MIT"
+
+COPY --from=dhi.io/shellcheck:0-debian13@sha256:eb696ecbc0a6dbe57588d88c700c3da7cce3824f8c865795348f9b51c7524331 \
+  /usr/local/bin/shellcheck /usr/local/bin/shellcheck
+COPY --from=dhi.io/gitleaks:8-debian13@sha256:08b93b96ee818647ab1fb8e148bf8af4e1190b344e48b0e9bfa57eae98db8117 \
+  /usr/local/bin/gitleaks /usr/local/bin/gitleaks
+COPY --from=hadolint/hadolint:2.12.0-alpine@sha256:3c206a451cec6d486367e758645269fd7d696c5ccb6ff59d8b03b0e45268a199 \
+  /bin/hadolint /usr/local/bin/hadolint
+COPY --from=rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 \
+  /usr/local/bin/actionlint /usr/local/bin/actionlint
+
+# Python packages + console scripts from pybuild (no uv binary in final).
+COPY --from=pybuild /usr/lib/python3.13/site-packages /usr/lib/python3.13/site-packages
+COPY --from=pybuild /usr/bin/semgrep /usr/bin/pysemgrep /usr/bin/zizmor /usr/bin/yamllint /usr/bin/
+
+ENV PATH="/usr/local/bin:${PATH}" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Drop build-only headers/dev packages and the DHI status.d stubs that apt-get
+# purge leaves behind (Trivy otherwise reports phantom linux-libc-dev CVEs).
+USER root
+RUN set -eu; \
+    apt-get purge -y --auto-remove \
+      linux-libc-dev libc6-dev libexpat1-dev libpython-3.13-dev \
+      python-3.13-dev zlib1g-dev rpcsvc-proto 2>/dev/null || true; \
+    for p in linux-libc-dev libc6-dev libexpat1-dev libpython-3.13-dev \
+             python-3.13-dev zlib1g-dev rpcsvc-proto; do \
+      rm -f "/var/lib/dpkg/status.d/${p}" "/var/lib/dpkg/status.d/${p}.md5sums"; \
+    done; \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+
+WORKDIR /workspace
+
+# Non-root default user. DHI images have no useradd; write passwd/group directly.
+RUN printf 'ci:x:1000:1000::/home/ci:/bin/bash\n' >> /etc/passwd \
+ && printf 'ci:x:1000:\n' >> /etc/group \
+ && mkdir -p /home/ci \
+ && chown -R 1000:1000 /home/ci /workspace
+USER 1000:1000
+
+ENTRYPOINT []
+CMD ["bash"]

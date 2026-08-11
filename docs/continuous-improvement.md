@@ -59,12 +59,14 @@ workflow correctly in ~10 minutes.
 
 | Class | Examples |
 |-------|----------|
-| Improvement | Missing `scripts_ref` docs; ci-base still unused by reusables; thin self-CI gaps |
-| Bug | Broken sparse-checkout path; wrong default for `blocking`; license gate ignores thresholds |
+| Improvement | Missing `scripts_ref` docs; ci-lint still unused by reusables; thin self-CI gaps |
+| Bug | Broken sparse-checkout path; wrong default for `blocking`; license gate ignores thresholds; **caller permissions missing a scope the reusable declares (startup_failure)** |
 | Design flaw | Baking threshold numbers into workflows; dual install paths that drift |
 
 Identify **improvements, bugs, and design flaws** in workflows, scripts, Dockerfiles, and
-docs — not only process/docs hygiene.
+docs — not only process/docs hygiene. Prefer **local-first validation** notes
+(`docker build`, structure-test, Trivy library+ignorefile and raw os,library) before
+recommending Actions-only verification.
 
 ### 4. Optional: alternatives (lightweight)
 
@@ -95,10 +97,11 @@ Use milestone `Continuous improvement` (or whatever already exists on the repo).
 
 | Prefix | Theme |
 |--------|-------|
-| `CMN-WF-…` | Reusable workflow contracts / CI-024/025 |
-| `CMN-IMG-…` | ci-base image / DHI pins / structure-test |
+| `CMN-…` (numeric) | Authored backlog already in `docs/issues.yml` — do not re-file |
+| `CMN-WF-…` | Reusable workflow contracts / CI-024/025 / caller permissions |
+| `CMN-IMG-…` | ci-lint / ci-supply-chain images / DHI pins / structure-test |
 | `CMN-SC-…` | Supply-chain, license gate, Scorecard |
-| `CMN-DOC-…` | README / workflows.md / handoff clarity |
+| `CMN-DOC-…` | README / workflows.md / handoff / docker-hub clarity |
 | `CMN-DEP-…` | Dependabot / SC-DEP |
 | `CMN-ECO-…` | Ecosystem work owned by another repo (name it) |
 
@@ -123,10 +126,11 @@ Provenance after human merge+sync uses these prefixes and the PR description; do
 
 | Area | Intent |
 |------|--------|
-| `.github/workflows/` | Reusable `common-*` workflows + self CI + ci-base caller |
+| `.github/workflows/` | Reusable `common-*` workflows + self CI + ci-lint / ci-supply-chain callers |
 | `scripts/` | Install, local/docker parity, license gate, DHI pin refresh |
-| `docker/ci-base/` | Shared CI tooling image |
-| `docs/` | Handoff, workflows reference, this prompt, authored `issues.yml` |
+| `docker/ci-lint/` / `docker/ci-supply-chain/` | Split CI toolchain images (ci-base deprecated) |
+| `docs/` | Handoff, workflows reference, docker-hub pages, this prompt, `issues.yml`, deviations |
+| `.trivyignore.yaml` | Path-scoped donor CVE ignores (plus per-image copies) |
 | `.github/dependabot.yml` | Multi-ecosystem dependency updates |
 
 Ecosystem (URL only): [guardrails](https://github.com/pirlruc/guardrails),
@@ -144,12 +148,13 @@ Do not recommend removing these without **requires user decision**:
 4. `docs/issues.yml` is the authored backlog — sync creates issues; no hand-created owned issues
 5. Guardrails stay canonical in `pirlruc/guardrails` — cite IDs; record deviations here only
 6. DHI digests stay pinned; do not float `latest` on production FROM lines
+7. Caller jobs must grant every permission the reusable job declares (no escalation)
 
 ## Automation configuration
 
 | Setting | Suggestion |
 |---------|------------|
-| Trigger | Weekly schedule (or manual) |
+| Trigger | Manual until GitHub Agents Automations is configured; then weekly |
 | Tools | Push changes; create pull request |
 | Secrets | None in the prompt |
 

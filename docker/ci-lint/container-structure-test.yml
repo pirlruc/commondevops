@@ -1,0 +1,58 @@
+schemaVersion: "2.0.0"
+metadataTest:
+  envVars:
+    - key: PYTHONDONTWRITEBYTECODE
+      value: "1"
+    - key: PYTHONUNBUFFERED
+      value: "1"
+commandTests:
+  - name: shellcheck
+    command: "shellcheck"
+    args: ["--version"]
+    exitCode: 0
+  - name: hadolint
+    command: "hadolint"
+    args: ["--version"]
+    exitCode: 0
+  - name: actionlint
+    command: "actionlint"
+    args: ["-version"]
+    exitCode: 0
+  - name: gitleaks
+    command: "gitleaks"
+    args: ["version"]
+    exitCode: 0
+  - name: zizmor
+    command: "zizmor"
+    args: ["--version"]
+    exitCode: 0
+  - name: yamllint
+    command: "yamllint"
+    args: ["--version"]
+    exitCode: 0
+  - name: semgrep
+    command: "semgrep"
+    args: ["--version"]
+    exitCode: 0
+fileExistenceTests:
+  - name: shellcheck binary
+    path: "/usr/local/bin/shellcheck"
+    shouldExist: true
+  - name: hadolint binary
+    path: "/usr/local/bin/hadolint"
+    shouldExist: true
+  - name: actionlint binary
+    path: "/usr/local/bin/actionlint"
+    shouldExist: true
+  - name: gitleaks binary
+    path: "/usr/local/bin/gitleaks"
+    shouldExist: true
+  - name: uv absent
+    path: "/usr/local/bin/uv"
+    shouldExist: false
+  - name: cosign absent
+    path: "/usr/local/bin/cosign"
+    shouldExist: false
+  - name: trivy absent
+    path: "/usr/local/bin/trivy"
+    shouldExist: false
