@@ -37,14 +37,21 @@ jobs:
         run: |
           set -euo pipefail
           echo "Setting ghcr.io/${OWNER}/${PACKAGE} visibility=${VISIBILITY}"
-          # User-owned packages use /user/packages; org-owned use /orgs/{org}/packages.
-          if gh api "users/${OWNER}" --jq .type | grep -qi Organization; then
+          # GITHUB_TOKEN is repo-scoped, not a user PAT — use /users or /orgs, not /user.
+          OWNER_TYPE="$(gh api "users/${OWNER}" --jq .type)"
+          echo "owner_type=${OWNER_TYPE}"
+          if [[ "${OWNER_TYPE}" == "Organization" ]]; then
             API="orgs/${OWNER}/packages/container/${PACKAGE}"
           else
-            API="user/packages/container/${PACKAGE}"
+            API="users/${OWNER}/packages/container/${PACKAGE}"
           fi
+          echo "GET ${API}"
+          gh api -H "Accept: application/vnd.github+json" "${API}" \
+            --jq '{name,visibility,package_type,html_url}'
+          echo "PATCH visibility=${VISIBILITY}"
           gh api --method PATCH \
             -H "Accept: application/vnd.github+json" \
             "${API}" \
-            -f visibility="${VISIBILITY}"
+            -f visibility="${VISIBILITY}" \
+            --jq '{name,visibility}'
           echo "Updated ${API} → visibility=${VISIBILITY}"
