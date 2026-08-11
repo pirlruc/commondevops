@@ -47,8 +47,11 @@ jobs:
       id-token: write
     uses: ./.github/workflows/common-scorecard.yml
     with:
-      blocking: true
+      # Private repos need SCORECARD_TOKEN (classic PAT, repo scope) for blocking Scorecard
+      blocking: ${{ github.event.repository.private == false }}
       publish_results: false
+    secrets:
+      repo_token: ${{ secrets.SCORECARD_TOKEN }}
 
   # Optional note: published-image rescan of ghcr.io/pirlruc/ci-base:latest can be
   # wired once the package exists (Trivy image scan). Skipped here until ci-base

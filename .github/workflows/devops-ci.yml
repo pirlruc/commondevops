@@ -66,5 +66,8 @@ jobs:
       id-token: write
     uses: ./.github/workflows/common-scorecard.yml
     with:
-      blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
+      # Private repos need SCORECARD_TOKEN (classic PAT, repo scope) for blocking Scorecard
+      blocking: ${{ github.event.repository.private == false && (github.event_name != 'workflow_dispatch' || inputs.blocking) }}
       publish_results: false
+    secrets:
+      repo_token: ${{ secrets.SCORECARD_TOKEN }}
