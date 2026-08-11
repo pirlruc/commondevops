@@ -18,8 +18,11 @@
 FROM dhi.io/python:3.13-debian13-dev@sha256:5985b54ea3f145c9106890612792a0eb17c99e742e11fd9c391658f1946e1777
 
 LABEL org.opencontainers.image.title="ci-supply-chain" \
-      org.opencontainers.image.description="Supply-chain tooling for pirlruc/commondevops" \
+      org.opencontainers.image.description="Short-lived CI toolchain image for SBOM generation and vulnerability/license gates: syft, grype, trivy, grant. Non-root 1000:1000, linux/amd64." \
       org.opencontainers.image.source="https://github.com/pirlruc/commondevops" \
+      org.opencontainers.image.url="https://hub.docker.com/r/pirlruc/ci-supply-chain" \
+      org.opencontainers.image.documentation="https://hub.docker.com/r/pirlruc/ci-supply-chain" \
+      org.opencontainers.image.vendor="pirlruc" \
       org.opencontainers.image.licenses="MIT"
 
 COPY --from=dhi.io/syft:1-debian13@sha256:3484ac184dd20f130a2f7b7ceb57b2e4f21a264338bb384295ea72bb825b2e3c \

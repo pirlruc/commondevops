@@ -101,8 +101,16 @@ Thin callers into containerdevops for lint/build/scan/publish of
 Optional Hub push via `dockerhub_image`. Caller must grant `packages: read` on
 the build job (container-build declares it).
 
-Public package pages: [docker-hub-ci-lint.md](docker-hub-ci-lint.md),
-[docker-hub-ci-supply-chain.md](docker-hub-ci-supply-chain.md).
+Public package pages:
+[docker-hub-ci-lint.md](docker-hub-ci-lint.md) /
+[github-packages-ci-lint.md](github-packages-ci-lint.md),
+[docker-hub-ci-supply-chain.md](docker-hub-ci-supply-chain.md) /
+[github-packages-ci-supply-chain.md](github-packages-ci-supply-chain.md).
+
+Pass `image_title`, `image_description`, `image_documentation`, `image_url`,
+`image_vendor`, `dockerhub_readme`, and `dockerhub_short_description` into
+containerdevops `container-publish` so OCI labels describe the image (not the
+repository) and Hub Overview stays in sync.
 
 `docker/ci-base/` and the former `ci-base-image.yml` are deprecated (2.0.0).
 

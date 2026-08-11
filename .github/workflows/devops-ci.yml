@@ -30,7 +30,7 @@ jobs:
       blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
       working_directory: .
       shell_scripts: scripts/*.sh
-      dockerfiles: docker/ci-base/Dockerfile
+      dockerfiles: docker/ci-lint/Dockerfile docker/ci-supply-chain/Dockerfile
       scripts_ref: ${{ github.sha }}
 
   secrets-sast:

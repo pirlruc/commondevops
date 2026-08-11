@@ -6,10 +6,10 @@ on:
   workflow_dispatch:
     inputs:
       package_name:
-        description: Container package name under the owner (e.g. ci-base)
+        description: Container package name under the owner (e.g. ci-lint)
         type: string
         required: true
-        default: ci-base
+        default: ci-lint
 
 permissions:
   contents: read

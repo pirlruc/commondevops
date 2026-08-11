@@ -53,9 +53,9 @@ jobs:
     secrets:
       repo_token: ${{ secrets.SCORECARD_TOKEN }}
 
-  # Optional note: published-image rescan of ghcr.io/pirlruc/ci-base:latest can be
-  # wired once the package exists (Trivy image scan). Skipped here until ci-base
-  # is published — no container-scan reusable in this repo.
+  # Optional note: published-image rescan of ghcr.io/pirlruc/ci-lint:latest and
+  # ci-supply-chain:latest can be wired via containerdevops container-scan.
+  # Skipped here — no container-scan reusable in this repo; publish path rescans.
   published-image-rescan:
     if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-24.04
@@ -64,11 +64,11 @@ jobs:
       contents: read
       packages: read
     steps:
-      - name: Note — ci-base image rescan
+      - name: Note — published image rescan
         run: |
           cat <<'EOF'
           Scheduled security lane covers secrets/SAST, supply-chain (SBOM + license),
-          and Scorecard. A Trivy rescan of ghcr.io/pirlruc/ci-base:latest will be
-          added after the package is published (CI-027 monthly rebuild also rescans
-          on the image publish path).
+          and Scorecard. Trivy rescan of ghcr.io/pirlruc/ci-lint:latest and
+          ghcr.io/pirlruc/ci-supply-chain:latest runs on the image publish path
+          (CI-027 monthly rebuild).
           EOF

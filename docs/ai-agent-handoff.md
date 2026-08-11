@@ -6,6 +6,7 @@
 |-------|-------|
 | **Folder** | `common/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
+| **Branch** | `feature-package-metadata-docs` (land on `main`) |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, release + `ci-lint` / `ci-supply-chain` images |
 | **Type** | CI infrastructure |
 
@@ -24,7 +25,7 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops).
 |--------------|--------|
 | CMN-001 — reusable workflows | Done |
 | CMN-002 — ci toolchain images | Done → split to ci-lint + ci-supply-chain (2.0.0) |
-| CMN-003 — Dependabot SC-DEP | Done (private registry secrets still needed) |
+| CMN-003 — Dependabot SC-DEP | Done (docker ecosystems retargeted to ci-lint + ci-supply-chain) |
 | CMN-004 — ai-reviewer prompt | Done |
 | CMN-005 — self-CI + security schedule | Done |
 | CMN-006 — release-gated publish | Done |
@@ -33,15 +34,17 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops).
 | CMN-009 — grant license gate | Done |
 | CMN-010 — DOCKER-PERF-001 size deviation | Done (700 MB per image; du -sxm /) |
 | CMN-011 — Trivy ignores for donor binaries | Done |
+| CMN-012 — package metadata + registry pages | **Done** (this branch) |
 
 ## Pins
 
 | Component | Ref |
 |-----------|-----|
-| guardrails submodule | tag `1.1.0` → `6fe580c…` (deinit'd) |
-| github-scaffold submodule | `f8a6ba1…` (deinit'd) |
-| containerdevops (image callers) | `e673165f…` (re-pin after hygiene merge) |
+| guardrails submodule | tag `1.1.0` → `6fe580c…` |
+| github-scaffold submodule | `f8a6ba1…` |
+| containerdevops (image callers) | `3a7cac1c…` (CDO-016 metadata + Hub sync) |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
+| Release | [`2.0.0`](https://github.com/pirlruc/commondevops/releases/tag/2.0.0) @ `26d7219…` |
 
 ## Local image sizes (2026-08-11, `du -sxm /`)
 
@@ -68,14 +71,17 @@ python3 .github/scaffold/scripts/issues-sync.py \
 - **Caller permissions:** reusable workflows cannot escalate. Build callers must
   grant `packages: read` (container-build declares it) or the run dies at
   **startup_failure** before any job starts.
+- **OCI labels:** pass `image_title` / `image_description` into containerdevops
+  publish or the package page shows the repository description. Hub Overview needs
+  `dockerhub_readme` + Hub token with read/write/delete (admin) scope.
 - **Private `checkout_token`:** Cross-repo callers need contents:read on this repo.
 - **`scripts_ref`:** Must match the `uses:` pin.
 - **License gate:** thresholds vendored at `scripts/supply-chain.profile.thresholds.yml`.
   Default engine is **grant**.
-- **Submodules deinitialized**; hydrate before sync-templates.
 - **Publish:** cut releases with a PAT (`GITHUB_TOKEN`-created releases do not trigger workflows).
 - **Signing:** keep `sign: false` while private.
-- **ci-base deprecated** — use `ci-lint` / `ci-supply-chain`; MAJOR 2.0.0.
+- **ci-base deprecated** — stub only under `docker/ci-base/`; use `ci-lint` /
+  `ci-supply-chain`.
 - **DHI `status.d`:** after `apt-get purge` of `-dev` packages, also delete
   `/var/lib/dpkg/status.d/<pkg>` or Trivy reports phantom linux-libc-dev CVEs.
 - **Size gate:** measure with `du -sxm /`, not `docker inspect .Size` (store-dependent).
@@ -83,15 +89,17 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. Re-pin containerdevops after hygiene merge (ignorefile input + size gate).
-2. Publish 2.0.0; grant Actions Read on new GHCR packages; create Hub repos.
-3. Sync issues (`--update`) to close CMN-001…011 on GitHub.
+1. Land CMN-012; cut `2.0.1` and verify Hub/GHCR labels + Overview.
+2. Grant Actions Read on GHCR packages; keep Hub repos public.
+3. Sync issues (`--update`) to close CMN-001…012 on GitHub.
 4. Refresh donor digests / drop ignorefile entries before 2026-11-11.
 
 ## Recent history
 
+- 2026-08-12: CMN-012 — re-pin containerdevops `3a7cac1c…`, image metadata,
+  Hub/GHCR docs, Dependabot/ci-base cleanup.
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; packages:read fix;
   deviations at 700 MB; docker-hub docs; issues-sync-targets.yml.
-- 2026-08-11: release `1.0.0` (ci-base); Scorecard advisory-on-private.
+- 2026-08-11: release `2.0.0`; release `1.0.0` (ci-base).
 
-*Last updated: 2026-08-11*
+*Last updated: 2026-08-12*

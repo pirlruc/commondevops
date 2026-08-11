@@ -68,7 +68,7 @@ jobs:
     defaults:
       run:
         working-directory: ${{ inputs.working_directory }}
-    # Prefer ghcr.io/pirlruc/ci-base:latest once published (image may not exist yet).
+    # Prefer ghcr.io/pirlruc/ci-lint:latest once Actions package access is granted.
     # v1: bare ubuntu-24.04 + install-common-tools.sh from this repo.
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

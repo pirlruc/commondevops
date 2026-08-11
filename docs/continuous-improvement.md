@@ -101,7 +101,7 @@ Use milestone `Continuous improvement` (or whatever already exists on the repo).
 | `CMN-WF-…` | Reusable workflow contracts / CI-024/025 / caller permissions |
 | `CMN-IMG-…` | ci-lint / ci-supply-chain images / DHI pins / structure-test |
 | `CMN-SC-…` | Supply-chain, license gate, Scorecard |
-| `CMN-DOC-…` | README / workflows.md / handoff / docker-hub clarity |
+| `CMN-DOC-…` | README / workflows.md / handoff / registry page clarity |
 | `CMN-DEP-…` | Dependabot / SC-DEP |
 | `CMN-ECO-…` | Ecosystem work owned by another repo (name it) |
 
@@ -129,7 +129,7 @@ Provenance after human merge+sync uses these prefixes and the PR description; do
 | `.github/workflows/` | Reusable `common-*` workflows + self CI + ci-lint / ci-supply-chain callers |
 | `scripts/` | Install, local/docker parity, license gate, DHI pin refresh |
 | `docker/ci-lint/` / `docker/ci-supply-chain/` | Split CI toolchain images (ci-base deprecated) |
-| `docs/` | Handoff, workflows reference, docker-hub pages, this prompt, `issues.yml`, deviations |
+| `docs/` | Handoff, workflows reference, Docker Hub and GitHub Packages pages, this prompt, `issues.yml`, deviations |
 | `.trivyignore.yaml` | Path-scoped donor CVE ignores (plus per-image copies) |
 | `.github/dependabot.yml` | Multi-ecosystem dependency updates |
 

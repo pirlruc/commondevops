@@ -39,11 +39,11 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@e673165fb4ed31e30f8110db66709f36f9a6855a
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@3a7cac1c67f2a2755750440a39175ff4d438f211
     with:
       dockerfile: docker/ci-supply-chain/Dockerfile
       working_directory: .
-      scripts_ref: e673165fb4ed31e30f8110db66709f36f9a6855a
+      scripts_ref: 3a7cac1c67f2a2755750440a39175ff4d438f211
       runner_image: ""
       run_infra_lint: false
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -60,16 +60,21 @@ jobs:
     permissions:
       contents: read
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@e673165fb4ed31e30f8110db66709f36f9a6855a
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@3a7cac1c67f2a2755750440a39175ff4d438f211
     with:
       context: docker/ci-supply-chain
       dockerfile: docker/ci-supply-chain/Dockerfile
       image_name: ci-supply-chain:ci
       structure_test_config: docker/ci-supply-chain/container-structure-test.yml
-      scripts_ref: e673165fb4ed31e30f8110db66709f36f9a6855a
+      scripts_ref: 3a7cac1c67f2a2755750440a39175ff4d438f211
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
       # Rootfs ~575 MB measured via du -sxm /; headroom for base churn.
       image_max_size_mb: "700"
+      image_title: ci-supply-chain
+      image_description: >-
+        Short-lived CI toolchain image for SBOM generation and
+        vulnerability/license gates: syft, grype, trivy, grant. Non-root
+        1000:1000, linux/amd64.
       dhi_login: true
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -85,11 +90,11 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@e673165fb4ed31e30f8110db66709f36f9a6855a
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@3a7cac1c67f2a2755750440a39175ff4d438f211
     with:
       image: ci-supply-chain:ci
       image_artifact: container-image
-      scripts_ref: e673165fb4ed31e30f8110db66709f36f9a6855a
+      scripts_ref: 3a7cac1c67f2a2755750440a39175ff4d438f211
       pkg_types: library
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
     secrets:
@@ -104,11 +109,11 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@e673165fb4ed31e30f8110db66709f36f9a6855a
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@3a7cac1c67f2a2755750440a39175ff4d438f211
     with:
       image: ci-supply-chain:ci
       image_artifact: container-image
-      scripts_ref: e673165fb4ed31e30f8110db66709f36f9a6855a
+      scripts_ref: 3a7cac1c67f2a2755750440a39175ff4d438f211
       pkg_types: os,library
       blocking: false
     secrets:
@@ -125,14 +130,25 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@e673165fb4ed31e30f8110db66709f36f9a6855a
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@3a7cac1c67f2a2755750440a39175ff4d438f211
     with:
       context: docker/ci-supply-chain
       dockerfile: docker/ci-supply-chain/Dockerfile
       image_name: ci-supply-chain
       dockerhub_image: pirlruc/ci-supply-chain
-      scripts_ref: e673165fb4ed31e30f8110db66709f36f9a6855a
+      scripts_ref: 3a7cac1c67f2a2755750440a39175ff4d438f211
       platforms: linux/amd64
+      image_title: ci-supply-chain
+      image_description: >-
+        Short-lived CI toolchain image for SBOM generation and
+        vulnerability/license gates: syft, grype, trivy, grant. Non-root
+        1000:1000, linux/amd64.
+      image_documentation: https://hub.docker.com/r/pirlruc/ci-supply-chain
+      image_url: https://hub.docker.com/r/pirlruc/ci-supply-chain
+      image_vendor: pirlruc
+      dockerhub_readme: docs/docker-hub-ci-supply-chain.md
+      dockerhub_short_description: >-
+        CI toolchain: syft, grype, trivy, grant for SBOM and vulnerability/license gates
       sign: ${{ github.event.repository.visibility == 'public' }}
       blocking: true
       dhi_login: true
