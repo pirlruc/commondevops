@@ -38,7 +38,7 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops).
 |-----------|-----|
 | guardrails submodule | tag `1.1.0` → `6fe580c…` (deinit'd) |
 | github-scaffold submodule | `f8a6ba1…` (deinit'd) |
-| containerdevops (ci-base caller) | `4185836…` until PR1 merges; then merge SHA / `1.0.0` |
+| containerdevops (ci-base caller) | merge `5117142…` (PR #21); re-pin to `1.0.0` after containerdevops release |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 
 ## Commands
@@ -66,13 +66,15 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. After containerdevops PR merges: bump CONTAINERDEVOPS_PIN; enable `tag_latest` + `runner_image: ""`.
-2. Tag/release `1.0.0`; make `ghcr.io/pirlruc/ci-base` public.
-3. Sync issues (`--update`) to close CMN-001…009 on GitHub.
-4. Enable Dependabot private registries.
+1. Merge this PR; cut annotated tag + GitHub Release `1.0.0` (PAT) to publish ci-base.
+2. Make `ghcr.io/pirlruc/ci-base` package public; verify unauthenticated pull.
+3. Cut containerdevops `1.0.0`; make `ci-container` public; re-pin this repo to that tag.
+4. Sync issues (`--update`) to close CMN-001…009 on GitHub; enable Dependabot private registries.
 
 ## Recent history
 
+- 2026-08-11: restored self-CI triggers; CONTAINERDEVOPS_PIN → `5117142…` (PR #21 merge);
+  enabled `runner_image: ""`, `tag_latest`, `verify_command`.
 - 2026-08-11: grant license engine, fail-closed thresholds, CI-026 pins, release-gated
   ci-base publish, devops-ci/security triggers, submodule bump to guardrails 1.1.0.
 

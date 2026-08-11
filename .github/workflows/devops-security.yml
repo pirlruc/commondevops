@@ -1,8 +1,9 @@
 name: DevOps Security (scheduled)
 
-# TEMP (bootstrap): schedule disabled while containerdevops CI is stabilized.
-# Restore Monday cron after containerdevops PR #21 is green/merged.
 on:
+  schedule:
+    # Monday 06:17 UTC — staggered off the hour (CI-002 / OpenSSF weekly Scorecard cadence).
+    - cron: "17 6 * * 1"
   workflow_dispatch:
 
 concurrency:
