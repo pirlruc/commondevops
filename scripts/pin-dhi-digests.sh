@@ -14,7 +14,9 @@ mapfile -t FILES < <(
   if [[ $# -gt 0 ]]; then
     printf '%s\n' "$@"
   else
-    printf '%s\n' "${ROOT}/docker/ci-base/Dockerfile"
+    printf '%s\n' \
+      "${ROOT}/docker/ci-lint/Dockerfile" \
+      "${ROOT}/docker/ci-supply-chain/Dockerfile"
   fi
 )
 

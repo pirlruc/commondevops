@@ -108,4 +108,4 @@ install_if_missing grant bash -c "
 "
 
 echo "Tool install complete. PATH=${PATH}"
-echo "Note: prefer ghcr.io/pirlruc/ci-base for DHI-pinned syft/grype/trivy/shellcheck/grant when available."
+echo "Note: prefer ghcr.io/pirlruc/ci-lint and ghcr.io/pirlruc/ci-supply-chain for DHI-pinned toolchain images when available."

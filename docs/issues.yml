@@ -322,7 +322,7 @@ milestones:
                 - .github/workflows/ci-base-image.yml
                 - docs/issues.yml
             verification:
-              - grep -q 'image_max_size_mb: \"1500\"' .github/workflows/ci-base-image.yml
+              - grep -q 'image_max_size_mb: \"700\"' .github/workflows/ci-lint-image.yml
               - grep -q 'DOCKER-PERF-001' docs/guardrail-deviations.yml
             guardrail_refs:
               - DOCKER-PERF-001
@@ -370,3 +370,67 @@ milestones:
                 --pkg-types library --scanners vuln --ignorefile /tmp/.trivyignore.yaml ci-base:ci
             guardrail_refs:
               - DOCKER-SEC-001
+
+      - id: CMN-012
+        status: done
+        title: Consumer-facing package metadata and registry pages
+        overview:
+          problem: >-
+            Published ci-lint / ci-supply-chain images inherited the repository
+            description via docker/metadata-action defaults. Hub Overview was empty;
+            Dependabot still pointed at deprecated docker/ci-base.
+          goal: >-
+            Pin containerdevops with image_* / dockerhub_* inputs; split Hub and
+            GitHub Packages consumer docs; retarget Dependabot and clear ci-base refs.
+        architecture:
+          target: ci-*-image.yml + registry docs
+          modules:
+            - .github/workflows/ci-lint-image.yml
+            - .github/workflows/ci-supply-chain-image.yml
+            - docker/ci-lint/Dockerfile
+            - docker/ci-supply-chain/Dockerfile
+            - docs/docker-hub-ci-lint.md
+            - docs/docker-hub-ci-supply-chain.md
+            - docs/github-packages-ci-lint.md
+            - docs/github-packages-ci-supply-chain.md
+            - .github/dependabot.yml
+        acceptance_criteria:
+          - Publish labels carry image-specific title/description
+          - Hub Overview synced from docs/docker-hub-ci-*.md
+          - Dependabot docker ecosystems cover ci-lint and ci-supply-chain
+          - No active scripts/workflows still default to ci-base
+        guardrail_refs:
+          - DOCKER-DOC-001
+          - DOCKER-DOC-002
+          - SC-DEP-001
+        tasks:
+          - id: CMN-012-T1
+            status: done
+            title: Wire metadata overrides, Hub sync, and re-pin containerdevops
+            instructions:
+              files:
+                - .github/workflows/ci-lint-image.yml
+                - .github/workflows/ci-supply-chain-image.yml
+                - docker/ci-lint/Dockerfile
+                - docker/ci-supply-chain/Dockerfile
+            verification:
+              - rg -n "image_description|dockerhub_readme" .github/workflows/ci-lint-image.yml
+            guardrail_refs:
+              - DOCKER-DOC-001
+          - id: CMN-012-T2
+            status: done
+            title: Split Hub and GitHub Packages docs; retarget Dependabot
+            instructions:
+              files:
+                - docs/docker-hub-ci-lint.md
+                - docs/github-packages-ci-lint.md
+                - docs/docker-hub-ci-supply-chain.md
+                - docs/github-packages-ci-supply-chain.md
+                - .github/dependabot.yml
+                - scripts/check-ci-local.sh
+            verification:
+              - test -f docs/github-packages-ci-lint.md
+              - rg -n "ci-lint|ci-supply-chain" .github/dependabot.yml
+            guardrail_refs:
+              - DOCKER-DOC-002
+              - SC-DEP-001

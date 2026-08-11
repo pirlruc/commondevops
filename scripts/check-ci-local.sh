@@ -2,14 +2,14 @@
 # Local CI parity for commondevops (CI-008).
 # Host PATH tools preferred; missing tools deferred to check-ci-docker.sh.
 #
-# Resolution table (host → Docker fallback via ci-base):
-# | Tool       | Host preferred | Docker fallback (ci-base / check-ci-docker) |
+# Resolution table (host → Docker fallback via ci-lint):
+# | Tool       | Host preferred | Docker fallback (ci-lint / check-ci-docker) |
 # |------------|----------------|---------------------------------------------|
-# | actionlint | actionlint     | ghcr.io/pirlruc/ci-base:latest              |
-# | shellcheck | shellcheck     | ghcr.io/pirlruc/ci-base:latest              |
-# | hadolint   | hadolint       | ghcr.io/pirlruc/ci-base:latest              |
-# | zizmor     | zizmor         | ghcr.io/pirlruc/ci-base:latest              |
-# | yamllint   | yamllint       | ghcr.io/pirlruc/ci-base:latest              |
+# | actionlint | actionlint     | ghcr.io/pirlruc/ci-lint:latest              |
+# | shellcheck | shellcheck     | ghcr.io/pirlruc/ci-lint:latest              |
+# | hadolint   | hadolint       | ghcr.io/pirlruc/ci-lint:latest              |
+# | zizmor     | zizmor         | ghcr.io/pirlruc/ci-lint:latest              |
+# | yamllint   | yamllint       | ghcr.io/pirlruc/ci-lint:latest              |
 #
 # Usage:
 #   bash scripts/check-ci-local.sh
@@ -66,7 +66,15 @@ run_host shellcheck bash -c '
 '
 
 echo "==> hadolint"
-run_host hadolint hadolint docker/ci-base/Dockerfile
+# shellcheck disable=SC2016
+run_host hadolint bash -c '
+  mapfile -t DFS < <(find docker -name Dockerfile 2>/dev/null | grep -v ci-base)
+  if [[ ${#DFS[@]} -eq 0 ]]; then
+    echo "No Dockerfiles to lint"
+    exit 0
+  fi
+  hadolint "${DFS[@]}"
+'
 
 echo "==> zizmor"
 run_host zizmor zizmor .github/workflows

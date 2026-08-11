@@ -41,8 +41,11 @@ RUN printf 'mcp==1.29.0\n' > /tmp/uv-overrides.txt \
 FROM ${BASE}
 
 LABEL org.opencontainers.image.title="ci-lint" \
-      org.opencontainers.image.description="Lint and secrets/SAST tooling for pirlruc/commondevops" \
+      org.opencontainers.image.description="Short-lived CI toolchain image for lint and secrets/SAST: actionlint, hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep. Non-root 1000:1000, linux/amd64." \
       org.opencontainers.image.source="https://github.com/pirlruc/commondevops" \
+      org.opencontainers.image.url="https://hub.docker.com/r/pirlruc/ci-lint" \
+      org.opencontainers.image.documentation="https://hub.docker.com/r/pirlruc/ci-lint" \
+      org.opencontainers.image.vendor="pirlruc" \
       org.opencontainers.image.licenses="MIT"
 
 COPY --from=dhi.io/shellcheck:0-debian13@sha256:eb696ecbc0a6dbe57588d88c700c3da7cce3824f8c865795348f9b51c7524331 \

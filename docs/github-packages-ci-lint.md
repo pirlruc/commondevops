@@ -1,4 +1,4 @@
-# ci-lint
+# ci-lint (GitHub Packages)
 
 Short-lived CI toolchain image for GitHub Actions jobs that run workflow lint
 and secrets/SAST: actionlint, hadolint, shellcheck, zizmor, yamllint, gitleaks,
@@ -8,7 +8,7 @@ and semgrep. Not a product runtime — no `HEALTHCHECK`.
 
 | Item | Value |
 |------|--------|
-| Docker Hub | `pirlruc/ci-lint` |
+| GHCR | `ghcr.io/pirlruc/ci-lint` |
 | Architectures | `linux/amd64` |
 | User | non-root `1000:1000` |
 
@@ -23,21 +23,51 @@ and semgrep. Not a product runtime — no `HEALTHCHECK`.
 
 Prefer a version tag or digest in production.
 
+## Authentication
+
+If the package is public, anonymous pulls work:
+
 ```bash
-docker pull pirlruc/ci-lint:2.0.1
-# or
-docker pull pirlruc/ci-lint@sha256:<digest>
+docker pull ghcr.io/pirlruc/ci-lint:2.0.1
 ```
 
-## Quick start
+If the package is private, authenticate with a PAT that has `read:packages`:
+
+```bash
+echo "$CR_PAT" | docker login ghcr.io -u USERNAME --password-stdin
+docker pull ghcr.io/pirlruc/ci-lint:2.0.1
+# or
+docker pull ghcr.io/pirlruc/ci-lint@sha256:<digest>
+```
+
+## Use as a GitHub Actions job container
+
+```yaml
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    container:
+      image: ghcr.io/pirlruc/ci-lint:2.0.1
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: actionlint .github/workflows/*.yml
+```
+
+Grant the package **Actions** Read access for the calling repository when using
+`GITHUB_TOKEN`, or pass a PAT with `read:packages`.
+
+## Quick start (local)
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-lint:2.0.1 \
+  ghcr.io/pirlruc/ci-lint:2.0.1 \
   actionlint .github/workflows/*.yml
 ```
 
-Hardened local run (read-only workspace mount):
+Hardened local run:
 
 ```bash
 docker run --rm \
@@ -46,7 +76,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-lint:2.0.1 \
+  ghcr.io/pirlruc/ci-lint:2.0.1 \
   semgrep scan --config auto --error .
 ```
 
@@ -68,12 +98,12 @@ and `ci-container`).
 ## Verify a publish
 
 ```bash
-docker pull pirlruc/ci-lint@sha256:<digest>
+docker pull ghcr.io/pirlruc/ci-lint@sha256:<digest>
 
 cosign verify \
   --certificate-identity-regexp 'https://github.com/pirlruc/commondevops/.github/workflows/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  pirlruc/ci-lint@sha256:<digest>
+  ghcr.io/pirlruc/ci-lint@sha256:<digest>
 ```
 
 Signing runs only when the source repository is public.

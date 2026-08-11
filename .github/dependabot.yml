@@ -42,7 +42,14 @@ updates:
       default-days: 7
 
   - package-ecosystem: docker
-    directory: /docker/ci-base
+    directory: /docker/ci-lint
+    patterns: ["*"]
+    multi-ecosystem-group: all-dependencies
+    cooldown:
+      default-days: 7
+
+  - package-ecosystem: docker
+    directory: /docker/ci-supply-chain
     patterns: ["*"]
     multi-ecosystem-group: all-dependencies
     cooldown:
