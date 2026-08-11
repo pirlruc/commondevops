@@ -52,6 +52,8 @@ jobs:
       scripts_ref: 09dded47b7e40a667aa4ad5b5df339ae42452fdc
       # Bootstrap: no ci-container yet; host install path.
       runner_image: ""
+      # Nested infra uses commondevops@74695e83 (pre --min-severity); devops-ci covers infra.
+      run_infra_lint: false
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
     secrets:
       # Nested commondevops reusables: caller's own token.
