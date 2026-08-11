@@ -1,0 +1,50 @@
+# Make a GHCR package public using GITHUB_TOKEN (packages: write).
+# Local `gh` often lacks packages scopes; run via workflow_dispatch.
+name: GHCR Package Visibility
+
+on:
+  workflow_dispatch:
+    inputs:
+      package_name:
+        description: Container package name under the owner (e.g. ci-base)
+        type: string
+        required: true
+        default: ci-base
+      visibility:
+        description: public or private
+        type: choice
+        options:
+          - public
+          - private
+        default: public
+
+permissions:
+  contents: read
+
+jobs:
+  set-visibility:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      packages: write
+    steps:
+      - name: Set package visibility
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
+          PACKAGE: ${{ inputs.package_name }}
+          VISIBILITY: ${{ inputs.visibility }}
+        run: |
+          set -euo pipefail
+          echo "Setting ghcr.io/${OWNER}/${PACKAGE} visibility=${VISIBILITY}"
+          # User-owned packages use /user/packages; org-owned use /orgs/{org}/packages.
+          if gh api "users/${OWNER}" --jq .type | grep -qi Organization; then
+            API="orgs/${OWNER}/packages/container/${PACKAGE}"
+          else
+            API="user/packages/container/${PACKAGE}"
+          fi
+          gh api --method PATCH \
+            -H "Accept: application/vnd.github+json" \
+            "${API}" \
+            -f visibility="${VISIBILITY}"
+          echo "Updated ${API} → visibility=${VISIBILITY}"
