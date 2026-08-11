@@ -40,7 +40,7 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops).
 |-----------|-----|
 | guardrails submodule | tag `1.1.0` → `6fe580c…` (deinit'd) |
 | github-scaffold submodule | `f8a6ba1…` (deinit'd) |
-| containerdevops (ci-base caller) | `cc66d44f…` (PR #33 single-platform verify) |
+| containerdevops (ci-base caller) | `e673165f…` (release [`1.0.1`](https://github.com/pirlruc/containerdevops/releases/tag/1.0.1)) |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 
 ## Commands
@@ -70,34 +70,31 @@ python3 .github/scaffold/scripts/issues-sync.py \
   mcp must stay on 1.x (`==1.29.0`); mcp 2.x drops FastMCP and breaks semgrep.
 - **container-scan ignorefile** requires containerdevops ≥ `304cd8f1…`.
 - **Publish verify** requires containerdevops ≥ `cc66d44f…` (single-platform
-  image manifests are not OCI indexes).
+  image manifests are not OCI indexes); current pin is `1.0.1` / `e673165f…`.
 - **Private Scorecard:** `GITHUB_TOKEN` cannot `ListCommits` on default-branch analysis.
   Callers pass optional `SCORECARD_TOKEN` (classic PAT, `repo` scope). Without it,
   Scorecard is **advisory** when `repository.private` is true (PR #10).
 
 ## Known pitfalls (GHCR)
 
-- **No API to make packages public.** UI only:
-  https://github.com/users/pirlruc/packages/container/package/ci-base
-  → Package settings → Change visibility → Public.
-  Grant Actions Read to `pirlruc/containerdevops` if keeping private.
+- **No API to make packages public.** UI only, or keep private and grant Actions Read.
+  `ci-base`: already granted Read to `pirlruc/containerdevops`.
+  `ci-container`: grant Read to consumers (commondevops / app repos) the same way
+  after first publish (`:1.0.1` is live).
 
 ## Suggested next work
 
-1. Make `ci-base` public in GHCR UI (blocks ci-container publish).
-2. Re-run containerdevops CI Container Image publish / finish `1.0.0`.
-3. Re-pin this repo to containerdevops `@1.0.0` SHA.
-
-1. Make `ghcr.io/pirlruc/ci-base` package public; verify unauthenticated pull.
-2. Cut containerdevops `1.0.0`; make `ci-container` public; re-pin this repo to that tag.
-3. Optionally set repo secret `SCORECARD_TOKEN` to restore blocking Scorecard on private main.
-4. Sync issues (`--update`) to close CMN-001…011 on GitHub; enable Dependabot private registries.
-5. Refresh donor digests / drop `.trivyignore.yaml` entries when upstream ships fixes (before 2026-11-11).
+1. Grant Actions Read on `ghcr.io/pirlruc/ci-container` to repos that pull it
+   (or make the package public in UI).
+2. Optionally set repo secret `SCORECARD_TOKEN` to restore blocking Scorecard on private main.
+3. Sync issues (`--update`) to close CMN-001…011 on GitHub; enable Dependabot private registries.
+4. Refresh donor digests / drop `.trivyignore.yaml` entries when upstream ships fixes (before 2026-11-11).
 
 ## Recent history
 
+- 2026-08-11: re-pin containerdevops to `e673165f…` (`1.0.1` — Trivy ignores + dive/CST).
 - 2026-08-11: release `1.0.0`; Scorecard advisory-on-private + optional `SCORECARD_TOKEN`
-  (PR #10, merge `3893494`); pin containerdevops `cc66d44f…` (PR #33) for publish verify.
+  (PR #10, merge `3893494`); earlier pin `cc66d44f…` (PR #33) for publish verify.
 - 2026-08-11: actionlint 1.7.12, semgrep 1.172.0 + mcp==1.29.0 override, `.trivyignore.yaml`
   (CMN-011); pin containerdevops `304cd8f1…` (PR #32 ignorefile support).
 - 2026-08-11: CONTAINERDEVOPS_PIN → `c3851646…` (PR #29); pass `scripts_token` +
