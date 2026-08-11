@@ -38,7 +38,7 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops).
 |-----------|-----|
 | guardrails submodule | tag `1.1.0` → `6fe580c…` (deinit'd) |
 | github-scaffold submodule | `f8a6ba1…` (deinit'd) |
-| containerdevops (ci-base caller) | merge `5117142…` (PR #21); re-pin to `1.0.0` after containerdevops release |
+| containerdevops (ci-base caller) | merge `09dded47…` (PR #29 scripts_token); re-pin to `1.0.0` after release |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 
 ## Commands
@@ -73,7 +73,9 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
-- 2026-08-11: restored self-CI triggers; CONTAINERDEVOPS_PIN → `5117142…` (PR #21 merge);
+- 2026-08-11: CONTAINERDEVOPS_PIN → `09dded47…` (PR #29); pass `scripts_token` +
+  `checkout_token: github.token` for cross-repo reusable calls.
+- 2026-08-11: restored self-CI triggers; earlier pin `5117142…` (PR #21 merge);
   enabled `runner_image: ""`, `tag_latest`, `verify_command`.
 - 2026-08-11: grant license engine, fail-closed thresholds, CI-026 pins, release-gated
   ci-base publish, devops-ci/security triggers, submodule bump to guardrails 1.1.0.

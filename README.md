@@ -51,7 +51,7 @@ bash scripts/check-ci-local.sh
 [`docker/ci-base/`](docker/ci-base/) assembles DHI-pinned syft/grype/trivy/shellcheck
 plus hadolint, actionlint, and uv-installed zizmor/yamllint/semgrep. Built and
 published by [`.github/workflows/ci-base-image.yml`](.github/workflows/ci-base-image.yml)
-via [containerdevops](https://github.com/pirlruc/containerdevops)@`5117142`.
+via [containerdevops](https://github.com/pirlruc/containerdevops)@`09dded47`.
 
 ## Submodules
 
