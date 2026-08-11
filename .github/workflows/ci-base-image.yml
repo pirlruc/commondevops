@@ -43,6 +43,8 @@ jobs:
        github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
+      # Nested container-lint → common-secrets-sast needs security-events: write.
+      security-events: write
     uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@5117142fac3ae31d1c24eab9d3c0cd86107e36ea
     with:
       dockerfile: docker/ci-base/Dockerfile
