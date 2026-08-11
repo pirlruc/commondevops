@@ -56,5 +56,13 @@ RUN uv pip install --system --no-cache \
       'semgrep==1.159.0'
 
 WORKDIR /workspace
+
+# Non-root default user (semgrep dockerfile.security.missing-user*). Tools are
+# world-executable under /usr/local/bin; Actions job containers still get a
+# writable workspace bind-mount.
+RUN useradd --create-home --uid 1000 --shell /bin/bash ci \
+ && chown -R ci:ci /workspace
+USER ci
+
 ENTRYPOINT []
 CMD ["bash"]
