@@ -1,0 +1,33 @@
+# Vendored from pirlruc/guardrails supply-chain/profile.thresholds.yml for reusable CI.
+# Keep in sync when org supply-chain thresholds change; do not edit casually.
+# license_allow_list is a commondevops extension for the grant evaluator (SC-LIC-001/002).
+
+# Org-default numeric / enum gates for supply-chain policy.
+# CI and Dependabot templates should treat this file as the single source of truth.
+# Repos may override values with a recorded justification (Epic required when lowering a gate).
+
+dependency_update_interval: monthly              # SC-DEP-003
+dependency_update_open_pr_limit: 5               # SC-DEP-002
+dependency_update_blocked_semver_levels: none    # SC-DEP-003
+
+# SPDX license substrings denied by SC-LIC-001 (case-insensitive match against licenseConcluded/Declared).
+# Empty list means the spdx-deny engine runs but denies nothing; consumers tighten as needed.
+license_deny_list: []                            # SC-LIC-001
+
+# Grant allow-list patterns (glob-style, case-sensitive) for license_engine=grant.
+# Org deny list is empty; allow meaningful permissive OSS matching Anchore grant defaults.
+license_allow_list:                              # SC-LIC-001 (grant)
+  - "MIT"
+  - "MIT-*"
+  - "Apache-*"
+  - "BSD-*"
+  - "ISC"
+  - "0BSD"
+  - "Unlicense"
+  - "CC0-*"
+  - "Zlib"
+  - "Python-2.0"
+  - "PSF-2.0"
+  - "BlueOak-1.0.0"
+  - "MPL-2.0"
+  - "LGPL-*"

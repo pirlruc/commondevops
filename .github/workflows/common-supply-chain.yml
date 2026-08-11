@@ -18,6 +18,11 @@ on:
         required: false
         type: string
         default: "[]"
+      license_engine:
+        description: "License evaluator: grant (default) or spdx-deny (license_gate.py)"
+        required: false
+        type: string
+        default: grant
       scripts_ref:
         description: "Commit/tag/branch of commondevops to checkout for scripts (must match uses: pin)"
         required: false
@@ -37,6 +42,9 @@ on:
       license_deny_list:
         type: string
         default: "[]"
+      license_engine:
+        type: string
+        default: grant
       scripts_ref:
         type: string
         default: ""
@@ -75,10 +83,21 @@ jobs:
             scripts
           sparse-checkout-cone-mode: false
 
+      - name: Require vendored supply-chain thresholds
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -euo pipefail
+          THR="${{ github.workspace }}/_commondevops/scripts/supply-chain.profile.thresholds.yml"
+          if [[ ! -f "${THR}" ]]; then
+            echo "::error::Missing vendored thresholds at ${THR}; failing closed (SC-LIC-001)."
+            exit 1
+          fi
+          echo "THRESHOLDS_PATH=${THR}" >> "${GITHUB_ENV}"
+
       - name: Install tooling
         working-directory: ${{ github.workspace }}
         env:
-          INSTALL_ONLY: syft,grype,trivy
+          INSTALL_ONLY: ${{ inputs.license_engine == 'grant' && 'syft,grype,trivy,grant' || 'syft,grype,trivy' }}
         run: bash _commondevops/scripts/install-common-tools.sh
 
       - name: Syft SBOM (CycloneDX + SPDX)
@@ -113,12 +132,28 @@ jobs:
           trivy fs --scanners vuln --severity HIGH,CRITICAL \
             --exit-code 1 "${CFG[@]}" .
 
-      - name: License gate
+      - name: License gate (grant)
+        if: inputs.license_engine == 'grant'
+        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        env:
+          THRESHOLDS_PATH: ${{ env.THRESHOLDS_PATH }}
+          GRANT_CONFIG_PATH: .grant.yaml
+        run: |
+          set -euo pipefail
+          python3 "${{ github.workspace }}/_commondevops/scripts/generate_grant_config.py"
+          DRY=()
+          if [[ "${ADVISORY}" == "true" ]]; then
+            DRY=(--dry-run)
+          fi
+          grant check scan-results/sbom-spdx.json --disable-file-search -c .grant.yaml "${DRY[@]}"
+
+      - name: License gate (spdx-deny)
+        if: inputs.license_engine == 'spdx-deny'
         continue-on-error: ${{ env.ADVISORY == 'true' }}
         env:
           SPDX_SBOM_PATH: scan-results/sbom-spdx.json
           LICENSE_DENY_LIST: ${{ inputs.license_deny_list }}
-          THRESHOLDS_PATH: ${{ github.workspace }}/docs/guardrails/supply-chain/profile.thresholds.yml
+          THRESHOLDS_PATH: ${{ env.THRESHOLDS_PATH }}
         run: python3 "${{ github.workspace }}/_commondevops/scripts/license_gate.py"
 
       - name: Upload scan results

@@ -2,9 +2,9 @@
 # Read a threshold key from a YAML profile (vendored or guardrails submodule).
 set -euo pipefail
 KEY="${1:?threshold key required}"
-FILE="${2:-docs/guardrails/supply-chain/profile.thresholds.yml}"
+FILE="${2:-scripts/supply-chain.profile.thresholds.yml}"
 if [[ ! -f "${FILE}" ]]; then
-  echo "Missing ${FILE}; init the guardrails submodule first." >&2
+  echo "Missing ${FILE}; vendor or pass an explicit thresholds path." >&2
   exit 1
 fi
 # Strip inline comments after the value

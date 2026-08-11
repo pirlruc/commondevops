@@ -17,6 +17,7 @@ GITLEAKS_VERSION="${GITLEAKS_VERSION:-8.21.2}"
 TRIVY_VERSION="${TRIVY_VERSION:-0.73.0}"
 SYFT_VERSION="${SYFT_VERSION:-1.50.0}"
 GRYPE_VERSION="${GRYPE_VERSION:-0.116.1}"
+GRANT_VERSION="${GRANT_VERSION:-0.6.8}"
 
 should_install() {
   local name="$1"
@@ -98,5 +99,12 @@ install_if_missing grype bash -c "
   rm -f /tmp/grype.tgz
 "
 
+install_if_missing grant bash -c "
+  curl -sSfL -o /tmp/grant.tgz \
+    'https://github.com/anchore/grant/releases/download/v${GRANT_VERSION}/grant_${GRANT_VERSION}_linux_amd64.tar.gz'
+  tar -xzf /tmp/grant.tgz -C '${DEST}' grant
+  rm -f /tmp/grant.tgz
+"
+
 echo "Tool install complete. PATH=${PATH}"
-echo "Note: prefer ghcr.io/pirlruc/ci-base for DHI-pinned syft/grype/trivy/shellcheck when available."
+echo "Note: prefer ghcr.io/pirlruc/ci-base for DHI-pinned syft/grype/trivy/shellcheck/grant when available."

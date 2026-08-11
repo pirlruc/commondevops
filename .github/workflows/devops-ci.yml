@@ -1,12 +1,20 @@
 name: DevOps CI (self)
 
 on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
     inputs:
       blocking:
         description: Fail jobs on gate errors
         type: boolean
         default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 # CI-025 default-deny; reusable callees declare their own job permissions.
 permissions: {}
@@ -16,7 +24,8 @@ jobs:
     if: github.actor != 'dependabot[bot]'
     uses: ./.github/workflows/common-infra-lint.yml
     with:
-      blocking: ${{ inputs.blocking }}
+      # Push/PR are blocking; workflow_dispatch honours the input.
+      blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
       working_directory: .
       shell_scripts: scripts/*.sh
       dockerfiles: docker/ci-base/Dockerfile
@@ -27,7 +36,7 @@ jobs:
     if: github.actor != 'dependabot[bot]'
     uses: ./.github/workflows/common-secrets-sast.yml
     with:
-      blocking: ${{ inputs.blocking }}
+      blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
       working_directory: .
       scripts_ref: ${{ github.sha }}
 
@@ -35,7 +44,7 @@ jobs:
     if: github.actor != 'dependabot[bot]'
     uses: ./.github/workflows/common-supply-chain.yml
     with:
-      blocking: ${{ inputs.blocking }}
+      blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
       working_directory: .
       license_deny_list: "[]"
       scripts_ref: ${{ github.sha }}
@@ -46,5 +55,5 @@ jobs:
       github.event.repository.fork == false
     uses: ./.github/workflows/common-scorecard.yml
     with:
-      blocking: ${{ inputs.blocking }}
+      blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
       publish_results: false

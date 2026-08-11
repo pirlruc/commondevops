@@ -10,8 +10,9 @@
 #   hadolint/hadolint:2.12.0-alpine → /bin/hadolint
 #   rhysd/actionlint:1.7.7     → /usr/local/bin/actionlint
 #   ghcr.io/astral-sh/uv:0.12.0 → /uv /uvx
+#   anchore/grant:v0.6.8       → /grant
 
-# dhi.io/python:3.13-debian13-dev — digest pinned (DOCKER-BUILD-003)
+# dhi.io/python:3.13-debian13-dev — digest pinned (DOCKER-BUILD-003 / CI-026)
 FROM dhi.io/python:3.13-debian13-dev@sha256:5985b54ea3f145c9106890612792a0eb17c99e742e11fd9c391658f1946e1777
 
 LABEL org.opencontainers.image.title="ci-base" \
@@ -33,12 +34,15 @@ COPY --from=dhi.io/cosign:2-debian13@sha256:44445adedd81bde6fee8645d4e23c36ffd62
 COPY --from=dhi.io/gitleaks:8-debian13@sha256:08b93b96ee818647ab1fb8e148bf8af4e1190b344e48b0e9bfa57eae98db8117 \
   /usr/local/bin/gitleaks /usr/local/bin/gitleaks
 
-# Hub donors for workflow linters
-COPY --from=hadolint/hadolint:2.12.0-alpine /bin/hadolint /usr/local/bin/hadolint
-COPY --from=rhysd/actionlint:1.7.7 /usr/local/bin/actionlint /usr/local/bin/actionlint
-
-# uv for Python tooling (zizmor, yamllint, semgrep)
-COPY --from=ghcr.io/astral-sh/uv:0.12.0 /uv /uvx /usr/local/bin/
+# Hub / GHCR donors for workflow linters, uv, and license gate (CI-026 digest pins)
+COPY --from=hadolint/hadolint:2.12.0-alpine@sha256:3c206a451cec6d486367e758645269fd7d696c5ccb6ff59d8b03b0e45268a199 \
+  /bin/hadolint /usr/local/bin/hadolint
+COPY --from=rhysd/actionlint:1.7.7@sha256:887a259a5a534f3c4f36cb02dca341673c6089431057242cdc931e9f133147e9 \
+  /usr/local/bin/actionlint /usr/local/bin/actionlint
+COPY --from=ghcr.io/astral-sh/uv:0.12.0@sha256:606e70c71c852d03f611b1e56a195d08648507018a7057fab82c4974c4eae105 \
+  /uv /uvx /usr/local/bin/
+COPY --from=anchore/grant:v0.6.8@sha256:172463611795f43b77302cdfbd7b3f81295492a7330e0820cfe41c3674920237 \
+  /grant /usr/local/bin/grant
 
 ENV PATH="/usr/local/bin:${PATH}" \
     UV_SYSTEM_PYTHON=1 \

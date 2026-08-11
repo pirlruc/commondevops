@@ -61,8 +61,8 @@ jobs:
           TAG: ${{ inputs.tag }}
         run: |
           set -euo pipefail
-          if [[ ! "${TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-].*)?$ ]]; then
-            echo "::error::Tag '${TAG}' must match semver-ish vMAJOR.MINOR.PATCH"
+          if [[ ! "${TAG}" =~ ^(v)?[0-9]+\.[0-9]+\.[0-9]+([.-].*)?$ ]]; then
+            echo "::error::Tag '${TAG}' must match semver-ish [v]MAJOR.MINOR.PATCH"
             exit 1
           fi
           if ! git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
