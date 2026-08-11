@@ -1,10 +1,9 @@
 name: DevOps CI (self)
 
+# TEMP (bootstrap): push/PR triggers disabled while containerdevops CI is stabilized
+# to avoid burning Actions minutes. Restore push:[main] + pull_request:[main] after
+# containerdevops PR #21 is green/merged.
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
     inputs:
       blocking:

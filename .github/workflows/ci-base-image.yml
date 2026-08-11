@@ -5,16 +5,9 @@
 name: CI Base Image
 
 on:
-  release:
-    types: [published]
-  schedule:
-    # Monthly on the 15th at 05:17 UTC (CI-027 rebuild cadence).
-    - cron: "17 5 15 * *"
-  pull_request:
-    branches: [main]
-    paths:
-      - "docker/ci-base/**"
-      - ".github/workflows/ci-base-image.yml"
+  # TEMP (bootstrap): release/schedule/PR triggers disabled while containerdevops
+  # CI is stabilized. Restore release:[published], monthly schedule, and path-filtered
+  # pull_request after containerdevops PR #21 is green/merged.
   workflow_dispatch:
     inputs:
       blocking:
