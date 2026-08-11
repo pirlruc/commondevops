@@ -11,74 +11,82 @@
 
 ## Scope
 
-Owns `.github/workflows/common-*.yml`, `scripts/`, `docker/ci-base/`. Consumers
-pin `pirlruc/commondevops@<sha>` and pass matching `scripts_ref` +
+Owns `.github/workflows/common-*.yml`, `devops-ci.yml`, `devops-security.yml`,
+`ci-base-image.yml`, `scripts/`, `docker/ci-base/`. Consumers pin
+`pirlruc/commondevops@<sha|tag>` and pass matching `scripts_ref` +
 `checkout_token`.
 
-Companion: [containerdevops](https://github.com/pirlruc/containerdevops) (OCI
-image lifecycle), [pydevops](https://github.com/pirlruc/pydevops) (Python
-quality).
+Companion: [containerdevops](https://github.com/pirlruc/containerdevops).
 
 ## Delivery status
 
 | Phase / epic | Status |
 |--------------|--------|
-| Phase 0 — measurement baseline | **Done (local 2026-08-10):** cpp inline apt+venv ≈51s vs `ci-cpp` cold start ≈0.8s; container curl install ≈18.5s vs `ci-base` cold start ≈0.8s; uv already fast → **skip `ci-python`**. Build `ci-base`/`ci-cpp`/`ci-container`. |
-| Phase 1 — repo foundation (files on disk) | Local tree authored; **no initial commit yet** |
-| CMN-001 — reusable workflows | Authored in tree; not synced to GitHub issues |
-| CMN-002 — ci-base image | Dockerfile + caller authored; image not published |
-| CMN-003 — Dependabot SC-DEP | `.github/dependabot.yml` present |
-| CMN-004 — ai-reviewer prompt | `docs/continuous-improvement.md` present |
+| CMN-001 — reusable workflows | Done |
+| CMN-002 — ci-base image | Done (awaiting first release publish) |
+| CMN-003 — Dependabot SC-DEP | Done (private registry secrets still needed) |
+| CMN-004 — ai-reviewer prompt | Done |
+| CMN-005 — self-CI + security schedule | Done |
+| CMN-006 — release-gated publish | Done |
+| CMN-007 — CI-026 digest pins + grant | Done |
+| CMN-008 — vendored thresholds fail-closed | Done |
+| CMN-009 — grant license gate | Done |
+| CMN-010 — DOCKER-PERF-001 size deviation | In progress (on PR) |
+| CMN-011 — Trivy ignores for donor binaries | In progress (on PR) |
 
 ## Pins
 
 | Component | Ref |
 |-----------|-----|
-| guardrails submodule | tag `1.0.0` → commit `925b9f32659936382c67850ec125a182261710bf` (annotated tag object `d79a82d…`) |
-| github-scaffold submodule | `0db5890f808e4a9b9d11eabfc9a95b2b90898fad` |
-| containerdevops (ci-base caller) | `4185836ce6ea925e38d9b93c281b4ef8cf77c2d2` |
-| actions/checkout | `3d3c42e5aac5ba805825da76410c181273ba90b1` (v7.0.1) |
+| guardrails submodule | tag `1.1.0` → `6fe580c…` (deinit'd) |
+| github-scaffold submodule | `f8a6ba1…` (deinit'd) |
+| containerdevops (ci-base caller) | `304cd8f1…` (PR #32 ignorefile + rescan probe) |
+| actions/checkout | `3d3c42e…` (v7.0.1) |
 
 ## Commands
 
 ```bash
 bash scripts/check-ci-local.sh
-bash scripts/check-ci-docker.sh   # via COMMONDEVOPS_DOCKER_STEPS=…
 bash scripts/pin-dhi-digests.sh docker/ci-base/Dockerfile
+THRESHOLDS_PATH=scripts/supply-chain.profile.thresholds.yml \
+  python3 scripts/generate_grant_config.py
 python3 .github/scaffold/scripts/issues-sync.py \
   --repo pirlruc/commondevops --yaml docs/issues.yml --dry-run
 ```
 
 ## Known pitfalls
 
-- **Private `checkout_token`:** Cross-repo callers must pass a PAT/fine-grained
-  token with `contents:read` on this repo. Without it, nested sparse checkout
-  fails with REST `Not Found`.
-- **`scripts_ref`:** Must match the `uses:` pin. Never use `github.workflow_sha`
-  (that is the *caller* workflow object). Empty `scripts_ref` falls back to
-  `github.sha` of the *called* workflow only when the reusable lives in the
-  same repo.
-- **dhi.io login:** Building `docker/ci-base` needs Hub credentials
-  (`DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN`) for `docker login dhi.io`.
-- **ci-base may be unpublished:** Workflows install tools via
-  `install-common-tools.sh` until `ghcr.io/pirlruc/ci-base:latest` exists.
-- **Empty git history:** Repo has no commits yet; submodule gitlinks need the
-  first commit to record pins. Working tree clones are present under
-  `docs/guardrails` and `.github/scaffold`.
-- **Signing:** Keyless cosign / attestations need public repo or GHEC; keep
-  `sign: false` while private and record a deviation if required.
+- **Private `checkout_token`:** Cross-repo callers need contents:read on this repo.
+- **`scripts_ref`:** Must match the `uses:` pin.
+- **License gate:** thresholds are vendored at `scripts/supply-chain.profile.thresholds.yml`
+  (not `docs/guardrails/`). Default engine is **grant** with `--disable-file-search`.
+- **Submodules deinitialized** (bor-cpp style); hydrate before sync-templates.
+- **Publish:** `release: [published]` + monthly schedule; cut releases with `gh release create`
+  under a PAT (GITHUB_TOKEN-created releases do not trigger workflows).
+- **Signing:** keep `sign: false` while private; record deviation if required.
+- Dependabot needs Dependabot secrets for private `containerdevops` + `dhi.io`.
+- **ci-base Trivy:** donor-static HIGH CVEs are path-scoped in `.trivyignore.yaml`
+  (review 2026-11-11, CMN-011). Do not ignore PyJWT/mcp — bump via Dockerfile.
+  mcp must stay on 1.x (`==1.29.0`); mcp 2.x drops FastMCP and breaks semgrep.
+- **container-scan ignorefile** requires containerdevops ≥ `304cd8f1…`.
 
 ## Suggested next work
 
-1. Initial commit + push (approval-gated); enable Actions access for private
-   reusable workflows (`access_level: user`).
-2. Sync `docs/issues.yml` (dry-run first).
-3. Publish `ci-base` via `ci-base-image.yml` once secrets are set.
-4. Phase 0 measurement: capture baseline before migrating consumers.
+1. Merge this PR; cut annotated tag + GitHub Release `1.0.0` (PAT) to publish ci-base.
+2. Make `ghcr.io/pirlruc/ci-base` package public; verify unauthenticated pull.
+3. Cut containerdevops `1.0.0`; make `ci-container` public; re-pin this repo to that tag.
+4. Sync issues (`--update`) to close CMN-001…011 on GitHub; enable Dependabot private registries.
+5. Refresh donor digests / drop `.trivyignore.yaml` entries when upstream ships fixes (before 2026-11-11).
 
 ## Recent history
 
-- Phase 2 bootstrap: authored reusable workflows, scripts, ci-base Dockerfile,
-  Dependabot, handoff, continuous-improvement prompt, issues manifest (2026-08-10).
+- 2026-08-11: actionlint 1.7.12, semgrep 1.172.0 + mcp==1.29.0 override, `.trivyignore.yaml`
+  (CMN-011); pin containerdevops `304cd8f1…` (PR #32 ignorefile support).
+- 2026-08-11: CONTAINERDEVOPS_PIN → `c3851646…` (PR #29); pass `scripts_token` +
+  `checkout_token: github.token` for cross-repo reusable calls.
+- 2026-08-11: restored self-CI triggers; earlier pin `5117142…` (PR #21 merge);
+  enabled `runner_image: ""`, `tag_latest`, `verify_command`.
+- 2026-08-11: grant license engine, fail-closed thresholds, CI-026 pins, release-gated
+  ci-base publish, devops-ci/security triggers, submodule bump to guardrails 1.1.0.
 
-*Last updated: 2026-08-10*
+*Last updated: 2026-08-11*

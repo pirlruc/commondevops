@@ -2,4 +2,15 @@
 # Schema: https://github.com/pirlruc/guardrails#deviation-rule
 # Process: https://github.com/pirlruc/methodologies/blob/1.1.0/github-issue-adr/docs/process/guardrail-compliance.md
 
-deviations: []
+deviations:
+  - id: DOCKER-PERF-001
+    key: image_max_size_mb
+    org_default: 300
+    repo_value: 1500
+    why: >
+      ci-base is a shared CI toolchain image (syft/grype/trivy/cosign/semgrep/grant),
+      not a product runtime image; uncompressed size on GHA is ~1.2GB.
+    epic: CMN-010
+    owner: pirlruc
+    approved_by: Engineering Lead
+    review: 2026-12-31

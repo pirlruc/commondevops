@@ -38,6 +38,10 @@ commandTests:
     command: "semgrep"
     args: ["--version"]
     exitCode: 0
+  - name: grant
+    command: "grant"
+    args: ["version"]
+    exitCode: 0
 fileExistenceTests:
   - name: syft binary
     path: "/usr/local/bin/syft"
@@ -50,4 +54,7 @@ fileExistenceTests:
     shouldExist: true
   - name: uv binary
     path: "/usr/local/bin/uv"
+    shouldExist: true
+  - name: grant binary
+    path: "/usr/local/bin/grant"
     shouldExist: true

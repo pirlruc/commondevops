@@ -7,7 +7,7 @@ milestones:
   - name: Phase 1 — Foundation
     epics:
       - id: CMN-001
-        status: open
+        status: done
         title: Reusable common-* workflows (infra lint, secrets/SAST, supply-chain, scorecard, release)
         overview:
           problem: Language devops repos duplicate gitleaks/semgrep/SBOM/Scorecard/release wiring.
@@ -33,7 +33,7 @@ milestones:
           - SC-LIC-001
         tasks:
           - id: CMN-001-T1
-            status: open
+            status: done
             title: Land common-* reusable workflows and install/license scripts
             instructions:
               files:
@@ -46,7 +46,7 @@ milestones:
               - CI-025
 
       - id: CMN-002
-        status: open
+        status: done
         title: ci-base image (DHI-first tool assembly) and publish caller
         overview:
           problem: Host runners reinstall syft/grype/trivy/hadolint per job; no shared CI image.
@@ -67,7 +67,7 @@ milestones:
           - DOCKER-TEST-001
         tasks:
           - id: CMN-002-T1
-            status: open
+            status: done
             title: Author Dockerfile structure-test and containerdevops thin caller
             instructions:
               files:
@@ -79,7 +79,7 @@ milestones:
               - DOCKER-BUILD-003
 
       - id: CMN-003
-        status: open
+        status: done
         title: Dependabot multi-ecosystem groups (SC-DEP)
         overview:
           problem: Actions and docker/ci-base base images need monthly grouped updates.
@@ -97,7 +97,7 @@ milestones:
           - SC-DEP-003
         tasks:
           - id: CMN-003-T1
-            status: open
+            status: done
             title: Author dependabot.yml for actions and ci-base docker
             instructions:
               files:
@@ -108,7 +108,7 @@ milestones:
               - SC-DEP-003
 
       - id: CMN-004
-        status: open
+        status: done
         title: ai-reviewer continuous-improvement prompt (CMN-* prefixes)
         overview:
           problem: No Automation prompt for ongoing commondevops review.
@@ -124,7 +124,7 @@ milestones:
           - CI-008
         tasks:
           - id: CMN-004-T1
-            status: open
+            status: done
             title: Author continuous-improvement.md for GitHub Agents Automations
             instructions:
               files:
@@ -135,4 +135,238 @@ milestones:
               - CI-008
 
   - name: Continuous improvement
-    epics: []
+    epics:
+      - id: CMN-005
+        status: done
+        title: Self-CI and scheduled security trigger policy
+        overview:
+          problem: devops-ci was dispatch-only; no weekly security lane for rule/advisory drift.
+          goal: Push/PR main + concurrency for devops-ci; weekly devops-security for secrets/SAST, supply-chain, Scorecard.
+        architecture:
+          target: .github/workflows/devops-ci.yml + devops-security.yml
+          modules:
+            - .github/workflows/devops-ci.yml
+            - .github/workflows/devops-security.yml
+        acceptance_criteria:
+          - Push/PR set blocking true; workflow_dispatch uses inputs.blocking
+          - Weekly cron Mon 06:17 UTC; concurrency groups present
+        guardrail_refs:
+          - CI-002
+          - CI-024
+          - CI-025
+        tasks:
+          - id: CMN-005-T1
+            status: done
+            title: Wire devops-ci push/PR triggers and add devops-security.yml
+            instructions:
+              files:
+                - .github/workflows/devops-ci.yml
+                - .github/workflows/devops-security.yml
+            verification:
+              - actionlint .github/workflows/devops-ci.yml
+              - actionlint .github/workflows/devops-security.yml
+            guardrail_refs:
+              - CI-002
+
+      - id: CMN-006
+        status: done
+        title: Release-gated ci-base publish and monthly rebuild
+        overview:
+          problem: Push-to-main published images; bare semver tags rejected; no CI-027 cadence.
+          goal: Publish on release/schedule/dispatch+publish; relax tag regex; monthly rebuild cron.
+        architecture:
+          target: ci-base-image.yml + common-release.yml
+          modules:
+            - .github/workflows/ci-base-image.yml
+            - .github/workflows/common-release.yml
+        acceptance_criteria:
+          - No push-to-main publish; release published + monthly 15th cron + break-glass dispatch
+          - Tag regex accepts 1.2.3 and v1.2.3
+        guardrail_refs:
+          - CI-027
+          - DOCKER-DELIV-001
+        tasks:
+          - id: CMN-006-T1
+            status: done
+            title: Rewrite ci-base-image triggers and relax common-release tag regex
+            instructions:
+              files:
+                - .github/workflows/ci-base-image.yml
+                - .github/workflows/common-release.yml
+            verification:
+              - actionlint .github/workflows/ci-base-image.yml
+            guardrail_refs:
+              - CI-027
+
+      - id: CMN-007
+        status: done
+        title: CI-026 digest-pin Hub/GHCR donors in ci-base
+        overview:
+          problem: hadolint, actionlint, and uv COPY --from lines were tag-only.
+          goal: Digest-pin all donors including grant; structure-test covers grant.
+        architecture:
+          target: docker/ci-base
+          modules:
+            - docker/ci-base/Dockerfile
+            - docker/ci-base/container-structure-test.yml
+        acceptance_criteria:
+          - Every FROM and COPY --from carries @sha256
+          - grant binary present and version-tested
+        guardrail_refs:
+          - CI-026
+          - DOCKER-BUILD-003
+        tasks:
+          - id: CMN-007-T1
+            status: done
+            title: Digest-pin donors and add grant to Dockerfile and structure-test
+            instructions:
+              files:
+                - docker/ci-base/Dockerfile
+                - docker/ci-base/container-structure-test.yml
+            verification:
+              - hadolint docker/ci-base/Dockerfile
+            guardrail_refs:
+              - CI-026
+
+      - id: CMN-008
+        status: done
+        title: Vendored supply-chain thresholds and fail-closed resolution
+        overview:
+          problem: THRESHOLDS_PATH pointed at unpopulated docs/guardrails/; missing file returned [].
+          goal: Vendor scripts/supply-chain.profile.thresholds.yml; fail closed when file missing.
+        architecture:
+          target: scripts/ + common-supply-chain.yml
+          modules:
+            - scripts/supply-chain.profile.thresholds.yml
+            - scripts/license_gate.py
+            - scripts/read-thresholds.sh
+            - .github/workflows/common-supply-chain.yml
+        acceptance_criteria:
+          - THRESHOLDS_PATH uses _commondevops sparse-checkout scripts path
+          - Missing thresholds exits non-zero; effective deny list is logged
+        guardrail_refs:
+          - SC-LIC-001
+        tasks:
+          - id: CMN-008-T1
+            status: done
+            title: Vendor thresholds and make license_gate.py fail closed
+            instructions:
+              files:
+                - scripts/supply-chain.profile.thresholds.yml
+                - scripts/license_gate.py
+                - .github/workflows/common-supply-chain.yml
+            verification:
+              - THRESHOLDS_PATH=/nonexistent python3 scripts/license_gate.py; test $? -ne 0
+            guardrail_refs:
+              - SC-LIC-001
+
+      - id: CMN-009
+        status: done
+        title: Grant license gate on Syft SPDX SBOM
+        overview:
+          problem: Substring deny list cannot express SPDX operators; empty deny list denied nothing.
+          goal: Default license_engine=grant with generated .grant.yaml; keep spdx-deny fallback.
+        architecture:
+          target: grant evaluator path
+          modules:
+            - scripts/generate_grant_config.py
+            - scripts/install-common-tools.sh
+            - .github/workflows/common-supply-chain.yml
+            - docker/ci-base/Dockerfile
+        acceptance_criteria:
+          - grant check uses --disable-file-search against sbom-spdx.json
+          - license_engine input selects grant or spdx-deny
+          - GRANT_VERSION 0.6.8 installable via install-common-tools.sh
+        guardrail_refs:
+          - SC-LIC-001
+          - SC-LIC-002
+        tasks:
+          - id: CMN-009-T1
+            status: done
+            title: Add generate_grant_config.py and wire license_engine in supply-chain
+            instructions:
+              files:
+                - scripts/generate_grant_config.py
+                - scripts/install-common-tools.sh
+                - .github/workflows/common-supply-chain.yml
+            verification:
+              - python3 scripts/generate_grant_config.py
+              - test -f .grant.yaml
+            guardrail_refs:
+              - SC-LIC-002
+
+      - id: CMN-010
+        status: in_progress
+        title: DOCKER-PERF-001 size deviation for ci-base toolchain image
+        overview:
+          problem: Org image_max_size_mb=300 fits product images; ci-base bundles scanners and exceeds ~1.2GB uncompressed on GHA.
+          goal: Document approved repo_value=1500 and pass image_max_size_mb override into container-build.
+        architecture:
+          target: ci-base size gate
+          modules:
+            - docs/guardrail-deviations.yml
+            - .github/workflows/ci-base-image.yml
+        acceptance_criteria:
+          - Deviation recorded for DOCKER-PERF-001 image_max_size_mb with epic CMN-010
+          - ci-base-image.yml passes image_max_size_mb matching repo_value
+          - CI Base Image build size gate passes on PRs
+        guardrail_refs:
+          - DOCKER-PERF-001
+        tasks:
+          - id: CMN-010-T1
+            status: in_progress
+            title: Wire size override and record deviation
+            instructions:
+              files:
+                - docs/guardrail-deviations.yml
+                - .github/workflows/ci-base-image.yml
+                - docs/issues.yml
+            verification:
+              - grep -q 'image_max_size_mb: \"1500\"' .github/workflows/ci-base-image.yml
+              - grep -q 'DOCKER-PERF-001' docs/guardrail-deviations.yml
+            guardrail_refs:
+              - DOCKER-PERF-001
+
+      - id: CMN-011
+        status: in_progress
+        title: Time-boxed Trivy ignores for vendor-static ci-base donor binaries
+        overview:
+          problem: >
+            HIGH/CRITICAL CVEs embedded in upstream static donor binaries (syft/grype/trivy/grant/actionlint)
+            fail DOCKER-SEC-001 image scan even after PyJWT/mcp upgrades and actionlint 1.7.12.
+          goal: >
+            Path-scoped .trivyignore.yaml (review 2026-11-11) plus containerdevops ignorefile support;
+            refresh donor digests when upstream ships fixes.
+        architecture:
+          target: ci-base scan ignore path
+          modules:
+            - .trivyignore.yaml
+            - docker/ci-base/Dockerfile
+            - .github/workflows/ci-base-image.yml
+        acceptance_criteria:
+          - .trivyignore.yaml covers remaining donor-binary HIGH/CRITICAL with path + statement
+          - PyJWT 2.13 via semgrep 1.172.0; mcp==1.29.0 via uv override (not ignored; mcp 2.x breaks semgrep FastMCP)
+
+          - Local and CI Trivy --severity HIGH,CRITICAL --exit-code 1 passes with ignorefile
+          - containerdevops pin includes ignorefile-aware container-scan.yml
+        guardrail_refs:
+          - DOCKER-SEC-001
+        tasks:
+          - id: CMN-011-T1
+            status: in_progress
+            title: Author ignorefile, bump actionlint/PyJWT/mcp, pin containerdevops
+            instructions:
+              files:
+                - .trivyignore.yaml
+                - docker/ci-base/Dockerfile
+                - .github/workflows/ci-base-image.yml
+                - docs/issues.yml
+            verification:
+              - docker build -t ci-base:ci -f docker/ci-base/Dockerfile docker/ci-base
+              - >
+                docker run --rm -v /var/run/docker.sock:/var/run/docker.sock
+                -v $PWD/.trivyignore.yaml:/tmp/.trivyignore.yaml:ro
+                aquasec/trivy:0.73.0 image --severity HIGH,CRITICAL --exit-code 1
+                --pkg-types library --scanners vuln --ignorefile /tmp/.trivyignore.yaml ci-base:ci
+            guardrail_refs:
+              - DOCKER-SEC-001

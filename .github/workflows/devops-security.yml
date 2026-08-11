@@ -1,16 +1,10 @@
-name: DevOps CI (self)
+name: DevOps Security (scheduled)
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  schedule:
+    # Monday 06:17 UTC — staggered off the hour (CI-002 / OpenSSF weekly Scorecard cadence).
+    - cron: "17 6 * * 1"
   workflow_dispatch:
-    inputs:
-      blocking:
-        description: Fail jobs on gate errors
-        type: boolean
-        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -20,19 +14,6 @@ concurrency:
 permissions: {}
 
 jobs:
-  infra-lint:
-    if: github.actor != 'dependabot[bot]'
-    permissions:
-      contents: read
-    uses: ./.github/workflows/common-infra-lint.yml
-    with:
-      # Push/PR are blocking; workflow_dispatch honours the input.
-      blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
-      working_directory: .
-      shell_scripts: scripts/*.sh
-      dockerfiles: docker/ci-base/Dockerfile
-      scripts_ref: ${{ github.sha }}
-
   secrets-sast:
     if: github.actor != 'dependabot[bot]'
     permissions:
@@ -40,7 +21,7 @@ jobs:
       security-events: write
     uses: ./.github/workflows/common-secrets-sast.yml
     with:
-      blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
+      blocking: true
       working_directory: .
       scripts_ref: ${{ github.sha }}
 
@@ -51,7 +32,7 @@ jobs:
       security-events: write
     uses: ./.github/workflows/common-supply-chain.yml
     with:
-      blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
+      blocking: true
       working_directory: .
       license_deny_list: "[]"
       scripts_ref: ${{ github.sha }}
@@ -66,5 +47,25 @@ jobs:
       id-token: write
     uses: ./.github/workflows/common-scorecard.yml
     with:
-      blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
+      blocking: true
       publish_results: false
+
+  # Optional note: published-image rescan of ghcr.io/pirlruc/ci-base:latest can be
+  # wired once the package exists (Trivy image scan). Skipped here until ci-base
+  # is published — no container-scan reusable in this repo.
+  published-image-rescan:
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Note — ci-base image rescan
+        run: |
+          cat <<'EOF'
+          Scheduled security lane covers secrets/SAST, supply-chain (SBOM + license),
+          and Scorecard. A Trivy rescan of ghcr.io/pirlruc/ci-base:latest will be
+          added after the package is published (CI-027 monthly rebuild also rescans
+          on the image publish path).
+          EOF

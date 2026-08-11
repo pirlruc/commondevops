@@ -85,7 +85,7 @@ Permissions: `contents: write`; `id-token: write` when signing is requested
 
 ## `ci-base-image.yml` (caller)
 
-Thin caller into containerdevops@`4185836` for lint/build/scan/publish of
+Thin caller into containerdevops@`09dded47` for lint/build/scan/publish of
 `docker/ci-base`. Secrets: `CONTAINERDEVOPS_READ_TOKEN`, `DOCKERHUB_USERNAME`,
 `DOCKERHUB_TOKEN`. `dhi_login: true`.
 

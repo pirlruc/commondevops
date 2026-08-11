@@ -8,10 +8,11 @@
 #   dhi.io/trivy:0-debian13    → /usr/bin/trivy
 #   dhi.io/shellcheck:0-debian13 → /usr/local/bin/shellcheck
 #   hadolint/hadolint:2.12.0-alpine → /bin/hadolint
-#   rhysd/actionlint:1.7.7     → /usr/local/bin/actionlint
+#   rhysd/actionlint:1.7.12    → /usr/local/bin/actionlint
 #   ghcr.io/astral-sh/uv:0.12.0 → /uv /uvx
+#   anchore/grant:v0.6.8       → /grant
 
-# dhi.io/python:3.13-debian13-dev — digest pinned (DOCKER-BUILD-003)
+# dhi.io/python:3.13-debian13-dev — digest pinned (DOCKER-BUILD-003 / CI-026)
 FROM dhi.io/python:3.13-debian13-dev@sha256:5985b54ea3f145c9106890612792a0eb17c99e742e11fd9c391658f1946e1777
 
 LABEL org.opencontainers.image.title="ci-base" \
@@ -33,12 +34,15 @@ COPY --from=dhi.io/cosign:2-debian13@sha256:44445adedd81bde6fee8645d4e23c36ffd62
 COPY --from=dhi.io/gitleaks:8-debian13@sha256:08b93b96ee818647ab1fb8e148bf8af4e1190b344e48b0e9bfa57eae98db8117 \
   /usr/local/bin/gitleaks /usr/local/bin/gitleaks
 
-# Hub donors for workflow linters
-COPY --from=hadolint/hadolint:2.12.0-alpine /bin/hadolint /usr/local/bin/hadolint
-COPY --from=rhysd/actionlint:1.7.7 /usr/local/bin/actionlint /usr/local/bin/actionlint
-
-# uv for Python tooling (zizmor, yamllint, semgrep)
-COPY --from=ghcr.io/astral-sh/uv:0.12.0 /uv /uvx /usr/local/bin/
+# Hub / GHCR donors for workflow linters, uv, and license gate (CI-026 digest pins)
+COPY --from=hadolint/hadolint:2.12.0-alpine@sha256:3c206a451cec6d486367e758645269fd7d696c5ccb6ff59d8b03b0e45268a199 \
+  /bin/hadolint /usr/local/bin/hadolint
+COPY --from=rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 \
+  /usr/local/bin/actionlint /usr/local/bin/actionlint
+COPY --from=ghcr.io/astral-sh/uv:0.12.0@sha256:606e70c71c852d03f611b1e56a195d08648507018a7057fab82c4974c4eae105 \
+  /uv /uvx /usr/local/bin/
+COPY --from=anchore/grant:v0.6.8@sha256:172463611795f43b77302cdfbd7b3f81295492a7330e0820cfe41c3674920237 \
+  /grant /usr/local/bin/grant
 
 ENV PATH="/usr/local/bin:${PATH}" \
     UV_SYSTEM_PYTHON=1 \
@@ -46,11 +50,25 @@ ENV PATH="/usr/local/bin:${PATH}" \
     PYTHONUNBUFFERED=1
 
 # Install Python CLIs into the DHI python image (dev variant has pip/uv-friendly layout).
-RUN uv pip install --system --no-cache \
+# semgrep>=1.168 brings PyJWT~=2.13; it still pins mcp==1.23.3. Override to mcp 1.29.0
+# (CVE floor >=1.28.1) — mcp 2.x drops FastMCP and breaks semgrep's MCP command.
+RUN printf 'mcp==1.29.0\n' > /tmp/uv-overrides.txt \
+ && uv pip install --system --no-cache --override /tmp/uv-overrides.txt \
       'zizmor>=1.0' \
       'yamllint>=1.35' \
-      'semgrep==1.159.0'
+      'semgrep==1.172.0' \
+      'mcp==1.29.0' \
+ && rm -f /tmp/uv-overrides.txt
 
 WORKDIR /workspace
+
+# Non-root default user (semgrep dockerfile.security.missing-user*).
+# DHI images have no useradd/adduser; write passwd/group entries directly.
+RUN printf 'ci:x:1000:1000::/home/ci:/bin/bash\n' >> /etc/passwd \
+ && printf 'ci:x:1000:\n' >> /etc/group \
+ && mkdir -p /home/ci \
+ && chown -R 1000:1000 /home/ci /workspace
+USER 1000:1000
+
 ENTRYPOINT []
 CMD ["bash"]

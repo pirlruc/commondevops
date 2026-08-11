@@ -1,13 +1,15 @@
 ---
-# Thin caller — pinned to containerdevops@4185836 (checkout_token + scripts_ref + dhi_login).
+# Thin caller — CONTAINERDEVOPS_PIN: 304cd8f1b5dc23f9bb801394d9c55e4f99a9c959
+# PR #32 merge (trivy ignorefile + unpublished image rescan probe)
+# 1.0.0 after that release (PR3).
 name: CI Base Image
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "docker/ci-base/**"
-      - ".github/workflows/ci-base-image.yml"
+  release:
+    types: [published]
+  schedule:
+    # Monthly on the 15th at 05:17 UTC (CI-027 rebuild cadence).
+    - cron: "17 5 15 * *"
   pull_request:
     branches: [main]
     paths:
@@ -20,9 +22,13 @@ on:
         type: boolean
         default: false
       publish:
-        description: Publish to GHCR (also runs on push to main)
+        description: Publish to GHCR (break-glass; also runs on release / schedule)
         type: boolean
         default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 # CI-025: default-deny at workflow level; jobs that call reusables grant scopes.
 permissions:
@@ -37,14 +43,23 @@ jobs:
        github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+      # Nested container-lint → common-secrets-sast needs security-events: write.
+      security-events: write
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@304cd8f1b5dc23f9bb801394d9c55e4f99a9c959
     with:
       dockerfile: docker/ci-base/Dockerfile
       working_directory: .
-      scripts_ref: 4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+      scripts_ref: 304cd8f1b5dc23f9bb801394d9c55e4f99a9c959
+      # Bootstrap: no ci-container yet; host install path.
+      runner_image: ""
+      # Nested infra uses commondevops@74695e83 (pre --min-severity); devops-ci covers infra.
+      run_infra_lint: false
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
     secrets:
-      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+      # Nested commondevops reusables: caller's own token.
+      checkout_token: ${{ github.token }}
+      # Sparse-checkout of private containerdevops scripts/.
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   build:
     needs: lint
@@ -54,19 +69,20 @@ jobs:
        github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@304cd8f1b5dc23f9bb801394d9c55e4f99a9c959
     with:
       context: docker/ci-base
       dockerfile: docker/ci-base/Dockerfile
       image_name: ci-base:ci
       structure_test_config: docker/ci-base/container-structure-test.yml
-      scripts_ref: 4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+      scripts_ref: 304cd8f1b5dc23f9bb801394d9c55e4f99a9c959
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
+      image_max_size_mb: "1500"
       dhi_login: true
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   scan:
     needs: build
@@ -77,38 +93,42 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@304cd8f1b5dc23f9bb801394d9c55e4f99a9c959
     with:
       image: ci-base:ci
       image_artifact: container-image
-      scripts_ref: 4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+      scripts_ref: 304cd8f1b5dc23f9bb801394d9c55e4f99a9c959
       pkg_types: library
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
     secrets:
-      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   publish:
     needs: [build, scan]
+    # Release / monthly schedule / dispatch+publish only — no push-to-main publish.
     if: >-
       github.actor != 'dependabot[bot]' &&
-      (github.event_name == 'push' ||
+      (github.event_name == 'release' ||
+       github.event_name == 'schedule' ||
        (github.event_name == 'workflow_dispatch' && inputs.publish))
     permissions:
       contents: read
       packages: write
       id-token: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@304cd8f1b5dc23f9bb801394d9c55e4f99a9c959
     with:
       context: docker/ci-base
       dockerfile: docker/ci-base/Dockerfile
       image_name: ci-base
-      scripts_ref: 4185836ce6ea925e38d9b93c281b4ef8cf77c2d2
+      scripts_ref: 304cd8f1b5dc23f9bb801394d9c55e4f99a9c959
       platforms: linux/amd64
       # Private Free-plan repos cannot use artifact attestations; enable when public.
       sign: ${{ github.event.repository.visibility == 'public' }}
       blocking: true
       dhi_login: true
+      tag_latest: ${{ github.event_name != 'release' || github.event.release.prerelease == false }}
+      verify_command: /bin/true
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
