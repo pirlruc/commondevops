@@ -1,18 +1,21 @@
 # syntax=docker/dockerfile:1
-# Org CI lint image — workflow linters + secrets/SAST CLIs for commondevops.
-# Refresh digests: docker login dhi.io && bash scripts/pin-dhi-digests.sh docker/ci-lint/Dockerfile
+# Org CI lint image (Alpine 3.24) — workflow linters + secrets/SAST CLIs.
+# Refresh digests: docker login dhi.io && bash scripts/pin-dhi-digests.sh docker/ci-lint/Dockerfile.alpine
 #
-# Binary path discoveries (2026-08-10):
-#   dhi.io/shellcheck:0-debian13 → /usr/local/bin/shellcheck
-#   dhi.io/gitleaks:8-debian13   → /usr/local/bin/gitleaks
+# Binary path discoveries (2026-08-12):
+#   dhi.io/shellcheck:0-debian13 → /usr/local/bin/shellcheck (static; no Alpine DHI tag)
+#   dhi.io/gitleaks:8-debian13   → /usr/local/bin/gitleaks   (static; no Alpine DHI tag)
 #   hadolint/hadolint:2.12.0-alpine → /bin/hadolint
 #   rhysd/actionlint:1.7.12      → /usr/local/bin/actionlint
 #   ghcr.io/astral-sh/uv:0.12.0  → /uv (build stage only)
 #
+# shellcheck and gitleaks have no dhi.io alpine3.24 build. Both Debian donors are
+# statically linked and run on musl (verified locally on alpine3.24-dev).
+#
 # No HEALTHCHECK: short-lived CI toolchain (CLI job container), not a supervised
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
-ARG BASE=dhi.io/python:3.13-debian13-dev@sha256:5985b54ea3f145c9106890612792a0eb17c99e742e11fd9c391658f1946e1777
+ARG BASE=dhi.io/python:3.13-alpine3.24-dev@sha256:8e51f99fa957d0b2531c4936b178d67d997e76fe48d7150357143295a03b1fd4
 
 # ---------------------------------------------------------------------------
 # pybuild — install Python CLIs; uv stays out of the final image (~53 MB).
@@ -41,13 +44,14 @@ RUN printf 'mcp==1.29.0\n' > /tmp/uv-overrides.txt \
 FROM ${BASE}
 
 LABEL org.opencontainers.image.title="ci-lint" \
-      org.opencontainers.image.description="Short-lived CI toolchain image for lint and secrets/SAST: actionlint, hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep. Non-root 1000:1000, linux/amd64." \
+      org.opencontainers.image.description="Short-lived CI toolchain image for lint and secrets/SAST: actionlint, hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep. Alpine 3.24 variant. Non-root 1000:1000, linux/amd64." \
       org.opencontainers.image.source="https://github.com/pirlruc/commondevops" \
       org.opencontainers.image.url="https://hub.docker.com/r/pirlruc/ci-lint" \
       org.opencontainers.image.documentation="https://hub.docker.com/r/pirlruc/ci-lint" \
       org.opencontainers.image.vendor="pirlruc" \
       org.opencontainers.image.licenses="MIT"
 
+# Debian DHI donors: statically linked; no alpine3.24 DHI tag exists for these tools.
 COPY --from=dhi.io/shellcheck:0-debian13@sha256:eb696ecbc0a6dbe57588d88c700c3da7cce3824f8c865795348f9b51c7524331 \
   /usr/local/bin/shellcheck /usr/local/bin/shellcheck
 COPY --from=dhi.io/gitleaks:8-debian13@sha256:08b93b96ee818647ab1fb8e148bf8af4e1190b344e48b0e9bfa57eae98db8117 \
@@ -65,23 +69,18 @@ ENV PATH="/usr/local/bin:${PATH}" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-# Drop build-only headers/dev packages and the DHI status.d stubs that apt-get
-# purge leaves behind (Trivy otherwise reports phantom linux-libc-dev CVEs).
+# Drop build-only headers/dev packages when present (apk equivalent of the debian purge).
 USER root
 RUN set -eu; \
-    apt-get purge -y --auto-remove \
-      linux-libc-dev libc6-dev libexpat1-dev libpython-3.13-dev \
-      python-3.13-dev zlib1g-dev rpcsvc-proto 2>/dev/null || true; \
-    for p in linux-libc-dev libc6-dev libexpat1-dev libpython-3.13-dev \
-             python-3.13-dev zlib1g-dev rpcsvc-proto; do \
-      rm -f "/var/lib/dpkg/status.d/${p}" "/var/lib/dpkg/status.d/${p}.md5sums"; \
+    for p in python3-dev musl-dev linux-headers zlib-dev expat-dev; do \
+      if apk info -e "$p" >/dev/null 2>&1; then apk del --purge "$p"; fi; \
     done; \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+    rm -rf /var/cache/apk/*
 
 WORKDIR /workspace
 
 # Non-root default user. DHI images have no useradd; write passwd/group directly.
-# Login shell is /bin/sh so the same CMD works on Debian and Alpine variants.
+# Login shell is /bin/sh — Alpine DHI has no bash (busybox ash via sh).
 RUN printf 'ci:x:1000:1000::/home/ci:/bin/sh\n' >> /etc/passwd \
  && printf 'ci:x:1000:\n' >> /etc/group \
  && mkdir -p /home/ci \

@@ -16,6 +16,7 @@ mapfile -t FILES < <(
   else
     printf '%s\n' \
       "${ROOT}/docker/ci-lint/Dockerfile" \
+      "${ROOT}/docker/ci-lint/Dockerfile.alpine" \
       "${ROOT}/docker/ci-supply-chain/Dockerfile" \
       "${ROOT}/docker/ci-supply-chain/Dockerfile.alpine"
   fi
@@ -34,8 +35,8 @@ refs_in_file() {
 declare -A DIGESTS=()
 
 if [[ -n "${DHI_FROM_REFS:-}" ]]; then
-  # shellcheck disable=SC2206
-  forced=(${DHI_FROM_REFS})
+  # Read into an array without unquoted word-split (SC2206).
+  read -r -a forced <<< "${DHI_FROM_REFS}"
   for ref in "${forced[@]}"; do
     DIGESTS["${ref}"]=pending
   done

@@ -616,7 +616,7 @@ milestones:
               - grep -qi "referenced file\|do not infer\|verify.*against" docs/continuous-improvement.md
 
       - id: CMN-IMG-001
-        status: open
+        status: done
         title: Alpine 3.24 variant for ci-supply-chain
         overview:
           problem: >-
@@ -649,7 +649,7 @@ milestones:
           - CI-026
         tasks:
           - id: CMN-IMG-001-T1
-            status: open
+            status: done
             title: Author Dockerfile.alpine and pin-dhi-digests default list
             instructions:
               files:
@@ -662,7 +662,7 @@ milestones:
             guardrail_refs:
               - DOCKER-BUILD-003
           - id: CMN-IMG-001-T2
-            status: open
+            status: done
             title: Wire parallel Alpine jobs and variant tag suffixes
             instructions:
               files:
@@ -676,7 +676,7 @@ milestones:
             guardrail_refs:
               - CI-026
           - id: CMN-IMG-001-T3
-            status: open
+            status: done
             title: Document variants and record Alpine size deviation
             instructions:
               files:
@@ -691,7 +691,7 @@ milestones:
               - DOCKER-PERF-001
 
       - id: CMN-IMG-002
-        status: open
+        status: done
         title: Remove deprecated docker/ci-base tree
         overview:
           problem: >-
@@ -719,7 +719,7 @@ milestones:
           - DOCKER-LINT-001
         tasks:
           - id: CMN-IMG-002-T1
-            status: open
+            status: done
             title: Delete docker/ci-base and clear active references
             instructions:
               files:
@@ -735,3 +735,85 @@ milestones:
               - "! grep -q 'docker/ci-base' README.md"
             guardrail_refs:
               - DOCKER-LINT-001
+
+      - id: CMN-IMG-003
+        status: open
+        title: Alpine 3.24 variant for ci-lint
+        overview:
+          problem: >-
+            ci-lint ships only on debian13 DHI. Alpine 3.24 DHI python bases show
+            fewer OS findings; shellcheck and gitleaks have no Alpine DHI build but
+            their Debian donors are statically linked and run on musl.
+          goal: >-
+            Add Dockerfile.alpine with static Debian shellcheck/gitleaks donors,
+            parallel variant jobs, Alpine owning unsuffixed tags, unify CMD to sh
+            (fix the broken Alpine ci-supply-chain default command), and bump
+            containerdevops pins to 2.4.0.
+        architecture:
+          target: docker/ci-lint + ci-lint-image.yml
+          modules:
+            - docker/ci-lint/Dockerfile.alpine
+            - .github/workflows/ci-lint-image.yml
+            - docker/ci-supply-chain/Dockerfile.alpine
+            - scripts/check-ci-local.sh
+            - docs/guardrail-deviations.yml
+        acceptance_criteria:
+          - Dockerfile.alpine builds on dhi.io/python:3.13-alpine3.24-dev
+          - shellcheck/gitleaks copied from Debian DHI donors (static)
+          - Alpine owns unsuffixed tags; Debian publishes -debian only
+          - All toolchain images use CMD [sh] and /bin/sh login shell
+          - Alpine size gate matches measured rootfs (~752 MB → 850 MB deviation)
+          - containerdevops uses:/scripts_ref pin 2.4.0 in lockstep
+        guardrail_refs:
+          - DOCKER-BUILD-003
+          - DOCKER-PERF-001
+          - DOCKER-SEC-001
+          - CI-026
+        tasks:
+          - id: CMN-IMG-003-T1
+            status: open
+            title: Author ci-lint Dockerfile.alpine and unify CMD sh
+            instructions:
+              files:
+                - docker/ci-lint/Dockerfile.alpine
+                - docker/ci-lint/Dockerfile
+                - docker/ci-supply-chain/Dockerfile
+                - docker/ci-supply-chain/Dockerfile.alpine
+                - docker/ci-lint/container-structure-test.yml
+            verification:
+              - test -f docker/ci-lint/Dockerfile.alpine
+              - grep -q 'CMD \\["sh"\\]' docker/ci-lint/Dockerfile.alpine
+              - grep -q 'CMD \\["sh"\\]' docker/ci-supply-chain/Dockerfile.alpine
+            guardrail_refs:
+              - DOCKER-BUILD-003
+          - id: CMN-IMG-003-T2
+            status: open
+            title: Wire parallel Alpine ci-lint jobs and pin containerdevops 2.4.0
+            instructions:
+              files:
+                - .github/workflows/ci-lint-image.yml
+                - .github/workflows/ci-supply-chain-image.yml
+                - .github/workflows/devops-security.yml
+                - .github/workflows/common-infra-lint.yml
+            verification:
+              - grep -q 'tag_suffix: -alpine' .github/workflows/ci-lint-image.yml
+              - grep -q 'tag_alias_unsuffixed: true' .github/workflows/ci-lint-image.yml
+              - grep -q 'Dockerfile\\*' .github/workflows/common-infra-lint.yml
+            guardrail_refs:
+              - CI-026
+          - id: CMN-IMG-003-T3
+            status: open
+            title: Document variants, size deviation, and local gate fixes
+            instructions:
+              files:
+                - docs/guardrail-deviations.yml
+                - docs/docker-hub-ci-lint.md
+                - docs/github-packages-ci-lint.md
+                - scripts/check-ci-local.sh
+                - docs/ai-agent-handoff.md
+            verification:
+              - grep -q 'repo_value: 850' docs/guardrail-deviations.yml
+              - grep -q '4.0.0-alpine' docs/docker-hub-ci-lint.md
+              - grep -q yamllint scripts/check-ci-local.sh
+            guardrail_refs:
+              - DOCKER-PERF-001

@@ -46,3 +46,15 @@ deviations:
     owner: pirlruc
     approved_by: Engineering Lead
     review: 2026-12-31
+  - id: DOCKER-PERF-001
+    key: image_max_size_mb
+    org_default: 300
+    repo_value: 850
+    why: >
+      ci-lint Alpine 3.24 variant is a shared CI toolchain image. Measured rootfs
+      ~752 MB; larger than the Debian variant because the alpine-dev Python base
+      carries a fuller apk toolchain layer even after purging musl-dev.
+    epic: CMN-IMG-003
+    owner: pirlruc
+    approved_by: Engineering Lead
+    review: 2026-12-31

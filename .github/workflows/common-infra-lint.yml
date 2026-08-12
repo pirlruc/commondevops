@@ -19,7 +19,7 @@ on:
         type: string
         default: ""
       dockerfiles:
-        description: Glob or space-separated Dockerfiles for hadolint (empty → docker/**/Dockerfile)
+        description: Glob or space-separated Dockerfiles for hadolint (empty → docker/**/Dockerfile*)
         required: false
         type: string
         default: ""
@@ -137,7 +137,7 @@ jobs:
             # shellcheck disable=SC2086
             hadolint ${DOCKERFILES}
           else
-            mapfile -t DFS < <(find docker -name 'Dockerfile' 2>/dev/null || true)
+            mapfile -t DFS < <(find docker -name 'Dockerfile*' 2>/dev/null || true)
             if [[ ${#DFS[@]} -eq 0 ]]; then
               echo "No Dockerfiles"
               exit 0
