@@ -1,6 +1,6 @@
 ---
 # Thin caller — publishes ghcr.io/pirlruc/ci-lint (+ Docker Hub when secrets set).
-# CONTAINERDEVOPS_PIN: containerdevops main @ CDO-016 (package metadata + Hub sync).
+# containerdevops pin: tag 2.2.0 (ignorefile=none + install hardening).
 name: CI Lint Image
 
 on:
@@ -31,10 +31,6 @@ concurrency:
 permissions:
   contents: read
 
-env:
-  # containerdevops CDO-016 — image metadata overrides + Hub Overview sync.
-  CONTAINERDEVOPS_PIN: 63b414fc54dc4bf4a2079f5bc3323a451fded97d
-
 jobs:
   lint:
     if: >-
@@ -44,11 +40,11 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@63b414fc54dc4bf4a2079f5bc3323a451fded97d
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@0fb7bab3411a6756911debce0624061d60537a33
     with:
       dockerfile: docker/ci-lint/Dockerfile
       working_directory: .
-      scripts_ref: 63b414fc54dc4bf4a2079f5bc3323a451fded97d
+      scripts_ref: 0fb7bab3411a6756911debce0624061d60537a33
       runner_image: ""
       run_infra_lint: false
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -65,13 +61,13 @@ jobs:
     permissions:
       contents: read
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@63b414fc54dc4bf4a2079f5bc3323a451fded97d
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@0fb7bab3411a6756911debce0624061d60537a33
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile
       image_name: ci-lint:ci
       structure_test_config: docker/ci-lint/container-structure-test.yml
-      scripts_ref: 63b414fc54dc4bf4a2079f5bc3323a451fded97d
+      scripts_ref: 0fb7bab3411a6756911debce0624061d60537a33
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
       # Rootfs ~545 MB measured via du -sxm /; headroom for base churn.
       image_max_size_mb: "700"
@@ -95,17 +91,18 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@63b414fc54dc4bf4a2079f5bc3323a451fded97d
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@0fb7bab3411a6756911debce0624061d60537a33
     with:
       image: ci-lint:ci
       image_artifact: container-image
-      scripts_ref: 63b414fc54dc4bf4a2079f5bc3323a451fded97d
+      scripts_ref: 0fb7bab3411a6756911debce0624061d60537a33
       pkg_types: library
+      ignorefile: docker/ci-lint/.trivyignore.yaml
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
     secrets:
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
-  # Advisory posture scan (os+library, no ignorefile) — does not block publish.
+  # Advisory posture scan (os+library, ignorefile=none) — does not block publish.
   scan-posture:
     needs: build
     if: >-
@@ -115,12 +112,13 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@63b414fc54dc4bf4a2079f5bc3323a451fded97d
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@0fb7bab3411a6756911debce0624061d60537a33
     with:
       image: ci-lint:ci
       image_artifact: container-image
-      scripts_ref: 63b414fc54dc4bf4a2079f5bc3323a451fded97d
+      scripts_ref: 0fb7bab3411a6756911debce0624061d60537a33
       pkg_types: os,library
+      ignorefile: none
       blocking: false
     secrets:
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
@@ -136,13 +134,13 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@63b414fc54dc4bf4a2079f5bc3323a451fded97d
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@0fb7bab3411a6756911debce0624061d60537a33
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile
       image_name: ci-lint
       dockerhub_image: pirlruc/ci-lint
-      scripts_ref: 63b414fc54dc4bf4a2079f5bc3323a451fded97d
+      scripts_ref: 0fb7bab3411a6756911debce0624061d60537a33
       platforms: linux/amd64
       image_title: ci-lint
       image_description: >-

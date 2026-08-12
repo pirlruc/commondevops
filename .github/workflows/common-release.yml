@@ -22,6 +22,12 @@ on:
         required: false
         type: string
         default: common-supply-chain-results
+    secrets:
+      release_token:
+        description: >-
+          PAT used for gh release create. Prefer a PAT over github.token so the
+          published release fires on: release workflows in this and other repos.
+        required: false
   workflow_dispatch:
     inputs:
       tag:
@@ -81,10 +87,17 @@ jobs:
 
       - name: Create GitHub Release
         env:
-          GH_TOKEN: ${{ github.token }}
+          RELEASE_TOKEN: ${{ secrets.release_token }}
+          GITHUB_TOKEN_FALLBACK: ${{ github.token }}
           TAG: ${{ inputs.tag }}
           ATTACH_SBOM: ${{ inputs.attach_sbom }}
         run: |
+          if [[ -z "${RELEASE_TOKEN}" ]]; then
+            echo "::warning::release_token secret not provided — creating the release with github.token. Releases created with GITHUB_TOKEN do not fire on: release workflows. Pass secrets.release_token (PAT with contents:write) when callers need the release event chain."
+            export GH_TOKEN="${GITHUB_TOKEN_FALLBACK}"
+          else
+            export GH_TOKEN="${RELEASE_TOKEN}"
+          fi
           ARGS=(release create "${TAG}" --generate-notes)
           if [[ "${ATTACH_SBOM}" == "true" ]]; then
             shopt -s nullglob

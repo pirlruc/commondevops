@@ -434,3 +434,183 @@ milestones:
             guardrail_refs:
               - DOCKER-DOC-002
               - SC-DEP-001
+
+      - id: CMN-WF-001
+        status: done
+        title: Trivy ignore contract and posture-scan correctness
+        overview:
+          problem: >-
+            Per-image docker/ci-lint/.trivyignore.yaml and
+            docker/ci-supply-chain/.trivyignore.yaml exist but are never passed to
+            container-scan.yml. The root .trivyignore.yaml is applied implicitly by
+            the empty-ignorefile fallback, so scan-posture jobs labelled as running
+            without an ignorefile silently suppress 20+ CVEs.
+          goal: >-
+            Delete the root union ignorefile, pass per-image ignorefiles on blocking
+            scan jobs, and set ignorefile: none on both scan-posture jobs (requires
+            containerdevops ≥ 2.2.0). Document the contract in workflows.md.
+        architecture:
+          target: ci-*-image.yml scan jobs + ignorefiles + workflows.md
+          modules:
+            - .github/workflows/ci-lint-image.yml
+            - .github/workflows/ci-supply-chain-image.yml
+            - docker/ci-lint/.trivyignore.yaml
+            - docker/ci-supply-chain/.trivyignore.yaml
+            - .trivyignore.yaml
+            - docs/workflows.md
+        acceptance_criteria:
+          - Blocking scan jobs pass per-image ignorefile paths
+          - Both scan-posture jobs set ignorefile: none
+          - Root .trivyignore.yaml removed
+          - workflows.md documents the ignorefile contract
+        guardrail_refs:
+          - DOCKER-SEC-001
+        tasks:
+          - id: CMN-WF-001-T1
+            status: done
+            title: Delete root ignorefile and wire per-image ignorefiles on blocking scans
+            instructions:
+              files:
+                - .trivyignore.yaml
+                - .github/workflows/ci-lint-image.yml
+                - .github/workflows/ci-supply-chain-image.yml
+            verification:
+              - test ! -f .trivyignore.yaml
+              - rg -n "ignorefile: docker/ci-lint" .github/workflows/ci-lint-image.yml
+              - rg -n "ignorefile: docker/ci-supply-chain" .github/workflows/ci-supply-chain-image.yml
+            guardrail_refs:
+              - DOCKER-SEC-001
+          - id: CMN-WF-001-T2
+            status: done
+            title: Set ignorefile none on both scan-posture jobs
+            instructions:
+              files:
+                - .github/workflows/ci-lint-image.yml
+                - .github/workflows/ci-supply-chain-image.yml
+            verification:
+              - rg -n "ignorefile: none" .github/workflows/ci-lint-image.yml
+              - rg -n "ignorefile: none" .github/workflows/ci-supply-chain-image.yml
+          - id: CMN-WF-001-T3
+            status: done
+            title: Document ignorefile contract in workflows.md
+            instructions:
+              files:
+                - docs/workflows.md
+            verification:
+              - grep -q "ignorefile: none" docs/workflows.md
+
+      - id: CMN-WF-002
+        status: done
+        title: Release-token contract and real published-image rescan
+        overview:
+          problem: >-
+            common-release.yml creates releases with github.token; GITHUB_TOKEN-created
+            releases do not fire the release event, so consumers relying on that chain
+            silently skip publish. No release_token secret exists and workflows.md is
+            silent. devops-security.yml published-image-rescan is a no-op heredoc.
+          goal: >-
+            Add optional release_token secret with a diagnostic warning; document the
+            event-chain limitation; replace the no-op with a real registry pull-and-scan
+            of ci-lint and ci-supply-chain via containerdevops container-scan.yml.
+        architecture:
+          target: common-release.yml + devops-security.yml + workflows.md
+          modules:
+            - .github/workflows/common-release.yml
+            - .github/workflows/devops-security.yml
+            - docs/workflows.md
+        acceptance_criteria:
+          - common-release.yml has optional release_token secret and warns when falling back
+          - workflows.md documents the PAT requirement for release-event workflows
+          - devops-security.yml rescans ghcr.io/pirlruc/ci-lint:latest and ci-supply-chain:latest
+          - actionlint passes on both workflows
+        guardrail_refs:
+          - CI-024
+          - CI-025
+        tasks:
+          - id: CMN-WF-002-T1
+            status: done
+            title: Add release_token secret and event-chain warning
+            instructions:
+              files:
+                - .github/workflows/common-release.yml
+                - docs/workflows.md
+            verification:
+              - grep -q "release_token" .github/workflows/common-release.yml
+              - grep -q "release_token" docs/workflows.md
+              - actionlint .github/workflows/common-release.yml
+            guardrail_refs:
+              - CI-024
+          - id: CMN-WF-002-T2
+            status: done
+            title: Implement real published-image registry rescan
+            instructions:
+              files:
+                - .github/workflows/devops-security.yml
+            verification:
+              - "! grep -q 'Note — published image rescan' .github/workflows/devops-security.yml"
+              - grep -q "ci-lint:latest" .github/workflows/devops-security.yml
+              - actionlint .github/workflows/devops-security.yml
+            guardrail_refs:
+              - CI-025
+
+      - id: CMN-SC-001
+        status: done
+        title: Supply-chain install hardening, pin hygiene, and reviewer prompt
+        overview:
+          problem: >-
+            install-common-tools.sh pipes actionlint from main and verifies no SHA256
+            digests. ci-*-image.yml still pin containerdevops at 2.1.0 and declare a dead
+            CONTAINERDEVOPS_PIN env. The continuous-improvement prompt allowed the
+            ai-reviewer to infer companion-repo permissions instead of reading the file.
+          goal: >-
+            Mirror containerdevops install hardening; re-pin to containerdevops 2.2.0 and
+            remove the dead env; tighten the continuous-improvement prompt to require
+            verifying claims against the referenced file contents.
+        architecture:
+          target: install-common-tools.sh + image callers + continuous-improvement.md
+          modules:
+            - scripts/install-common-tools.sh
+            - .github/workflows/ci-lint-image.yml
+            - .github/workflows/ci-supply-chain-image.yml
+            - docs/continuous-improvement.md
+            - docs/ai-agent-handoff.md
+        acceptance_criteria:
+          - actionlint installs via versioned tarball with SHA256 verification
+          - All containerdevops uses:/scripts_ref pairs pin 2.2.0 SHA
+          - CONTAINERDEVOPS_PIN env removed
+          - continuous-improvement.md requires reading referenced files before claiming
+        guardrail_refs:
+          - SC-DEP-001
+        tasks:
+          - id: CMN-SC-001-T1
+            status: done
+            title: Add SHA256 verification and actionlint tarball to install-common-tools.sh
+            instructions:
+              files:
+                - scripts/install-common-tools.sh
+            verification:
+              - "! grep -q download-actionlint.bash scripts/install-common-tools.sh"
+              - grep -q sha256sum scripts/install-common-tools.sh
+              - shellcheck scripts/install-common-tools.sh
+          - id: CMN-SC-001-T2
+            status: done
+            title: Re-pin containerdevops to 2.2.0 and remove dead CONTAINERDEVOPS_PIN
+            instructions:
+              files:
+                - .github/workflows/ci-lint-image.yml
+                - .github/workflows/ci-supply-chain-image.yml
+            verification:
+              - "! grep -q CONTAINERDEVOPS_PIN .github/workflows/ci-lint-image.yml"
+              - grep -q 0fb7bab3411a6756911debce0624061d60537a33 .github/workflows/ci-lint-image.yml
+              - grep -q 0fb7bab3411a6756911debce0624061d60537a33 .github/workflows/ci-supply-chain-image.yml
+            guardrail_refs:
+              - SC-DEP-001
+          - id: CMN-SC-001-T3
+            status: done
+            title: Require file-backed verification in continuous-improvement prompt
+            instructions:
+              files:
+                - docs/continuous-improvement.md
+                - docs/ai-agent-handoff.md
+            verification:
+              - grep -qi "referenced file\|do not infer\|verify.*against" docs/continuous-improvement.md
