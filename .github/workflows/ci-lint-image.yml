@@ -1,6 +1,6 @@
 ---
 # Thin caller — publishes ghcr.io/pirlruc/ci-lint (+ Docker Hub when secrets set).
-# containerdevops pin: tag 2.2.0 (ignorefile=none + install hardening).
+# containerdevops pin: tag 2.3.0 (ignorefile=none + install hardening).
 name: CI Lint Image
 
 on:
@@ -40,11 +40,11 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@0fb7bab3411a6756911debce0624061d60537a33
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
     with:
       dockerfile: docker/ci-lint/Dockerfile
       working_directory: .
-      scripts_ref: 0fb7bab3411a6756911debce0624061d60537a33
+      scripts_ref: 010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
       runner_image: ""
       run_infra_lint: false
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -61,13 +61,13 @@ jobs:
     permissions:
       contents: read
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@0fb7bab3411a6756911debce0624061d60537a33
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile
       image_name: ci-lint:ci
       structure_test_config: docker/ci-lint/container-structure-test.yml
-      scripts_ref: 0fb7bab3411a6756911debce0624061d60537a33
+      scripts_ref: 010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
       # Rootfs ~545 MB measured via du -sxm /; headroom for base churn.
       image_max_size_mb: "700"
@@ -91,11 +91,11 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@0fb7bab3411a6756911debce0624061d60537a33
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
     with:
       image: ci-lint:ci
       image_artifact: container-image
-      scripts_ref: 0fb7bab3411a6756911debce0624061d60537a33
+      scripts_ref: 010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
       pkg_types: library
       ignorefile: docker/ci-lint/.trivyignore.yaml
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -112,11 +112,11 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@0fb7bab3411a6756911debce0624061d60537a33
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
     with:
       image: ci-lint:ci
       image_artifact: container-image
-      scripts_ref: 0fb7bab3411a6756911debce0624061d60537a33
+      scripts_ref: 010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
       pkg_types: os,library
       ignorefile: none
       blocking: false
@@ -134,13 +134,13 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@0fb7bab3411a6756911debce0624061d60537a33
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile
       image_name: ci-lint
       dockerhub_image: pirlruc/ci-lint
-      scripts_ref: 0fb7bab3411a6756911debce0624061d60537a33
+      scripts_ref: 010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
       platforms: linux/amd64
       image_title: ci-lint
       image_description: >-

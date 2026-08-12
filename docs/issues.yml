@@ -614,3 +614,124 @@ milestones:
                 - docs/ai-agent-handoff.md
             verification:
               - grep -qi "referenced file\|do not infer\|verify.*against" docs/continuous-improvement.md
+
+      - id: CMN-IMG-001
+        status: open
+        title: Alpine 3.24 variant for ci-supply-chain
+        overview:
+          problem: >-
+            ci-supply-chain ships only on debian13 DHI. Alpine 3.24 DHI bases and
+            syft/grype/trivy donors currently show fewer OS findings, but there is no
+            published Alpine lane or variant tagging contract.
+          goal: >-
+            Add Dockerfile.alpine, parallel build/scan/publish jobs with distinct
+            artifact and SARIF names, tag_suffix -alpine/-debian with Alpine owning
+            unsuffixed tags, and record the Alpine size deviation.
+        architecture:
+          target: docker/ci-supply-chain + ci-supply-chain-image.yml
+          modules:
+            - docker/ci-supply-chain/Dockerfile.alpine
+            - .github/workflows/ci-supply-chain-image.yml
+            - scripts/pin-dhi-digests.sh
+            - docs/guardrail-deviations.yml
+            - docs/docker-hub-ci-supply-chain.md
+            - docs/github-packages-ci-supply-chain.md
+        acceptance_criteria:
+          - Dockerfile.alpine builds on dhi.io/python:3.13-alpine3.24-dev with Alpine donors
+          - Publish emits -alpine and -debian tags; Alpine owns unsuffixed version/latest
+          - Parallel jobs use unique artifact_name / results_artifact / sarif_category
+          - Alpine size gate matches measured rootfs (~722 MB → 800 MB deviation)
+          - Blocking Alpine scan uses docker/ci-supply-chain/.trivyignore.yaml
+        guardrail_refs:
+          - DOCKER-BUILD-003
+          - DOCKER-PERF-001
+          - DOCKER-SEC-001
+          - CI-026
+        tasks:
+          - id: CMN-IMG-001-T1
+            status: open
+            title: Author Dockerfile.alpine and pin-dhi-digests default list
+            instructions:
+              files:
+                - docker/ci-supply-chain/Dockerfile.alpine
+                - scripts/pin-dhi-digests.sh
+            verification:
+              - test -f docker/ci-supply-chain/Dockerfile.alpine
+              - grep -q Dockerfile.alpine scripts/pin-dhi-digests.sh
+              - hadolint docker/ci-supply-chain/Dockerfile.alpine
+            guardrail_refs:
+              - DOCKER-BUILD-003
+          - id: CMN-IMG-001-T2
+            status: open
+            title: Wire parallel Alpine jobs and variant tag suffixes
+            instructions:
+              files:
+                - .github/workflows/ci-supply-chain-image.yml
+                - .github/workflows/devops-ci.yml
+            verification:
+              - grep -q 'tag_suffix: -alpine' .github/workflows/ci-supply-chain-image.yml
+              - grep -q 'tag_alias_unsuffixed: true' .github/workflows/ci-supply-chain-image.yml
+              - grep -q Dockerfile.alpine .github/workflows/devops-ci.yml
+              - actionlint .github/workflows/ci-supply-chain-image.yml
+            guardrail_refs:
+              - CI-026
+          - id: CMN-IMG-001-T3
+            status: open
+            title: Document variants and record Alpine size deviation
+            instructions:
+              files:
+                - docs/guardrail-deviations.yml
+                - docs/docker-hub-ci-supply-chain.md
+                - docs/github-packages-ci-supply-chain.md
+                - docs/workflows.md
+            verification:
+              - grep -q 'repo_value: 800' docs/guardrail-deviations.yml
+              - grep -q '3.0.0-alpine' docs/docker-hub-ci-supply-chain.md
+            guardrail_refs:
+              - DOCKER-PERF-001
+
+      - id: CMN-IMG-002
+        status: open
+        title: Remove deprecated docker/ci-base tree
+        overview:
+          problem: >-
+            docker/ci-base/ still holds a full monolithic Dockerfile whose digests are
+            no longer Dependabot-refreshed, and scripts/docs still mention the stub.
+          goal: >-
+            Delete docker/ci-base entirely; widen hadolint globs to Dockerfile*; clear
+            remaining active prose references (keep historical done epics untouched).
+        architecture:
+          target: docker/ci-base removal + script/doc cleanup
+          modules:
+            - docker/ci-base/
+            - scripts/check-ci-local.sh
+            - scripts/check-ci-docker.sh
+            - README.md
+            - docs/workflows.md
+            - docs/ai-agent-handoff.md
+            - docs/continuous-improvement.md
+            - docs/guardrail-deviations.yml
+        acceptance_criteria:
+          - docker/ci-base/ absent from the tree
+          - check-ci-local.sh and check-ci-docker.sh lint Dockerfile*
+          - No active README/workflows/handoff prose points consumers at ci-base
+        guardrail_refs:
+          - DOCKER-LINT-001
+        tasks:
+          - id: CMN-IMG-002-T1
+            status: open
+            title: Delete docker/ci-base and clear active references
+            instructions:
+              files:
+                - docker/ci-base/
+                - scripts/check-ci-local.sh
+                - scripts/check-ci-docker.sh
+                - README.md
+                - docs/workflows.md
+                - docs/ai-agent-handoff.md
+            verification:
+              - test ! -d docker/ci-base
+              - grep -q "Dockerfile\\*" scripts/check-ci-local.sh
+              - "! grep -q 'docker/ci-base' README.md"
+            guardrail_refs:
+              - DOCKER-LINT-001

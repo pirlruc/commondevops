@@ -123,7 +123,11 @@ Pass `image_title`, `image_description`, `image_documentation`, `image_url`,
 containerdevops `container-publish` so OCI labels describe the image (not the
 repository) and Hub Overview stays in sync.
 
-`docker/ci-base/` and the former `ci-base-image.yml` are deprecated (2.0.0).
+`ci-supply-chain` builds Debian (`Dockerfile`) and Alpine 3.24
+(`Dockerfile.alpine`) variants. Publish uses `tag_suffix: -debian` /
+`-alpine`; Alpine sets `tag_alias_unsuffixed: true` so it owns `<version>` and
+`latest`. Distinct `artifact_name` / `results_artifact` / `sarif_category`
+values keep parallel jobs from colliding (containerdevops ≥ `2.3.0`).
 
 ---
 

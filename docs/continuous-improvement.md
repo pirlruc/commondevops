@@ -78,7 +78,7 @@ recommending Actions-only verification.
 ### 4. Optional: alternatives (lightweight)
 
 Briefly weigh current defaults (sparse script checkout vs published action package;
-ci-base container job vs host install). Accept “current remains best” with a one-line
+host install vs job container). Accept “current remains best” with a one-line
 justification. Only propose work if material.
 
 ### 5. Emit or no-op
@@ -135,7 +135,7 @@ Provenance after human merge+sync uses these prefixes and the PR description; do
 |------|--------|
 | `.github/workflows/` | Reusable `common-*` workflows + self CI + ci-lint / ci-supply-chain callers |
 | `scripts/` | Install, local/docker parity, license gate, DHI pin refresh |
-| `docker/ci-lint/` / `docker/ci-supply-chain/` | Split CI toolchain images (ci-base deprecated) |
+| `docker/ci-lint/` / `docker/ci-supply-chain/` | Split CI toolchain images (Debian + Alpine supply-chain variants) |
 | `docs/` | Handoff, workflows reference, Docker Hub and GitHub Packages pages, this prompt, `issues.yml`, deviations |
 | `.trivyignore.yaml` | Path-scoped donor CVE ignores (plus per-image copies) |
 | `.github/dependabot.yml` | Multi-ecosystem dependency updates |

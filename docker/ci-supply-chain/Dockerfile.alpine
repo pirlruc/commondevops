@@ -1,0 +1,58 @@
+# syntax=docker/dockerfile:1
+# Org CI supply-chain image (Alpine 3.24) — SBOM / vuln / license CLIs for commondevops.
+# Refresh digests: docker login dhi.io && bash scripts/pin-dhi-digests.sh docker/ci-supply-chain/Dockerfile.alpine
+#
+# Binary path discoveries (2026-08-12):
+#   dhi.io/syft:1-alpine3.24  → /usr/bin/syft
+#   dhi.io/grype:0-alpine3.24 → /usr/bin/grype
+#   dhi.io/trivy:0-alpine3.24 → /usr/bin/trivy
+#   anchore/grant:v0.6.8      → /grant
+#
+# cosign is intentionally omitted: container-publish installs it on the runner
+# via INSTALL_ONLY when sign=true (~109 MB saved).
+#
+# No HEALTHCHECK: short-lived CI toolchain (CLI job container), not a supervised
+# service (DOCKER-RUN-002 / DOCKER-RUN-006).
+
+# dhi.io/python:3.13-alpine3.24-dev — digest pinned (DOCKER-BUILD-003 / CI-026)
+FROM dhi.io/python:3.13-alpine3.24-dev@sha256:8e51f99fa957d0b2531c4936b178d67d997e76fe48d7150357143295a03b1fd4
+
+LABEL org.opencontainers.image.title="ci-supply-chain" \
+      org.opencontainers.image.description="Short-lived CI toolchain image for SBOM generation and vulnerability/license gates: syft, grype, trivy, grant. Alpine 3.24 variant. Non-root 1000:1000, linux/amd64." \
+      org.opencontainers.image.source="https://github.com/pirlruc/commondevops" \
+      org.opencontainers.image.url="https://hub.docker.com/r/pirlruc/ci-supply-chain" \
+      org.opencontainers.image.documentation="https://hub.docker.com/r/pirlruc/ci-supply-chain" \
+      org.opencontainers.image.vendor="pirlruc" \
+      org.opencontainers.image.licenses="MIT"
+
+COPY --from=dhi.io/syft:1-alpine3.24@sha256:43f29062f6ac84b41fa0b1e76e5732f43ff8e8313cc57e95bdbdcb4f4b9fa89d \
+  /usr/bin/syft /usr/local/bin/syft
+COPY --from=dhi.io/grype:0-alpine3.24@sha256:2163fe694d9f884b7d96c1d857f8a0a1acfda6a7bb7953fa1bb98ab34b02c969 \
+  /usr/bin/grype /usr/local/bin/grype
+COPY --from=dhi.io/trivy:0-alpine3.24@sha256:0375be02b10cdf364c263d3ab8c9052584248793d94275f6dc96c3df6e9e7fc5 \
+  /usr/bin/trivy /usr/local/bin/trivy
+COPY --from=anchore/grant:v0.6.8@sha256:172463611795f43b77302cdfbd7b3f81295492a7330e0820cfe41c3674920237 \
+  /grant /usr/local/bin/grant
+
+ENV PATH="/usr/local/bin:${PATH}" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Drop build-only headers/dev packages when present (apk equivalent of the debian purge).
+USER root
+RUN set -eu; \
+    for p in python3-dev musl-dev linux-headers zlib-dev expat-dev; do \
+      if apk info -e "$p" >/dev/null 2>&1; then apk del --purge "$p"; fi; \
+    done; \
+    rm -rf /var/cache/apk/*
+
+WORKDIR /workspace
+
+RUN printf 'ci:x:1000:1000::/home/ci:/bin/bash\n' >> /etc/passwd \
+ && printf 'ci:x:1000:\n' >> /etc/group \
+ && mkdir -p /home/ci \
+ && chown -R 1000:1000 /home/ci /workspace
+USER 1000:1000
+
+ENTRYPOINT []
+CMD ["bash"]

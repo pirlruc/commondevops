@@ -15,7 +15,7 @@ deviations:
     why: >
       ci-lint is a shared CI toolchain image (shellcheck/hadolint/actionlint/
       gitleaks/semgrep/zizmor/yamllint), not a product runtime image.
-      Measured rootfs ~545 MB after split from ci-base and purge of -dev packages.
+      Measured rootfs ~545 MB after split into focused toolchain images and purge of -dev packages.
     epic: CMN-010
     owner: pirlruc
     approved_by: Engineering Lead
@@ -26,10 +26,23 @@ deviations:
     repo_value: 700
     why: >
       ci-supply-chain is a shared CI toolchain image (syft/grype/trivy/grant),
-      not a product runtime image. Measured rootfs ~575 MB after split from
-      ci-base (cosign omitted — installed on the publish runner) and purge of
+      not a product runtime image. Measured rootfs ~575 MB after the focused
+      toolchain split (cosign omitted — installed on the publish runner) and purge of
       -dev packages.
     epic: CMN-010
+    owner: pirlruc
+    approved_by: Engineering Lead
+    review: 2026-12-31
+  - id: DOCKER-PERF-001
+    key: image_max_size_mb
+    org_default: 300
+    repo_value: 800
+    why: >
+      ci-supply-chain Alpine 3.24 variant is a shared CI toolchain image
+      (syft/grype/trivy/grant). Measured rootfs ~722 MB; larger than the Debian
+      variant because the alpine-dev Python base carries a fuller apk toolchain
+      layer even after purging musl-dev.
+    epic: CMN-IMG-001
     owner: pirlruc
     approved_by: Engineering Lead
     review: 2026-12-31

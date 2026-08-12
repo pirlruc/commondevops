@@ -68,7 +68,7 @@ run_host shellcheck bash -c '
 echo "==> hadolint"
 # shellcheck disable=SC2016
 run_host hadolint bash -c '
-  mapfile -t DFS < <(find docker -name Dockerfile 2>/dev/null | grep -v ci-base)
+  mapfile -t DFS < <(find docker -name 'Dockerfile*' 2>/dev/null)
   if [[ ${#DFS[@]} -eq 0 ]]; then
     echo "No Dockerfiles to lint"
     exit 0
