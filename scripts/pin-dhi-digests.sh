@@ -16,7 +16,8 @@ mapfile -t FILES < <(
   else
     printf '%s\n' \
       "${ROOT}/docker/ci-lint/Dockerfile" \
-      "${ROOT}/docker/ci-supply-chain/Dockerfile"
+      "${ROOT}/docker/ci-supply-chain/Dockerfile" \
+      "${ROOT}/docker/ci-supply-chain/Dockerfile.alpine"
   fi
 )
 

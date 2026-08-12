@@ -53,12 +53,13 @@ bash scripts/check-ci-local.sh
 | Image | Contents | Docs |
 |-------|----------|------|
 | `ghcr.io/pirlruc/ci-lint` | actionlint, hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep | [Hub](docs/docker-hub-ci-lint.md) · [GHCR](docs/github-packages-ci-lint.md) |
-| `ghcr.io/pirlruc/ci-supply-chain` | syft, grype, trivy, grant | [Hub](docs/docker-hub-ci-supply-chain.md) · [GHCR](docs/github-packages-ci-supply-chain.md) |
+| `ghcr.io/pirlruc/ci-supply-chain` | syft, grype, trivy, grant — Alpine (default) and Debian (`-debian`) variants | [Hub](docs/docker-hub-ci-supply-chain.md) · [GHCR](docs/github-packages-ci-supply-chain.md) |
 
 Built via [`ci-lint-image.yml`](.github/workflows/ci-lint-image.yml) and
 [`ci-supply-chain-image.yml`](.github/workflows/ci-supply-chain-image.yml)
 using [containerdevops](https://github.com/pirlruc/containerdevops).
-`docker/ci-base/` is a deprecated stub (replaced in 2.0.0).
+`ci-supply-chain` publishes Debian (`-debian`) and Alpine (`-alpine`) variants;
+Alpine owns the unsuffixed tags.
 
 ## Submodules
 

@@ -62,7 +62,7 @@ docker run --rm \
           shellcheck "${SHS[@]}"
           ;;
         hadolint)
-          mapfile -t DFS < <(find docker -name Dockerfile 2>/dev/null)
+          mapfile -t DFS < <(find docker -name "Dockerfile*" 2>/dev/null)
           hadolint "${DFS[@]}"
           ;;
         zizmor)
