@@ -86,20 +86,22 @@ python3 .github/scaffold/scripts/issues-sync.py \
   `/var/lib/dpkg/status.d/<pkg>` or Trivy reports phantom linux-libc-dev CVEs.
 - **Size gate:** measure with `du -sxm /`, not `docker inspect .Size` (store-dependent).
 - mcp must stay on 1.x (`==1.29.0`); mcp 2.x breaks semgrep.
+- **Dependabot registries:** personal private repos need `registries:` wired to
+  Dependabot secrets (`DEPENDABOT_GITHUB_TOKEN`, `DOCKERHUB_*`). Without them,
+  updates fail with 401/403 on private submodules, reusable workflows, and `dhi.io`.
 
 ## Suggested next work
 
-1. Land CMN-012; cut `2.0.1` and verify Hub/GHCR labels + Overview.
+1. Confirm Dependabot `all-dependencies` PR after registries land (Insights).
 2. Grant Actions Read on GHCR packages; keep Hub repos public.
-3. Sync issues (`--update`) to close CMN-001…012 on GitHub.
+3. Paste Hub Overviews (or widen `DOCKERHUB_TOKEN` to admin) — sync was Forbidden.
 4. Refresh donor digests / drop ignorefile entries before 2026-11-11.
 
 ## Recent history
 
-- 2026-08-12: CMN-012 — re-pin containerdevops `3a7cac1c…`, image metadata,
-  Hub/GHCR docs, Dependabot/ci-base cleanup.
-- 2026-08-11: split ci-base → ci-lint + ci-supply-chain; packages:read fix;
-  deviations at 700 MB; docker-hub docs; issues-sync-targets.yml.
-- 2026-08-11: release `2.0.0`; release `1.0.0` (ci-base).
+- 2026-08-12: wire Dependabot `registries:` for private git + dhi.io.
+- 2026-08-12: CMN-012 — re-pin containerdevops, image metadata, Hub/GHCR docs;
+  releases `2.0.2` (prefer over `2.0.1`).
+- 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
 *Last updated: 2026-08-12*
