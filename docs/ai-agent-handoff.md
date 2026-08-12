@@ -17,8 +17,8 @@ Owns `.github/workflows/common-*.yml`, `devops-ci.yml`, `devops-security.yml`,
 `docker/ci-supply-chain/`. Consumers pin `pirlruc/commondevops@<sha|tag>` and pass
 matching `scripts_ref` + `checkout_token`.
 
-Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `2.3.1`
-(callers still pin `2.3.0` → `010bf9bf9033…` until a deliberate bump).
+Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `2.4.0`
+→ `ea908fd0feb87…`.
 
 ## Delivery status
 
@@ -30,6 +30,7 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `2.
 | CMN-SC-001 — install hardening + pin + prompt | Done |
 | CMN-IMG-001 — Alpine ci-supply-chain variant | Done (`3.0.0`) |
 | CMN-IMG-002 — Remove docker/ci-base | Done (`3.0.0`) |
+| CMN-IMG-003 — Alpine ci-lint variant | In progress (`4.0.0`) |
 
 ## Pins
 
@@ -37,38 +38,32 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `2.
 |-----------|-----|
 | guardrails submodule | commit `5a7ac83…` (post ci-base ref drop) |
 | github-scaffold submodule | `f8a6ba1…` |
-| containerdevops (image callers + security rescan) | tag `2.3.0` → `010bf9bf9033…` |
+| containerdevops (image callers + security rescan) | tag `2.4.0` → `ea908fd0feb87…` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
-| Release | `3.0.0` (major — unsuffixed `ci-supply-chain` is musl/Alpine) |
+| Release | `3.0.0` on main; next `4.0.0` (Alpine owns unsuffixed `ci-lint`) |
 
-## Local image sizes (2026-08-12, `du -sxm /`)
+## Local image sizes / posture (2026-08-12, `du -sxm /`)
 
-| Image | Rootfs | Library gate (ignorefile) | Notes |
-|-------|--------|---------------------------|-------|
-| ci-lint | ~545 MB | 0 | debian13 |
-| ci-supply-chain (debian) | ~575 MB | 0 | size gate 700 |
-| ci-supply-chain (alpine) | ~722 MB | 0 with ignorefile | size gate 800; grant/grype donor HIGHs |
-
-## Publish digests (`3.0.0`)
-
-| Image / variant | Digest | Tags |
-|-----------------|--------|------|
-| ci-supply-chain alpine | `sha256:5d25d0c3…` | `3.0.0`, `3.0.0-alpine`, `latest`, `latest-alpine` |
-| ci-supply-chain debian | `sha256:e4aa7960…` | `3.0.0-debian`, `latest-debian` |
-| ci-lint | `sha256:a3601772…` | `3.0.0`, `latest` |
+| Image | Rootfs | Posture (os+library, no ignore) | Notes |
+|-------|--------|----------------------------------|-------|
+| ci-lint debian | ~545 MB | 28 HIGH / 4 CRITICAL (20 OS) | size gate 700 |
+| ci-lint alpine | ~752 MB | 12 HIGH / 0 CRITICAL (0 OS) | size gate 850; **owns unsuffixed** |
+| ci-supply-chain debian | ~575 MB | — | size gate 700 |
+| ci-supply-chain alpine | ~722 MB | — | size gate 800; owns unsuffixed |
 
 ## Commands
 
 ```bash
 bash scripts/check-ci-local.sh
-COMMONDEVOPS_CI_IMAGE=ci-lint:local COMMONDEVOPS_DOCKER_STEPS="actionlint shellcheck hadolint zizmor" \
+COMMONDEVOPS_CI_IMAGE=ci-lint:alpine-local COMMONDEVOPS_DOCKER_STEPS="actionlint shellcheck hadolint zizmor yamllint" \
   bash scripts/check-ci-docker.sh
-docker build -t ci-supply-chain:alpine-local -f docker/ci-supply-chain/Dockerfile.alpine docker/ci-supply-chain
-docker run --rm --user root --entrypoint sh ci-supply-chain:alpine-local -c 'du -sxm /'
+docker build -t ci-lint:alpine-local -f docker/ci-lint/Dockerfile.alpine docker/ci-lint
+docker run --rm ci-lint:alpine-local echo ok
+docker run --rm --user root --entrypoint sh ci-lint:alpine-local -c 'du -sxm /'
 docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
-  -v "$PWD/docker/ci-supply-chain/.trivyignore.yaml:/tmp/.trivyignore.yaml:ro" \
+  -v "$PWD/docker/ci-lint/.trivyignore.yaml:/tmp/.trivyignore.yaml:ro" \
   aquasec/trivy:0.73.0 image --pkg-types library --severity HIGH,CRITICAL \
-  --ignorefile /tmp/.trivyignore.yaml ci-supply-chain:alpine-local
+  --ignorefile /tmp/.trivyignore.yaml ci-lint:alpine-local
 python3 .github/scaffold/scripts/issues-sync.py \
   --repo pirlruc/commondevops --yaml docs/issues.yml --dry-run
 ```
@@ -83,8 +78,11 @@ python3 .github/scaffold/scripts/issues-sync.py \
   fallback silently filters findings. Root `.trivyignore.yaml` was removed.
 - **Variant jobs:** parallel debian/alpine builds need unique `artifact_name`,
   `results_artifact`, and `sarif_category` (containerdevops ≥ 2.3.0).
-- **Alpine owns unsuffixed tags** for `ci-supply-chain` — consumers on glibc must
-  pin `:*-debian` after `3.0.0`.
+- **Alpine owns unsuffixed tags** for `ci-supply-chain` and (as of `4.0.0`)
+  `ci-lint` — consumers on glibc must pin `:*-debian`.
+- **CMD is `sh`:** Alpine DHI has no bash. All toolchain images use `CMD ["sh"]`
+  and `/bin/sh` in passwd. Do not restore `bash`.
+- **shellcheck/gitleaks on Alpine:** no DHI alpine tag; copy static Debian donors.
 - **OCI labels:** pass `image_title` / `image_description` into containerdevops
   publish or the package page shows the repository description. Hub Overview needs
   `dockerhub_readme` + Hub token with read/write/delete (admin) scope.
@@ -108,15 +106,20 @@ python3 .github/scaffold/scripts/issues-sync.py \
   (not installed). Prefer `actionlint`/`zizmor`/disposable install tests before push.
 - **GHCR inspect locally:** packages:read often missing on user tokens → 403; use
   Actions publish logs for digest/tag verification.
+- **check-ci-local.sh:** `--no-docker` fails when tools are missing (no silent pass);
+  license_gate is no longer masked with `|| true`.
 
 ## Suggested next work
 
-1. Optionally re-pin image callers + `devops-security.yml` to containerdevops `2.3.1`.
-2. Refresh donor digests / drop ignorefile entries before 2026-11-11.
-3. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
+1. Land containerdevops `2.4.0`, then bump all 17 pins and release commondevops `4.0.0`.
+2. Land containerdevops Alpine `ci-container` on the new Alpine `ci-lint` digest.
+3. Refresh donor digests / drop ignorefile entries before 2026-11-11.
 
 ## Recent history
 
+- 2026-08-12: CMN-IMG-003 in flight — Alpine `ci-lint`, static Debian shellcheck/
+  gitleaks donors, unify `CMD ["sh"]` (fixes broken Alpine `ci-supply-chain`
+  default command), local gate fixes.
 - 2026-08-12: containerdevops `2.3.1` published (CI_BASE + guardrails); callers still on `2.3.0`.
 - 2026-08-12: #54 bump guardrails past ci-base drop (`5a7ac83…`).
 - 2026-08-12: CMN-IMG-001 / CMN-IMG-002 / release `3.0.0` — delete `docker/ci-base`,

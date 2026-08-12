@@ -1,6 +1,7 @@
 ---
 # Thin caller — publishes ghcr.io/pirlruc/ci-lint (+ Docker Hub when secrets set).
-# containerdevops pin: tag 2.3.0 (ignorefile=none + install hardening).
+# Debian and Alpine variants; Alpine owns unsuffixed tags (lower vuln posture as of 2026-08).
+# containerdevops pin: tag 2.4.0 (variant cache scopes + Hub Overview gating).
 name: CI Lint Image
 
 on:
@@ -40,11 +41,11 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@ea908fd0feb87ab6615b71f5af1cce0637a6567b
     with:
       dockerfile: docker/ci-lint/Dockerfile
       working_directory: .
-      scripts_ref: 010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
+      scripts_ref: ea908fd0feb87ab6615b71f5af1cce0637a6567b
       runner_image: ""
       run_infra_lint: false
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -52,8 +53,29 @@ jobs:
       checkout_token: ${{ github.token }}
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
+  lint-alpine:
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    permissions:
+      contents: read
+      security-events: write
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@ea908fd0feb87ab6615b71f5af1cce0637a6567b
+    with:
+      dockerfile: docker/ci-lint/Dockerfile.alpine
+      working_directory: .
+      scripts_ref: ea908fd0feb87ab6615b71f5af1cce0637a6567b
+      runner_image: ""
+      run_infra_lint: false
+      run_secrets_scan: false
+      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
+    secrets:
+      checkout_token: ${{ github.token }}
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
   build:
-    needs: lint
+    needs: [lint, lint-alpine]
     if: >-
       github.actor != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
@@ -61,21 +83,53 @@ jobs:
     permissions:
       contents: read
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@ea908fd0feb87ab6615b71f5af1cce0637a6567b
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile
-      image_name: ci-lint:ci
+      image_name: ci-lint:ci-debian
+      artifact_name: container-image-debian
       structure_test_config: docker/ci-lint/container-structure-test.yml
-      scripts_ref: 010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
+      scripts_ref: ea908fd0feb87ab6615b71f5af1cce0637a6567b
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
       # Rootfs ~545 MB measured via du -sxm /; headroom for base churn.
       image_max_size_mb: "700"
       image_title: ci-lint
       image_description: >-
         Short-lived CI toolchain image for lint and secrets/SAST: actionlint,
-        hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep. Non-root
-        1000:1000, linux/amd64.
+        hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep. Debian 13
+        variant. Non-root 1000:1000, linux/amd64.
+      dhi_login: true
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  build-alpine:
+    needs: [lint, lint-alpine]
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    permissions:
+      contents: read
+      packages: read
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@ea908fd0feb87ab6615b71f5af1cce0637a6567b
+    with:
+      context: docker/ci-lint
+      dockerfile: docker/ci-lint/Dockerfile.alpine
+      image_name: ci-lint:ci-alpine
+      artifact_name: container-image-alpine
+      structure_test_config: docker/ci-lint/container-structure-test.yml
+      scripts_ref: ea908fd0feb87ab6615b71f5af1cce0637a6567b
+      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
+      # Rootfs ~752 MB measured via du -sxm /; headroom for base churn.
+      image_max_size_mb: "850"
+      image_title: ci-lint
+      image_description: >-
+        Short-lived CI toolchain image for lint and secrets/SAST: actionlint,
+        hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep. Alpine 3.24
+        variant. Non-root 1000:1000, linux/amd64.
       dhi_login: true
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -91,11 +145,35 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@ea908fd0feb87ab6615b71f5af1cce0637a6567b
     with:
-      image: ci-lint:ci
-      image_artifact: container-image
-      scripts_ref: 010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
+      image: ci-lint:ci-debian
+      image_artifact: container-image-debian
+      results_artifact: container-scan-results-debian
+      sarif_category: trivy-image-debian
+      scripts_ref: ea908fd0feb87ab6615b71f5af1cce0637a6567b
+      pkg_types: library
+      ignorefile: docker/ci-lint/.trivyignore.yaml
+      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
+    secrets:
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  scan-alpine:
+    needs: build-alpine
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    permissions:
+      contents: read
+      security-events: write
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@ea908fd0feb87ab6615b71f5af1cce0637a6567b
+    with:
+      image: ci-lint:ci-alpine
+      image_artifact: container-image-alpine
+      results_artifact: container-scan-results-alpine
+      sarif_category: trivy-image-alpine
+      scripts_ref: ea908fd0feb87ab6615b71f5af1cce0637a6567b
       pkg_types: library
       ignorefile: docker/ci-lint/.trivyignore.yaml
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -112,11 +190,35 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@ea908fd0feb87ab6615b71f5af1cce0637a6567b
     with:
-      image: ci-lint:ci
-      image_artifact: container-image
-      scripts_ref: 010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
+      image: ci-lint:ci-debian
+      image_artifact: container-image-debian
+      results_artifact: container-scan-posture-debian
+      sarif_category: trivy-posture-debian
+      scripts_ref: ea908fd0feb87ab6615b71f5af1cce0637a6567b
+      pkg_types: os,library
+      ignorefile: none
+      blocking: false
+    secrets:
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  scan-posture-alpine:
+    needs: build-alpine
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    permissions:
+      contents: read
+      security-events: write
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@ea908fd0feb87ab6615b71f5af1cce0637a6567b
+    with:
+      image: ci-lint:ci-alpine
+      image_artifact: container-image-alpine
+      results_artifact: container-scan-posture-alpine
+      sarif_category: trivy-posture-alpine
+      scripts_ref: ea908fd0feb87ab6615b71f5af1cce0637a6567b
       pkg_types: os,library
       ignorefile: none
       blocking: false
@@ -134,19 +236,63 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@ea908fd0feb87ab6615b71f5af1cce0637a6567b
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile
       image_name: ci-lint
       dockerhub_image: pirlruc/ci-lint
-      scripts_ref: 010bf9bf9033179eba3f7cc1cc403bf7b42e9d51
+      scripts_ref: ea908fd0feb87ab6615b71f5af1cce0637a6567b
       platforms: linux/amd64
+      tag_suffix: -debian
+      tag_alias_unsuffixed: false
       image_title: ci-lint
       image_description: >-
         Short-lived CI toolchain image for lint and secrets/SAST: actionlint,
-        hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep. Non-root
-        1000:1000, linux/amd64.
+        hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep. Debian 13
+        variant. Non-root 1000:1000, linux/amd64.
+      image_documentation: https://hub.docker.com/r/pirlruc/ci-lint
+      image_url: https://hub.docker.com/r/pirlruc/ci-lint
+      image_vendor: pirlruc
+      dockerhub_readme: docs/docker-hub-ci-lint.md
+      dockerhub_short_description: >-
+        CI toolchain: actionlint, hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep
+      sign: ${{ github.event.repository.visibility == 'public' }}
+      blocking: true
+      dhi_login: true
+      tag_latest: ${{ github.event_name != 'release' || github.event.release.prerelease == false }}
+      verify_command: /bin/true
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  publish-alpine:
+    needs: [build-alpine, scan-alpine]
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name == 'release' ||
+       github.event_name == 'schedule' ||
+       (github.event_name == 'workflow_dispatch' && inputs.publish))
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@ea908fd0feb87ab6615b71f5af1cce0637a6567b
+    with:
+      context: docker/ci-lint
+      dockerfile: docker/ci-lint/Dockerfile.alpine
+      image_name: ci-lint
+      dockerhub_image: pirlruc/ci-lint
+      scripts_ref: ea908fd0feb87ab6615b71f5af1cce0637a6567b
+      platforms: linux/amd64
+      tag_suffix: -alpine
+      tag_alias_unsuffixed: true
+      image_title: ci-lint
+      image_description: >-
+        Short-lived CI toolchain image for lint and secrets/SAST: actionlint,
+        hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep. Alpine 3.24
+        variant (default unsuffixed tags). Non-root 1000:1000, linux/amd64.
       image_documentation: https://hub.docker.com/r/pirlruc/ci-lint
       image_url: https://hub.docker.com/r/pirlruc/ci-lint
       image_vendor: pirlruc

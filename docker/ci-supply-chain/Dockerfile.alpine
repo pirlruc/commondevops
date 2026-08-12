@@ -48,11 +48,12 @@ RUN set -eu; \
 
 WORKDIR /workspace
 
-RUN printf 'ci:x:1000:1000::/home/ci:/bin/bash\n' >> /etc/passwd \
+# Login shell is /bin/sh — Alpine DHI has no bash (busybox ash via sh).
+RUN printf 'ci:x:1000:1000::/home/ci:/bin/sh\n' >> /etc/passwd \
  && printf 'ci:x:1000:\n' >> /etc/group \
  && mkdir -p /home/ci \
  && chown -R 1000:1000 /home/ci /workspace
 USER 1000:1000
 
 ENTRYPOINT []
-CMD ["bash"]
+CMD ["sh"]

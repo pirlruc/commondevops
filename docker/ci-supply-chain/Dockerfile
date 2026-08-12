@@ -53,11 +53,13 @@ RUN set -eu; \
 
 WORKDIR /workspace
 
-RUN printf 'ci:x:1000:1000::/home/ci:/bin/bash\n' >> /etc/passwd \
+# Non-root default user. DHI images have no useradd; write passwd/group directly.
+# Login shell is /bin/sh so the same CMD works on Debian and Alpine variants.
+RUN printf 'ci:x:1000:1000::/home/ci:/bin/sh\n' >> /etc/passwd \
  && printf 'ci:x:1000:\n' >> /etc/group \
  && mkdir -p /home/ci \
  && chown -R 1000:1000 /home/ci /workspace
 USER 1000:1000
 
 ENTRYPOINT []
-CMD ["bash"]
+CMD ["sh"]

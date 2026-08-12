@@ -1,5 +1,6 @@
 schemaVersion: "2.0.0"
 metadataTest:
+  cmd: ["sh"]
   envVars:
     - key: PYTHONDONTWRITEBYTECODE
       value: "1"
@@ -23,6 +24,9 @@ commandTests:
     args: ["version"]
     exitCode: 0
 fileExistenceTests:
+  - name: shell present
+    path: "/bin/sh"
+    shouldExist: true
   - name: syft binary
     path: "/usr/local/bin/syft"
     shouldExist: true

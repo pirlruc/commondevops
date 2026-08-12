@@ -16,15 +16,20 @@ and semgrep. Not a product runtime — no `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `2.0.1` | Immutable release (prefer the current semver) |
-| `2.0` | Latest patch in the `2.0` line |
-| `latest` | Latest non-prerelease publish |
-| `sha-<git>` | Exact git SHA of the published commit |
+| `4.0.0` / `4.0.0-alpine` | Immutable Alpine release (default unsuffixed = Alpine) |
+| `4.0.0-debian` | Immutable Debian 13 release |
+| `latest` / `latest-alpine` | Latest non-prerelease Alpine publish |
+| `latest-debian` | Latest non-prerelease Debian publish |
+| `sha-<git>` / `sha-<git>-alpine` / `sha-<git>-debian` | Exact git SHA of the published commit |
 
-Prefer a version tag or digest in production.
+Alpine owns the unsuffixed tags because it currently has the lower OS vulnerability
+posture on the DHI catalog (0 CRITICAL OS findings vs Debian). Prefer an explicit
+`-alpine` / `-debian` suffix when the libc matters; prefer a digest in production.
 
 ```bash
-docker pull pirlruc/ci-lint:2.0.1
+docker pull pirlruc/ci-lint:4.0.0
+# or
+docker pull pirlruc/ci-lint:4.0.0-debian
 # or
 docker pull pirlruc/ci-lint@sha256:<digest>
 ```
@@ -33,7 +38,7 @@ docker pull pirlruc/ci-lint@sha256:<digest>
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-lint:2.0.1 \
+  pirlruc/ci-lint:4.0.0 \
   actionlint .github/workflows/*.yml
 ```
 
@@ -46,7 +51,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-lint:2.0.1 \
+  pirlruc/ci-lint:4.0.0 \
   semgrep scan --config auto --error .
 ```
 
@@ -82,6 +87,8 @@ Signing runs only when the source repository is public.
 
 Donor Go binaries (notably actionlint) embed stdlib CVEs that only clear when
 upstream publishes a newer digest. The publish gate uses `--pkg-types library`.
+shellcheck and gitleaks on the Alpine variant are copied from the Debian DHI
+donors (no Alpine DHI build exists; both binaries are statically linked).
 
 ## License
 

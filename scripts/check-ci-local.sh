@@ -28,6 +28,7 @@ done
 
 declare -a DOCKER_STEPS=()
 declare -a EXECUTED=()
+declare -a MISSING=()
 
 run_host() {
   local name="$1"
@@ -40,6 +41,7 @@ run_host() {
   fi
   echo "→ ${name} missing on host; queue Docker"
   DOCKER_STEPS+=("${name}")
+  MISSING+=("${name}")
   return 0
 }
 
@@ -79,14 +81,22 @@ run_host hadolint bash -c '
 echo "==> zizmor"
 run_host zizmor zizmor .github/workflows
 
-echo "==> license_gate dry-run (no SBOM → skip)"
-python3 scripts/license_gate.py || true
+echo "==> yamllint"
+# shellcheck disable=SC2016
+run_host yamllint bash -c '
+  yamllint -d relaxed .github/workflows docs
+'
+
+echo "==> license_gate dry-run (no SBOM → skip with exit 0)"
+# license_gate.py exits 0 when no SBOM is present; do not mask real failures.
+python3 scripts/license_gate.py
 
 if ((${#DOCKER_STEPS[@]} > 0)); then
   if [[ "${USE_DOCKER}" == "1" ]]; then
     COMMONDEVOPS_DOCKER_STEPS="${DOCKER_STEPS[*]}" bash "${ROOT}/scripts/check-ci-docker.sh"
   else
-    echo "Skipped Docker fallback (--no-docker). Missing: ${DOCKER_STEPS[*]}"
+    echo "error: --no-docker set but tools missing on host: ${MISSING[*]}" >&2
+    exit 1
   fi
 fi
 
