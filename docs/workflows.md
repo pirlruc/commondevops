@@ -86,6 +86,10 @@ scope) or Scorecard stays advisory when `repository.private` is true.
 | `attach_sbom` | `false` | Downloads `sbom_artifact` when true |
 | `sign` | `false` | Emits cosign guidance; keyless needs public/GHEC |
 
+| Secret | Required | Notes |
+|--------|----------|-------|
+| `release_token` | Recommended | PAT with `contents:write`. Prefer over `github.token` so the published release fires `on: release` workflows (GITHUB_TOKEN-created releases do not). |
+
 Permissions: `contents: write`; `id-token: write` when signing is requested
 (job always requests `id-token` write so the expression stays static — unused when
 `sign: false`).
@@ -100,6 +104,13 @@ Thin callers into containerdevops for lint/build/scan/publish of
 `dhi_login: true`. `image_max_size_mb: "700"` (rootfs via `du -sxm /`).
 Optional Hub push via `dockerhub_image`. Caller must grant `packages: read` on
 the build job (container-build declares it).
+
+Trivy ignorefile contract (containerdevops ≥ `2.2.0`):
+
+| Job | `ignorefile` |
+|-----|--------------|
+| Blocking `scan` | `docker/ci-lint/.trivyignore.yaml` or `docker/ci-supply-chain/.trivyignore.yaml` |
+| Advisory `scan-posture` | `none` (disables caller-root fallback so findings are unfiltered) |
 
 Public package pages:
 [docker-hub-ci-lint.md](docker-hub-ci-lint.md) /
@@ -120,3 +131,10 @@ repository) and Hub Overview stays in sync.
 
 `push` / `pull_request` on `main` plus `workflow_dispatch`. Calls the `common-*`
 reusables against this repository (`scripts_ref: ${{ github.sha }}`).
+
+## `devops-security.yml` (scheduled)
+
+Weekly secrets/SAST, supply-chain, Scorecard, and registry rescans of
+`ghcr.io/pirlruc/ci-lint:latest` and `ghcr.io/pirlruc/ci-supply-chain:latest`
+via containerdevops `container-scan.yml` (skips when the package is not yet
+pullable).

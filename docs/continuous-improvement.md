@@ -55,6 +55,13 @@ Re-filing completed or open work is a failure of this run.
 Judge every finding against least friction: a consumer can pin a SHA and call a reusable
 workflow correctly in ~10 minutes.
 
+**Evidence rule (non-negotiable):** before claiming a nested reusable, companion repo,
+or downstream workflow "declares", "requires", or "fails with" a specific permission,
+input, or behaviour, **read the referenced file in this checkout** (or fetch the pinned
+`uses:` SHA via `gh`/raw URL). Do **not** infer companion contents from naming or
+comments. Findings that guess at another workflow's `permissions:` or SARIF steps are
+invalid and must not be filed.
+
 **Also look for defects in what the tree actually ships:**
 
 | Class | Examples |

@@ -53,22 +53,82 @@ jobs:
     secrets:
       repo_token: ${{ secrets.SCORECARD_TOKEN }}
 
-  # Optional note: published-image rescan of ghcr.io/pirlruc/ci-lint:latest and
-  # ci-supply-chain:latest can be wired via containerdevops container-scan.
-  # Skipped here — no container-scan reusable in this repo; publish path rescans.
-  published-image-rescan:
+  published-ci-lint-probe:
     if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 10
     permissions:
       contents: read
       packages: read
+    outputs:
+      present: ${{ steps.probe.outputs.present }}
     steps:
-      - name: Note — published image rescan
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - id: probe
         run: |
-          cat <<'EOF'
-          Scheduled security lane covers secrets/SAST, supply-chain (SBOM + license),
-          and Scorecard. Trivy rescan of ghcr.io/pirlruc/ci-lint:latest and
-          ghcr.io/pirlruc/ci-supply-chain:latest runs on the image publish path
-          (CI-027 monthly rebuild).
-          EOF
+          if docker pull ghcr.io/pirlruc/ci-lint:latest; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "ci-lint:latest not pullable yet; rescan will skip"
+          fi
+
+  published-ci-lint-rescan:
+    needs: published-ci-lint-probe
+    if: github.actor != 'dependabot[bot]' && needs.published-ci-lint-probe.outputs.present == 'true'
+    permissions:
+      contents: read
+      security-events: write
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@0fb7bab3411a6756911debce0624061d60537a33
+    with:
+      image: ghcr.io/pirlruc/ci-lint:latest
+      scripts_ref: 0fb7bab3411a6756911debce0624061d60537a33
+      pkg_types: library
+      ignorefile: docker/ci-lint/.trivyignore.yaml
+      blocking: true
+    secrets:
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  published-ci-supply-chain-probe:
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      present: ${{ steps.probe.outputs.present }}
+    steps:
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - id: probe
+        run: |
+          if docker pull ghcr.io/pirlruc/ci-supply-chain:latest; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "ci-supply-chain:latest not pullable yet; rescan will skip"
+          fi
+
+  published-ci-supply-chain-rescan:
+    needs: published-ci-supply-chain-probe
+    if: github.actor != 'dependabot[bot]' && needs.published-ci-supply-chain-probe.outputs.present == 'true'
+    permissions:
+      contents: read
+      security-events: write
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@0fb7bab3411a6756911debce0624061d60537a33
+    with:
+      image: ghcr.io/pirlruc/ci-supply-chain:latest
+      scripts_ref: 0fb7bab3411a6756911debce0624061d60537a33
+      pkg_types: library
+      ignorefile: docker/ci-supply-chain/.trivyignore.yaml
+      blocking: true
+    secrets:
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
