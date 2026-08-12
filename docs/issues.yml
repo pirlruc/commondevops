@@ -434,3 +434,124 @@ milestones:
             guardrail_refs:
               - DOCKER-DOC-002
               - SC-DEP-001
+
+      - id: CMN-WF-001
+        status: open
+        title: Wire per-image Trivy ignorefile into container-scan callers
+        overview:
+          problem: >-
+            docker/ci-lint/.trivyignore.yaml and docker/ci-supply-chain/.trivyignore.yaml
+            exist but are never passed as an ignorefile to the container-scan.yml reusable
+            in ci-lint-image.yml and ci-supply-chain-image.yml. The root .trivyignore.yaml
+            comment explicitly defers this to "when container-scan supports the ignorefile
+            input (containerdevops ≥ hygiene SHA)". Until wired, the per-image ignore files
+            are dead configuration: scan jobs either fail on donor-binary CVEs the team
+            already triaged or the root file is applied implicitly by Trivy, making the
+            split-file structure misleading and fragile.
+          goal: >-
+            Pass ignorefile: docker/ci-lint/.trivyignore.yaml (or ci-supply-chain equivalent)
+            into each image caller's scan job so triage decisions are local, auditable, and
+            enforced by CI. Update workflows.md to document the ignorefile contract for
+            consumer callers.
+        architecture:
+          target: ci-*-image.yml scan jobs + workflows.md
+          modules:
+            - .github/workflows/ci-lint-image.yml
+            - .github/workflows/ci-supply-chain-image.yml
+            - docker/ci-lint/.trivyignore.yaml
+            - docker/ci-supply-chain/.trivyignore.yaml
+            - docs/workflows.md
+        acceptance_criteria:
+          - Both scan jobs in ci-lint-image.yml and ci-supply-chain-image.yml pass
+            the per-image ignorefile to container-scan.yml
+          - Root .trivyignore.yaml comment updated to reflect per-image files are active
+          - workflows.md documents ignorefile input and per-image override pattern
+          - CI scan job passes without unrelated CVE noise
+        guardrail_refs:
+          - DOCKER-SEC-001
+        tasks:
+          - id: CMN-WF-001-T1
+            status: open
+            title: Wire ignorefile inputs into ci-lint-image and ci-supply-chain-image scan jobs
+            instructions:
+              files:
+                - .github/workflows/ci-lint-image.yml
+                - .github/workflows/ci-supply-chain-image.yml
+            verification:
+              - rg -n "ignorefile" .github/workflows/ci-lint-image.yml
+              - rg -n "ignorefile" .github/workflows/ci-supply-chain-image.yml
+            guardrail_refs:
+              - DOCKER-SEC-001
+          - id: CMN-WF-001-T2
+            status: open
+            title: Update docs and root ignorefile comment
+            instructions:
+              files:
+                - docs/workflows.md
+                - .trivyignore.yaml
+            verification:
+              - grep -q "ignorefile" docs/workflows.md
+
+      - id: CMN-WF-002
+        status: open
+        title: Fix common-release.yml release-token contract and remove no-op rescan job
+        overview:
+          problem: >-
+            Two related issues reduce reliability and clarity of the security CI lane.
+            (1) common-release.yml uses github.token for gh release create; the handoff
+            explicitly warns "GITHUB_TOKEN-created releases do not trigger workflows" (i.e.,
+            the release event will not fire ci-lint-image.yml on: release). Callers have no
+            release_token secret input and no warning in workflows.md — this is a silent
+            contract failure for any consumer whose publish pipeline relies on the release
+            event. (2) devops-security.yml contains a published-image-rescan job that does
+            nothing except print a cat-EOF message and grants packages:read unnecessarily.
+            It was a placeholder from development and has never been implemented, wasting
+            Actions minutes and obscuring the real security coverage.
+          goal: >-
+            Add an optional release_token secret input to common-release.yml with a
+            diagnostic warning when absent. Document the token requirement and event-chain
+            limitation clearly in workflows.md. Remove the no-op published-image-rescan
+            job from devops-security.yml (or promote it to a real Trivy rescan via
+            containerdevops container-scan.yml when feasible).
+        architecture:
+          target: common-release.yml + devops-security.yml + workflows.md
+          modules:
+            - .github/workflows/common-release.yml
+            - .github/workflows/devops-security.yml
+            - docs/workflows.md
+        acceptance_criteria:
+          - common-release.yml has release_token secret input (required false); step warns
+            when github.token is used and notes the downstream event limitation
+          - workflows.md documents that GITHUB_TOKEN-created releases do not trigger
+            release-event workflows and that callers should pass a PAT
+          - devops-security.yml no-op published-image-rescan job removed or replaced with
+            a real Trivy pull-and-scan step against ghcr.io/pirlruc/ci-lint:latest
+          - actionlint passes on both workflows after changes
+        guardrail_refs:
+          - CI-024
+          - CI-025
+        tasks:
+          - id: CMN-WF-002-T1
+            status: open
+            title: Add release_token secret and event-chain warning to common-release.yml
+            instructions:
+              files:
+                - .github/workflows/common-release.yml
+                - docs/workflows.md
+            verification:
+              - actionlint .github/workflows/common-release.yml
+              - grep -q "release_token" .github/workflows/common-release.yml
+              - grep -q "release_token" docs/workflows.md
+            guardrail_refs:
+              - CI-024
+          - id: CMN-WF-002-T2
+            status: open
+            title: Remove no-op published-image-rescan from devops-security.yml
+            instructions:
+              files:
+                - .github/workflows/devops-security.yml
+            verification:
+              - actionlint .github/workflows/devops-security.yml
+              - "! grep -q 'published-image-rescan' .github/workflows/devops-security.yml"
+            guardrail_refs:
+              - CI-025

@@ -99,6 +99,9 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
+- 2026-08-12: ai-reviewer run — added CMN-WF-001 (per-image ignorefile not wired
+  into container-scan callers) and CMN-WF-002 (release-token contract gap +
+  no-op published-image-rescan in devops-security.yml) to docs/issues.yml.
 - 2026-08-12: wire Dependabot `registries:` for private git + dhi.io.
 - 2026-08-12: CMN-012 — re-pin containerdevops, image metadata, Hub/GHCR docs;
   releases `2.0.2` (prefer over `2.0.1`).
