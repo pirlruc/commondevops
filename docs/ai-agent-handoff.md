@@ -18,7 +18,8 @@ Owns `.github/workflows/common-*.yml`, `devops-ci.yml`, `devops-security.yml`,
 matching `scripts_ref` + `checkout_token`.
 
 Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `2.4.0`
-→ `ea908fd0feb87…`.
+→ `ea908fd0feb87…` (reusable workflows). Image tag `3.0.0` is Alpine `ci-container`
+only — **do not** re-pin callers to `3.0.0` unless a reusable workflow changes.
 
 ## Delivery status
 
@@ -30,7 +31,7 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `2.
 | CMN-SC-001 — install hardening + pin + prompt | Done |
 | CMN-IMG-001 — Alpine ci-supply-chain variant | Done (`3.0.0`) |
 | CMN-IMG-002 — Remove docker/ci-base | Done (`3.0.0`) |
-| CMN-IMG-003 — Alpine ci-lint variant | In progress (`4.0.0`) |
+| CMN-IMG-003 — Alpine ci-lint variant | Done (`4.0.0`) |
 
 ## Pins
 
@@ -40,7 +41,9 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `2.
 | github-scaffold submodule | `f8a6ba1…` |
 | containerdevops (image callers + security rescan) | tag `2.4.0` → `ea908fd0feb87…` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
-| Release | `3.0.0` on main; next `4.0.0` (Alpine owns unsuffixed `ci-lint`) |
+| `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `4.0.0` → `sha256:0a4691ba…` |
+| `ghcr.io/pirlruc/ci-lint` (debian) | `4.0.0-debian` → `sha256:ed619755…` |
+| Release | `4.0.0` (Alpine owns unsuffixed `ci-lint`) |
 
 ## Local image sizes / posture (2026-08-12, `du -sxm /`)
 
@@ -111,16 +114,17 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. Land containerdevops `2.4.0`, then bump all 17 pins and release commondevops `4.0.0`.
-2. Land containerdevops Alpine `ci-container` on the new Alpine `ci-lint` digest.
-3. Refresh donor digests / drop ignorefile entries before 2026-11-11.
+1. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
+2. Refresh donor digests / drop ignorefile entries before 2026-11-11.
+3. Paste Hub Overviews (or widen `DOCKERHUB_TOKEN` to admin) — sync was Forbidden.
 
 ## Recent history
 
-- 2026-08-12: CMN-IMG-003 in flight — Alpine `ci-lint`, static Debian shellcheck/
-  gitleaks donors, unify `CMD ["sh"]` (fixes broken Alpine `ci-supply-chain`
-  default command), local gate fixes.
-- 2026-08-12: containerdevops `2.3.1` published (CI_BASE + guardrails); callers still on `2.3.0`.
+- 2026-08-12: containerdevops `3.0.0` published Alpine `ci-container` on ci-lint
+  `4.0.0`; reusable callers **remain** on containerdevops `2.4.0` (no reusable delta).
+- 2026-08-12: CMN-IMG-003 / release `4.0.0` — Alpine `ci-lint` owns unsuffixed,
+  static Debian shellcheck/gitleaks donors, unify `CMD ["sh"]` (fixes broken Alpine
+  `ci-supply-chain` default command), pins → containerdevops `2.4.0`.
 - 2026-08-12: #54 bump guardrails past ci-base drop (`5a7ac83…`).
 - 2026-08-12: CMN-IMG-001 / CMN-IMG-002 / release `3.0.0` — delete `docker/ci-base`,
   add Alpine `ci-supply-chain` (`-alpine`/`-debian`; Alpine owns unsuffixed),

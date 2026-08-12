@@ -737,7 +737,7 @@ milestones:
               - DOCKER-LINT-001
 
       - id: CMN-IMG-003
-        status: open
+        status: done
         title: Alpine 3.24 variant for ci-lint
         overview:
           problem: >-
@@ -771,7 +771,7 @@ milestones:
           - CI-026
         tasks:
           - id: CMN-IMG-003-T1
-            status: open
+            status: done
             title: Author ci-lint Dockerfile.alpine and unify CMD sh
             instructions:
               files:
@@ -787,7 +787,7 @@ milestones:
             guardrail_refs:
               - DOCKER-BUILD-003
           - id: CMN-IMG-003-T2
-            status: open
+            status: done
             title: Wire parallel Alpine ci-lint jobs and pin containerdevops 2.4.0
             instructions:
               files:
@@ -802,7 +802,7 @@ milestones:
             guardrail_refs:
               - CI-026
           - id: CMN-IMG-003-T3
-            status: open
+            status: done
             title: Document variants, size deviation, and local gate fixes
             instructions:
               files:
