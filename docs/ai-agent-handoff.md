@@ -42,7 +42,7 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops).
 |-----------|-----|
 | guardrails submodule | tag `1.1.0` → `6fe580c…` |
 | github-scaffold submodule | `f8a6ba1…` |
-| containerdevops (image callers) | `8f64bd6e…` (CDO-016 + single-platform annotations fix) |
+| containerdevops (image callers) | `63b414fc…` (Hub Overview sync advisory) |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 | Release | [`2.0.0`](https://github.com/pirlruc/commondevops/releases/tag/2.0.0) @ `26d7219…` |
 
