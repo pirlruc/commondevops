@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `common/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
-| **Branch** | `feature-drop-ci-base-and-alpine-supply-chain` (land on `main`) |
+| **Branch** | `main` |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, release + `ci-lint` / `ci-supply-chain` images |
 | **Type** | CI infrastructure |
 
@@ -17,7 +17,8 @@ Owns `.github/workflows/common-*.yml`, `devops-ci.yml`, `devops-security.yml`,
 `docker/ci-supply-chain/`. Consumers pin `pirlruc/commondevops@<sha|tag>` and pass
 matching `scripts_ref` + `checkout_token`.
 
-Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `2.3.0`.
+Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `2.3.0`
+(main also has post-tag CI_BASE + guardrails commits — prefer `2.3.1` once cut).
 
 ## Delivery status
 
@@ -27,8 +28,8 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `2.
 | CMN-WF-001 — Trivy ignore + posture scan | Done |
 | CMN-WF-002 — release_token + registry rescan | Done |
 | CMN-SC-001 — install hardening + pin + prompt | Done |
-| CMN-IMG-001 — Alpine ci-supply-chain variant | **In progress** (this branch) |
-| CMN-IMG-002 — Remove docker/ci-base | **In progress** (this branch) |
+| CMN-IMG-001 — Alpine ci-supply-chain variant | Done (`3.0.0`) |
+| CMN-IMG-002 — Remove docker/ci-base | Done (`3.0.0`) |
 
 ## Pins
 
@@ -38,7 +39,7 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `2.
 | github-scaffold submodule | `f8a6ba1…` |
 | containerdevops (image callers + security rescan) | tag `2.3.0` → `010bf9bf9033…` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
-| Release | pending `3.0.0` (major — unsuffixed `ci-supply-chain` moves to musl/Alpine) |
+| Release | `3.0.0` (major — unsuffixed `ci-supply-chain` is musl/Alpine) |
 
 ## Local image sizes (2026-08-12, `du -sxm /`)
 
@@ -47,6 +48,14 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `2.
 | ci-lint | ~545 MB | 0 | debian13 |
 | ci-supply-chain (debian) | ~575 MB | 0 | size gate 700 |
 | ci-supply-chain (alpine) | ~722 MB | 0 with ignorefile | size gate 800; grant/grype donor HIGHs |
+
+## Publish digests (`3.0.0`)
+
+| Image / variant | Digest | Tags |
+|-----------------|--------|------|
+| ci-supply-chain alpine | `sha256:5d25d0c3…` | `3.0.0`, `3.0.0-alpine`, `latest`, `latest-alpine` |
+| ci-supply-chain debian | `sha256:e4aa7960…` | `3.0.0-debian`, `latest-debian` |
+| ci-lint | `sha256:a3601772…` | `3.0.0`, `latest` |
 
 ## Commands
 
@@ -97,18 +106,20 @@ python3 .github/scaffold/scripts/issues-sync.py \
 - **install-common-tools.sh:** versions + SHA256 digests are manual (not Dependabot).
 - **Local vs Actions:** nested `workflow_call` composition is not exercised by `act`
   (not installed). Prefer `actionlint`/`zizmor`/disposable install tests before push.
+- **GHCR inspect locally:** packages:read often missing on user tokens → 403; use
+  Actions publish logs for digest/tag verification.
 
 ## Suggested next work
 
-1. After merge: tag/release `3.0.0` with a PAT; watch dual-variant ci-supply-chain publish.
-2. Re-pin containerdevops `CI_BASE` after any later ci-lint release if needed.
-3. Guardrails PR to drop stale `ci-base` reference in `ci/guardrails.md`, then submodule bump.
-4. Refresh donor digests / drop ignorefile entries before 2026-11-11.
+1. After containerdevops cuts `2.3.1`, re-pin image callers + `devops-security.yml` if desired.
+2. Refresh donor digests / drop ignorefile entries before 2026-11-11.
+3. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
 
 ## Recent history
 
-- 2026-08-12: CMN-IMG-001 / CMN-IMG-002 — delete `docker/ci-base`, add Alpine
-  `ci-supply-chain` variant with `-alpine`/`-debian` tags (Alpine owns unsuffixed),
+- 2026-08-12: #54 bump guardrails past ci-base drop (`5a7ac83…`).
+- 2026-08-12: CMN-IMG-001 / CMN-IMG-002 / release `3.0.0` — delete `docker/ci-base`,
+  add Alpine `ci-supply-chain` (`-alpine`/`-debian`; Alpine owns unsuffixed),
   re-pin containerdevops `2.3.0`.
 - 2026-08-12: CMN-WF-001 / CMN-WF-002 / CMN-SC-001 — per-image ignorefiles,
   posture `ignorefile: none`, `release_token`, real registry rescan, install
