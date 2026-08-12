@@ -34,7 +34,7 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `2.
 
 | Component | Ref |
 |-----------|-----|
-| guardrails submodule | tag `1.1.0` → `6fe580c…` |
+| guardrails submodule | commit `5a7ac83…` (post ci-base ref drop) |
 | github-scaffold submodule | `f8a6ba1…` |
 | containerdevops (image callers + security rescan) | tag `2.3.0` → `010bf9bf9033…` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
