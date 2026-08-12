@@ -17,8 +17,8 @@ Owns `.github/workflows/common-*.yml`, `devops-ci.yml`, `devops-security.yml`,
 `docker/ci-supply-chain/`. Consumers pin `pirlruc/commondevops@<sha|tag>` and pass
 matching `scripts_ref` + `checkout_token`.
 
-Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `2.3.0`
-(main also has post-tag CI_BASE + guardrails commits — prefer `2.3.1` once cut).
+Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `2.3.1`
+(callers still pin `2.3.0` → `010bf9bf9033…` until a deliberate bump).
 
 ## Delivery status
 
@@ -111,12 +111,13 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. After containerdevops cuts `2.3.1`, re-pin image callers + `devops-security.yml` if desired.
+1. Optionally re-pin image callers + `devops-security.yml` to containerdevops `2.3.1`.
 2. Refresh donor digests / drop ignorefile entries before 2026-11-11.
 3. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
 
 ## Recent history
 
+- 2026-08-12: containerdevops `2.3.1` published (CI_BASE + guardrails); callers still on `2.3.0`.
 - 2026-08-12: #54 bump guardrails past ci-base drop (`5a7ac83…`).
 - 2026-08-12: CMN-IMG-001 / CMN-IMG-002 / release `3.0.0` — delete `docker/ci-base`,
   add Alpine `ci-supply-chain` (`-alpine`/`-debian`; Alpine owns unsuffixed),
