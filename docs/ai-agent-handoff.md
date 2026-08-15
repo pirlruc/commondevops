@@ -111,15 +111,30 @@ python3 .github/scaffold/scripts/issues-sync.py \
   Actions publish logs for digest/tag verification.
 - **check-ci-local.sh:** `--no-docker` fails when tools are missing (no silent pass);
   license_gate is no longer masked with `|| true`.
+- **Monthly image schedule:** cron `17 5 15 * *` rebuilds and publishes. Blocking
+  Trivy (`pkg_types: library`) fails when the vulndb adds HIGH/CRITICAL CVEs in
+  vendor-static donors. Refresh per-image `.trivyignore.yaml` (path + statement,
+  review 2026-11-11) or re-pin donors rebuilt with a patched Go; then
+  `workflow_dispatch` with `publish=true` to recover the missed publish.
 
 ## Suggested next work
 
-1. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
-2. Refresh donor digests / drop ignorefile entries before 2026-11-11.
-3. Paste Hub Overviews (or widen `DOCKERHUB_TOKEN` to admin) — sync was Forbidden.
+1. After merging the CVE-2026-39821 / CVE-2026-46600 ignore refresh, re-run
+   the 15th-of-month image workflows (`workflow_dispatch` with `publish=true`)
+   so GHCR/Hub get the scheduled rebuild that failed on 2026-08-15.
+2. Refresh donor digests / drop ignorefile entries before 2026-11-11 —
+   actionlint has no release past 1.7.12; DHI gitleaks/syft/grype/trivy and
+   grant 0.6.8 still embed Go stdlib older than 1.26.6.
+3. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
+4. Paste Hub Overviews (or widen `DOCKERHUB_TOKEN` to admin) — sync was Forbidden.
 
 ## Recent history
 
+- 2026-08-15: monthly schedule of CI Lint / CI Supply Chain Image failed on
+  blocking Trivy (`scan` / `scan-alpine`) after vulndb added Go stdlib HIGH
+  CVE-2026-39821 and CVE-2026-46600 in vendor-static donors (actionlint
+  1.7.12 / DHI gitleaks / DHI syft-grype-trivy / grant 0.6.8). Path-scoped
+  ignore refresh; no newer rebuilt donors yet.
 - 2026-08-12: containerdevops `3.0.0` published Alpine `ci-container` on ci-lint
   `4.0.0`; reusable callers **remain** on containerdevops `2.4.0` (no reusable delta).
 - 2026-08-12: CMN-IMG-003 / release `4.0.0` — Alpine `ci-lint` owns unsuffixed,
@@ -139,4 +154,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-08-12*
+*Last updated: 2026-08-15*

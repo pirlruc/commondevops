@@ -50,3 +50,16 @@ vulnerabilities:
     paths:
       - "**/actionlint"
     statement: Go stdlib embedded in rhysd/actionlint donor; no newer digest yet.
+  # Go 1.26.6 / 1.25.13 stdlib HIGH CVEs landed in Trivy DB after release 4.0.0.
+  # actionlint 1.7.12 still embeds v1.26.1; DHI gitleaks:8-debian13 embeds v1.26.5.
+  # No newer actionlint release; DHI gitleaks digest not rebuilt with 1.26.6 yet.
+  - id: CVE-2026-39821
+    paths:
+      - "**/actionlint"
+      - "**/gitleaks"
+    statement: Go stdlib idna (fixed in 1.26.6) in actionlint 1.7.12 and DHI gitleaks; no rebuilt digest yet.
+  - id: CVE-2026-46600
+    paths:
+      - "**/actionlint"
+      - "**/gitleaks"
+    statement: Go stdlib dnsmessage (fixed in 1.26.6) in actionlint 1.7.12 and DHI gitleaks; no rebuilt digest yet.

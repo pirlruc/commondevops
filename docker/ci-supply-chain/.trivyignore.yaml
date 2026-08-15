@@ -28,3 +28,19 @@ vulnerabilities:
     paths:
       - "**/grant"
     statement: Embedded gRPC-Go in grant donor binary.
+  # Go 1.26.6 / 1.25.13 stdlib HIGH CVEs landed in Trivy DB after release 4.0.0.
+  # DHI syft/grype/trivy and anchore/grant:v0.6.8 still embed stdlib v1.26.5.
+  - id: CVE-2026-39821
+    paths:
+      - "**/syft"
+      - "**/grype"
+      - "**/trivy"
+      - "**/grant"
+    statement: Go stdlib idna (fixed in 1.26.6) in DHI/Anchore donors; no rebuilt digest yet.
+  - id: CVE-2026-46600
+    paths:
+      - "**/syft"
+      - "**/grype"
+      - "**/trivy"
+      - "**/grant"
+    statement: Go stdlib dnsmessage (fixed in 1.26.6) in DHI/Anchore donors; no rebuilt digest yet.
