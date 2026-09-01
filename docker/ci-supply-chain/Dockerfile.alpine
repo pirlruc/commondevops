@@ -15,7 +15,7 @@
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
 # dhi.io/python:3.13-alpine3.24-dev — digest pinned (DOCKER-BUILD-003 / CI-026)
-FROM dhi.io/python:3.13-alpine3.24-dev@sha256:8e51f99fa957d0b2531c4936b178d67d997e76fe48d7150357143295a03b1fd4
+FROM dhi.io/python:3.14-alpine3.24-dev@sha256:f0240a9727788e6e4d7a39c1b077d3563e7fd23e4157001c3f962be692aff6fc
 
 LABEL org.opencontainers.image.title="ci-supply-chain" \
       org.opencontainers.image.description="Short-lived CI toolchain image for SBOM generation and vulnerability/license gates: syft, grype, trivy, grant. Alpine 3.24 variant. Non-root 1000:1000, linux/amd64." \

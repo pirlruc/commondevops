@@ -83,7 +83,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@ea908fd0feb87ab6615b71f5af1cce0637a6567b
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@c4a0777db36d780b4109e3a0376a8c12a7b571ae
     with:
       image: ghcr.io/pirlruc/ci-lint:latest
       scripts_ref: ea908fd0feb87ab6615b71f5af1cce0637a6567b
@@ -123,7 +123,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@ea908fd0feb87ab6615b71f5af1cce0637a6567b
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@c4a0777db36d780b4109e3a0376a8c12a7b571ae
     with:
       image: ghcr.io/pirlruc/ci-supply-chain:latest
       scripts_ref: ea908fd0feb87ab6615b71f5af1cce0637a6567b
