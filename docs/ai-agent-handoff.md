@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `common/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
-| **Branch** | `feature-rescan-permissions-trivyignore` (PR #62) |
+| **Branch** | `feature-published-rescan-caller` (from `origin/main` after #62) |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, release + `ci-lint` / `ci-supply-chain` images |
 | **Type** | CI infrastructure |
 
@@ -19,9 +19,11 @@ matching `scripts_ref` + `checkout_token`. New `common-doc-verify.yml` /
 `common-scaffold-verify.yml` (this branch) are not in older consumer pins — callers
 must re-pin after PR #62 merges.
 
-Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `3.0.1`
-→ `9a46e8437d369…` (reusable workflows, GHCR-login scan patch). Image tag `3.0.0` is Alpine `ci-container`
-only — **do not** re-pin callers to `3.0.0` unless a reusable workflow changes.
+Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `3.0.2`
+→ `3607bf0809c951d6d4b832d58f625a34eb3bb75b` (`container-published-rescan.yml` +
+GHCR-login scan). Image tag `3.0.0` is Alpine `ci-container` only.
+`common-doc-verify.yml` / `common-scaffold-verify.yml` shipped on `main` in #62
+(`75d0faf…`). Callers must re-pin; `scripts_ref` must match.
 
 ## Delivery status
 
@@ -43,7 +45,7 @@ only — **do not** re-pin callers to `3.0.0` unless a reusable workflow changes
 |-----------|-----|
 | guardrails submodule | commit `5a7ac83…` (post ci-base ref drop) |
 | github-scaffold submodule | `f8a6ba1…` |
-| containerdevops (image callers + security rescan) | tag `3.0.1` → `9a46e8437d369…` |
+| containerdevops (image callers + security rescan) | tag `3.0.2` → `3607bf0809c951…` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 | `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `4.0.0` → `sha256:0a4691ba…` |
 | `ghcr.io/pirlruc/ci-lint` (debian) | `4.0.0-debian` → `sha256:ed619755…` |
@@ -120,18 +122,20 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. Implement CMN-WF-003 / CMN-DOC-001 (accepted copilot findings, not yet synced).
-2. After PR #62 merges, consumers that need `common-doc-verify.yml` /
-   `common-scaffold-verify.yml` re-pin to that merge SHA (`scripts_ref` must match).
-3. Do **not** merge Dependabot #61 (containerdevops `3.0.0` `uses:` + Python 3.14,
-   CI skipped, `scripts_ref` lockstep broken). Reusables did not change 2.4.0→3.0.0.
-   Split Python 3.14 into a human-branch image rebuild. containerdevops #82
-   (commondevops 4.0.0) is the Alpine `ci-lint` consumer pin after lockstep.
+1. Implement CMN-WF-003 / CMN-DOC-001 (filed in `docs/issues.yml`; sync with
+   `issues-sync.py --update` after approval).
+2. Doc-repo callers of `common-doc-verify.yml` need `COMMONDEVOPS_READ_TOKEN`
+   before they can switch.
+3. Do **not** merge containerdevops #82 as-is (commondevops 4.0.0 pin must
+   lockstep `scripts_ref`; Python 3.14 untested). #61/#50 already closed.
 4. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
 5. Refresh donor digests / drop ignorefile entries before 2026-11-11.
 
 ## Recent history
 
+- 2026-09-11: Wave 4 — `devops-security.yml` published rescans call
+  `container-published-rescan.yml@3.0.2` (`3607bf0…`) with unique artifacts.
+  Image CI stays on `container-scan.yml` at the same SHA.
 - 2026-09-11: Wave 4 — add reusable `common-doc-verify.yml` (shellcheck/ruff/YAML/link
   lint) and `common-scaffold-verify.yml` (issues-sync `--validate-only` + SCAFFOLD_REF).
   Doc-repo callers and `GUARDRAILS_READ_TOKEN` wiring are follow-up. Do not treat

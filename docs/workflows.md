@@ -186,6 +186,6 @@ reusables against this repository (`scripts_ref: ${{ github.sha }}`).
 
 Weekly secrets/SAST, supply-chain, Scorecard, and registry rescans of
 `ghcr.io/pirlruc/ci-lint:latest` and `ghcr.io/pirlruc/ci-supply-chain:latest`
-via containerdevops `container-scan.yml@3.0.1` (skips when the package is not
-yet pullable). Not migrated to `container-published-rescan.yml` until that
-reusable exists on a released containerdevops SHA.
+via containerdevops `container-published-rescan.yml@3.0.2` (`3607bf0…`; probe
+skips the scan when the package is not yet pullable). Image CI (`ci-lint-image.yml`,
+`ci-supply-chain-image.yml`) still calls `container-scan.yml` at the same SHA.
