@@ -1,0 +1,179 @@
+name: Common Doc Verify (reusable)
+
+# Shellcheck, ruff, caller-vendored YAML parse, and markdown link lint.
+# Intended for documentation repos (guardrails, methodologies, github-scaffold).
+# Cross-repo callers pass checkout_token (COMMONDEVOPS_READ_TOKEN) so scripts_ref
+# can be checked out from this private repo; missing token is a caller gap.
+
+on:
+  workflow_call:
+    inputs:
+      blocking:
+        description: When false, failures are advisory only
+        required: false
+        type: boolean
+        default: false
+      shell_scripts:
+        description: Glob or space-separated scripts for shellcheck (empty → skip)
+        required: false
+        type: string
+        default: ""
+      ruff_paths:
+        description: Glob or space-separated paths for ruff check (empty → skip)
+        required: false
+        type: string
+        default: ""
+      yaml_files:
+        description: Space-separated YAML paths for scripts/validate-yaml.py (empty → none)
+        required: false
+        type: string
+        default: ""
+      yaml_globs:
+        description: Space-separated globs passed as --glob to validate-yaml.py (empty → none)
+        required: false
+        type: string
+        default: ""
+      run_link_lint:
+        description: Run scripts/lint-doc-links.py when that file exists in the caller
+        required: false
+        type: boolean
+        default: false
+      scripts_ref:
+        description: "Commit/tag/branch of commondevops to checkout for scripts (must match uses: pin)"
+        required: false
+        type: string
+        default: ""
+    secrets:
+      # Required when the caller is a different private repo: GITHUB_TOKEN cannot
+      # read pirlruc/commondevops. Pass a PAT/fine-grained token with contents:read.
+      checkout_token:
+        required: false
+  workflow_dispatch:
+    inputs:
+      blocking:
+        type: boolean
+        default: false
+      shell_scripts:
+        type: string
+        default: ""
+      ruff_paths:
+        type: string
+        default: ""
+      yaml_files:
+        type: string
+        default: ""
+      yaml_globs:
+        type: string
+        default: ""
+      run_link_lint:
+        type: boolean
+        default: false
+      scripts_ref:
+        type: string
+        default: ""
+
+# CI-025: default-deny; jobs grant the minimum they need.
+permissions: {}
+
+env:
+  ADVISORY: ${{ inputs.blocking == false }}
+
+jobs:
+  verify:
+    # CI-024: Dependabot PRs cannot use Actions secrets for private reusable workflows.
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: sh
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Checkout commondevops scripts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pirlruc/commondevops
+          # github.workflow_sha is the *caller* workflow; pass scripts_ref matching uses: @pin.
+          ref: ${{ inputs.scripts_ref || github.sha }}
+          token: ${{ secrets.checkout_token || github.token }}
+          persist-credentials: false
+          path: _commondevops
+          sparse-checkout: |
+            scripts
+          sparse-checkout-cone-mode: false
+
+      - name: Install shellcheck
+        if: inputs.shell_scripts != ''
+        working-directory: ${{ github.workspace }}
+        env:
+          INSTALL_ONLY: shellcheck
+        run: bash _commondevops/scripts/install-common-tools.sh
+
+      - name: shellcheck
+        if: inputs.shell_scripts != ''
+        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        env:
+          SHELL_SCRIPTS: ${{ inputs.shell_scripts }}
+        run: |
+          # Word-split so callers can pass globs. Paths must not contain spaces.
+          # shellcheck disable=SC2086
+          shellcheck ${SHELL_SCRIPTS}
+
+      - name: Install ruff
+        if: inputs.ruff_paths != ''
+        run: |
+          python3 -m venv .ci-venv
+          .ci-venv/bin/pip install -q 'ruff==0.14.10'
+
+      - name: ruff
+        if: inputs.ruff_paths != ''
+        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        env:
+          RUFF_PATHS: ${{ inputs.ruff_paths }}
+        run: |
+          # Word-split so callers can pass globs. Paths must not contain spaces.
+          # shellcheck disable=SC2086
+          .ci-venv/bin/ruff check ${RUFF_PATHS}
+
+      - name: Parse YAML manifests
+        if: inputs.yaml_files != '' || inputs.yaml_globs != ''
+        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        env:
+          YAML_FILES: ${{ inputs.yaml_files }}
+          YAML_GLOBS: ${{ inputs.yaml_globs }}
+        run: |
+          if [ ! -f scripts/validate-yaml.py ]; then
+            echo "note: scripts/validate-yaml.py not in caller; skipping YAML parse"
+            echo "Vendored the script from github-scaffold/guardrails if this check should run."
+            exit 0
+          fi
+          if [ ! -x .ci-venv/bin/python ]; then
+            python3 -m venv .ci-venv
+          fi
+          .ci-venv/bin/pip install -q pyyaml
+          # Preserve glob metacharacters for validate-yaml.py --glob (Python expands them).
+          set -f
+          set --
+          for g in ${YAML_GLOBS}; do
+            set -- "$@" --glob "$g"
+          done
+          for f in ${YAML_FILES}; do
+            set -- "$@" "$f"
+          done
+          set +f
+          .ci-venv/bin/python scripts/validate-yaml.py "$@"
+
+      - name: Lint relative markdown links
+        if: inputs.run_link_lint
+        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        run: |
+          if [ ! -f scripts/lint-doc-links.py ]; then
+            echo "note: scripts/lint-doc-links.py not in caller; skipping link lint"
+            exit 0
+          fi
+          python3 scripts/lint-doc-links.py

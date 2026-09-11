@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `common/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
-| **Branch** | `main` |
+| **Branch** | `feature-rescan-permissions-trivyignore` (PR #62) |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, release + `ci-lint` / `ci-supply-chain` images |
 | **Type** | CI infrastructure |
 
@@ -15,7 +15,9 @@
 Owns `.github/workflows/common-*.yml`, `devops-ci.yml`, `devops-security.yml`,
 `ci-lint-image.yml`, `ci-supply-chain-image.yml`, `scripts/`, `docker/ci-lint/`,
 `docker/ci-supply-chain/`. Consumers pin `pirlruc/commondevops@<sha|tag>` and pass
-matching `scripts_ref` + `checkout_token`.
+matching `scripts_ref` + `checkout_token`. New `common-doc-verify.yml` /
+`common-scaffold-verify.yml` (this branch) are not in older consumer pins — callers
+must re-pin after PR #62 merges.
 
 Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `3.0.1`
 → `9a46e8437d369…` (reusable workflows, GHCR-login scan patch). Image tag `3.0.0` is Alpine `ci-container`
@@ -119,12 +121,18 @@ python3 .github/scaffold/scripts/issues-sync.py \
 ## Suggested next work
 
 1. Implement CMN-WF-003 / CMN-DOC-001 (accepted copilot findings, not yet synced).
-2. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
-3. Refresh donor digests / drop ignorefile entries before 2026-11-11.
-4. Paste Hub Overviews (or widen `DOCKERHUB_TOKEN` to admin) — sync was Forbidden.
+2. After PR #62 merges, consumers that need `common-doc-verify.yml` /
+   `common-scaffold-verify.yml` re-pin to that merge SHA (`scripts_ref` must match).
+3. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
+4. Refresh donor digests / drop ignorefile entries before 2026-11-11.
+5. Paste Hub Overviews (or widen `DOCKERHUB_TOKEN` to admin) — sync was Forbidden.
 
 ## Recent history
 
+- 2026-09-11: Wave 4 — add reusable `common-doc-verify.yml` (shellcheck/ruff/YAML/link
+  lint) and `common-scaffold-verify.yml` (issues-sync `--validate-only` + SCAFFOLD_REF).
+  Doc-repo callers and `GUARDRAILS_READ_TOKEN` wiring are follow-up. Do not treat
+  older consumer pins (`74695e8`, `4fd8392`, `e4e902e`) as having these files.
 - 2026-09-11: accepted copilot ai-reviewer findings filed as CMN-WF-003 and
   CMN-DOC-001 on `feature-rescan-permissions-trivyignore` (not committed; do
   not run live `issues-sync.py` until approved).

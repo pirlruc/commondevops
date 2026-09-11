@@ -19,6 +19,8 @@ Pin every `uses:` to a **commit SHA** (not `@main`). Pass the same SHA as
 | Workflow | Purpose |
 |----------|---------|
 | [`common-infra-lint.yml`](.github/workflows/common-infra-lint.yml) | actionlint, shellcheck, hadolint, zizmor |
+| [`common-doc-verify.yml`](.github/workflows/common-doc-verify.yml) | shellcheck, ruff, caller YAML parse, markdown link lint |
+| [`common-scaffold-verify.yml`](.github/workflows/common-scaffold-verify.yml) | issues-sync `--validate-only` + `SCAFFOLD_REF` vs newest tag |
 | [`common-secrets-sast.yml`](.github/workflows/common-secrets-sast.yml) | gitleaks + semgrep |
 | [`common-supply-chain.yml`](.github/workflows/common-supply-chain.yml) | Syft SBOM, Grype, Trivy fs, license gate |
 | [`common-scorecard.yml`](.github/workflows/common-scorecard.yml) | OpenSSF Scorecard |
