@@ -26,7 +26,12 @@ Pin every `uses:` to a **commit SHA** (not `@main`). Pass the same SHA as
 | [`common-scorecard.yml`](.github/workflows/common-scorecard.yml) | OpenSSF Scorecard |
 | [`common-release.yml`](.github/workflows/common-release.yml) | Tag validation + GitHub Release |
 
-See [docs/workflows.md](docs/workflows.md) for inputs, secrets, and examples.
+See [docs/workflows.md](docs/workflows.md) for inputs, secrets, the caller-permission
+matrix, and examples.
+
+GHCR package visibility and Actions access are manual (API PATCH returns 404).
+Dispatch [`.github/workflows/ghcr-package-visibility.yml`](.github/workflows/ghcr-package-visibility.yml)
+to print the UI steps for a package.
 
 ### Caller example
 
@@ -45,9 +50,9 @@ jobs:
 ## Local parity
 
 ```bash
-bash scripts/check-ci-local.sh
-# Missing host tools → scripts/check-ci-docker.sh
-# Prefer: docker run --rm -v "$PWD:/workspace" -w /workspace ghcr.io/pirlruc/ci-lint:<tag> …
+sh scripts/check-ci-local.sh
+# Missing host tools → scripts/check-ci-docker.sh (POSIX sh; Alpine ci-lint has no bash)
+# Prefer: COMMONDEVOPS_CI_IMAGE=ci-lint:alpine-local sh scripts/check-ci-local.sh
 ```
 
 ## Toolchain images

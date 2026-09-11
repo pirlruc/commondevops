@@ -819,7 +819,7 @@ milestones:
               - DOCKER-PERF-001
 
       - id: CMN-WF-003
-        status: open
+        status: done
         title: Fix check-ci-docker.sh container shell for Alpine ci-lint and de-duplicate step logic
         overview:
           problem: >-
@@ -855,7 +855,7 @@ milestones:
           - CI-008
         tasks:
           - id: CMN-WF-003-T1
-            status: open
+            status: done
             title: Rewrite the in-container runner as POSIX sh
             instructions:
               files:
@@ -867,7 +867,7 @@ milestones:
             guardrail_refs:
               - CI-008
           - id: CMN-WF-003-T2
-            status: open
+            status: done
             title: Share per-step runners between host and Docker parity paths
             instructions:
               files:
@@ -880,7 +880,7 @@ milestones:
               - CI-008
 
       - id: CMN-DOC-001
-        status: open
+        status: done
         title: Caller-contract docs — stale Scorecard version, undiscoverable visibility helper, missing permission matrix
         overview:
           problem: >-
@@ -912,7 +912,7 @@ milestones:
           - CI-025
         tasks:
           - id: CMN-DOC-001-T1
-            status: open
+            status: done
             title: Fix stale scorecard-action version reference in workflows.md
             instructions:
               files:
@@ -921,7 +921,7 @@ milestones:
               - grep -q '2.4.4' docs/workflows.md
               - "! grep -q 'scorecard-action@v2.4.3' docs/workflows.md"
           - id: CMN-DOC-001-T2
-            status: open
+            status: done
             title: Add caller-permission matrix and link ghcr-package-visibility helper
             instructions:
               files:
@@ -932,3 +932,39 @@ milestones:
               - grep -q 'packages: read' docs/workflows.md
             guardrail_refs:
               - CI-025
+
+      - id: CMN-PIN-001
+        status: open
+        title: Bump docs/guardrails from a non-tag 1.1.0-4 SHA to tag 1.6.0
+        overview:
+          problem: >-
+            docs/guardrails is pinned at 5a7ac83 (describe 1.1.0-4-g5a7ac83), which
+            is not an annotated tag. Guardrails is at 1.6.0. SC-DEP-004 requires a
+            tag or full SHA that consumers can assert; a describe-suffix pin is
+            neither the current org default nor a recorded deviation.
+          goal: >-
+            Re-pin docs/guardrails to annotated tag 1.6.0 and remediate or record
+            deviations for any newly failing gates. Out of scope for the 4.1.0
+            POSIX local-parity / caller-docs wave.
+        architecture:
+          target: docs/guardrails gitlink
+          modules:
+            - docs/guardrails
+        acceptance_criteria:
+          - git submodule status docs/guardrails resolves to annotated tag 1.6.0
+          - Newly failing gates are remediated or recorded in docs/guardrail-deviations.yml
+        out_of_scope:
+          - Implementing the pin bump in the same change as CMN-WF-003 / CMN-DOC-001
+        guardrail_refs:
+          - SC-DEP-004
+        tasks:
+          - id: CMN-PIN-001-T1
+            status: open
+            title: Re-pin docs/guardrails at guardrails 1.6.0 and remediate gates
+            instructions:
+              files:
+                - docs/guardrails
+            verification:
+              - git -C docs/guardrails describe --tags --exact-match
+            guardrail_refs:
+              - SC-DEP-004

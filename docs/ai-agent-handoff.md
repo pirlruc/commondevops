@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `common/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
-| **Branch** | `feature-published-rescan-caller` (from `origin/main` after #62) |
+| **Branch** | `main` |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, release + `ci-lint` / `ci-supply-chain` images |
 | **Type** | CI infrastructure |
 
@@ -36,8 +36,9 @@ GHCR-login scan). Image tag `3.0.0` is Alpine `ci-container` only.
 | CMN-IMG-001 — Alpine ci-supply-chain variant | Done (`3.0.0`) |
 | CMN-IMG-002 — Remove docker/ci-base | Done (`3.0.0`) |
 | CMN-IMG-003 — Alpine ci-lint variant | Done (`4.0.0`) |
-| CMN-WF-003 — Alpine check-ci-docker.sh POSIX sh | Open (filed) |
-| CMN-DOC-001 — Caller-contract docs | Open (filed) |
+| CMN-WF-003 — Alpine check-ci-docker.sh POSIX sh | Done (local) |
+| CMN-DOC-001 — Caller-contract docs | Done (local); T1 was already 2.4.4 |
+| CMN-PIN-001 — guardrails 1.6.0 pin | Open (filed; do not bump this wave) |
 
 ## Pins
 
@@ -63,9 +64,9 @@ GHCR-login scan). Image tag `3.0.0` is Alpine `ci-container` only.
 ## Commands
 
 ```bash
-bash scripts/check-ci-local.sh
+sh scripts/check-ci-local.sh
 COMMONDEVOPS_CI_IMAGE=ci-lint:alpine-local COMMONDEVOPS_DOCKER_STEPS="actionlint shellcheck hadolint zizmor yamllint" \
-  bash scripts/check-ci-docker.sh
+  sh scripts/check-ci-docker.sh
 docker build -t ci-lint:alpine-local -f docker/ci-lint/Dockerfile.alpine docker/ci-lint
 docker run --rm ci-lint:alpine-local echo ok
 docker run --rm --user root --entrypoint sh ci-lint:alpine-local -c 'du -sxm /'
@@ -133,6 +134,10 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
+- 2026-09-11: CMN-WF-003 POSIX `check-ci-docker.sh` + shared `scripts/ci-steps.sh`;
+  CMN-DOC-001 permission matrix and `ghcr-package-visibility` link; filed
+  CMN-PIN-001 (stale non-tag guardrails pin vs 1.6.0). Digest-pinned default
+  `COMMONDEVOPS_CI_IMAGE`.
 - 2026-09-11: Wave 4 — `devops-security.yml` published rescans call
   `container-published-rescan.yml@3.0.2` (`3607bf0…`) with unique artifacts.
   Image CI stays on `container-scan.yml` at the same SHA.
