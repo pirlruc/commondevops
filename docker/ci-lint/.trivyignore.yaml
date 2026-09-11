@@ -50,3 +50,15 @@ vulnerabilities:
     paths:
       - "**/actionlint"
     statement: Go stdlib embedded in rhysd/actionlint donor; no newer digest yet.
+  - id: CVE-2026-39821
+    paths:
+      - "**/actionlint"
+      - "**/hadolint"
+      - "**/gitleaks"
+    statement: Go stdlib embedded in vendor-static CI toolchain donors; refresh digests when upstream ships fixes.
+  - id: CVE-2026-46600
+    paths:
+      - "**/actionlint"
+      - "**/hadolint"
+      - "**/gitleaks"
+    statement: Go stdlib embedded in vendor-static CI toolchain donors; refresh digests when upstream ships fixes.

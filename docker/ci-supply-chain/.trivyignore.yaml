@@ -28,3 +28,17 @@ vulnerabilities:
     paths:
       - "**/grant"
     statement: Embedded gRPC-Go in grant donor binary.
+  - id: CVE-2026-39821
+    paths:
+      - "**/syft"
+      - "**/grype"
+      - "**/trivy"
+      - "**/grant"
+    statement: Go stdlib embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+  - id: CVE-2026-46600
+    paths:
+      - "**/syft"
+      - "**/grype"
+      - "**/trivy"
+      - "**/grant"
+    statement: Go stdlib embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.

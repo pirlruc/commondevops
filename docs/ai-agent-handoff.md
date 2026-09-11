@@ -75,7 +75,9 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 - **Caller permissions:** reusable workflows cannot escalate. Build callers must
   grant `packages: read` (container-build declares it) or the run dies at
-  **startup_failure** before any job starts.
+  **startup_failure** before any job starts. Scan callers of a `ghcr.io/` image
+  must also grant `packages: read` once containerdevops includes GHCR login in
+  `container-scan.yml`.
 - **ignorefile:** blocking scans pass per-image files under `docker/ci-*/`. Posture
   scans must set `ignorefile: none` (containerdevops ≥ 2.2.0) or the caller-root
   fallback silently filters findings. Root `.trivyignore.yaml` was removed.
@@ -120,6 +122,8 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
+- 2026-09-11: `packages: read` on published-image rescan jobs; Trivy ignore
+  `CVE-2026-39821` / `CVE-2026-46600` for Go stdlib in donor binaries.
 - 2026-08-12: containerdevops `3.0.0` published Alpine `ci-container` on ci-lint
   `4.0.0`; reusable callers **remain** on containerdevops `2.4.0` (no reusable delta).
 - 2026-08-12: CMN-IMG-003 / release `4.0.0` — Alpine `ci-lint` owns unsuffixed,
@@ -139,4 +143,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-08-12*
+*Last updated: 2026-09-11*
