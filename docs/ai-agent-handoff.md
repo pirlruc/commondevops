@@ -122,8 +122,10 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
-- 2026-09-11: `packages: read` on published-image rescan jobs; Trivy ignore
-  `CVE-2026-39821` / `CVE-2026-46600` for Go stdlib in donor binaries.
+- 2026-09-11: `packages: read` on published-image rescans and ci-lint /
+  ci-supply-chain scan jobs; zizmor `self-repository` ignored until actionlint
+  supports `uses: $/…`; DHI python 3.13 donor digests refreshed (DOCKER-BUILD-006);
+  Trivy ignore extended for Go stdlib / x/crypto in donor binaries.
 - 2026-08-12: containerdevops `3.0.0` published Alpine `ci-container` on ci-lint
   `4.0.0`; reusable callers **remain** on containerdevops `2.4.0` (no reusable delta).
 - 2026-08-12: CMN-IMG-003 / release `4.0.0` — Alpine `ci-lint` owns unsuffixed,

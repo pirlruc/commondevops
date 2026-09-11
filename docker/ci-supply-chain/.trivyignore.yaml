@@ -42,3 +42,52 @@ vulnerabilities:
       - "**/trivy"
       - "**/grant"
     statement: Go stdlib embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+  - id: CVE-2026-33818
+    paths:
+      - "**/syft"
+      - "**/grype"
+      - "**/trivy"
+      - "**/grant"
+    statement: Go stdlib embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+  - id: CVE-2026-56853
+    paths:
+      - "**/syft"
+      - "**/grype"
+      - "**/trivy"
+      - "**/grant"
+    statement: Go stdlib embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+  - id: CVE-2026-56854
+    paths:
+      - "**/syft"
+      - "**/grype"
+      - "**/trivy"
+      - "**/grant"
+    statement: golang.org/x/crypto embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+  - id: CVE-2026-56858
+    paths:
+      - "**/syft"
+      - "**/grype"
+      - "**/trivy"
+      - "**/grant"
+    statement: Go stdlib embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+  - id: CVE-2026-56859
+    paths:
+      - "**/syft"
+      - "**/grype"
+      - "**/trivy"
+      - "**/grant"
+    statement: Go stdlib embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+  - id: CVE-2026-56860
+    paths:
+      - "**/syft"
+      - "**/grype"
+      - "**/trivy"
+      - "**/grant"
+    statement: Go stdlib embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+  - id: CVE-2026-56862
+    paths:
+      - "**/syft"
+      - "**/grype"
+      - "**/trivy"
+      - "**/grant"
+    statement: Go stdlib embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.

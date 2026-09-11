@@ -62,3 +62,43 @@ vulnerabilities:
       - "**/hadolint"
       - "**/gitleaks"
     statement: Go stdlib embedded in vendor-static CI toolchain donors; refresh digests when upstream ships fixes.
+  - id: CVE-2026-33818
+    paths:
+      - "**/actionlint"
+      - "**/hadolint"
+      - "**/gitleaks"
+    statement: Go stdlib embedded in vendor-static CI toolchain donors; refresh digests when upstream ships fixes.
+  - id: CVE-2026-56853
+    paths:
+      - "**/actionlint"
+      - "**/hadolint"
+      - "**/gitleaks"
+    statement: Go stdlib embedded in vendor-static CI toolchain donors; refresh digests when upstream ships fixes.
+  - id: CVE-2026-56854
+    paths:
+      - "**/gitleaks"
+    statement: golang.org/x/crypto embedded in vendor-static CI toolchain donors; refresh digests when upstream ships fixes.
+  - id: CVE-2026-56858
+    paths:
+      - "**/actionlint"
+      - "**/hadolint"
+      - "**/gitleaks"
+    statement: Go stdlib embedded in vendor-static CI toolchain donors; refresh digests when upstream ships fixes.
+  - id: CVE-2026-56859
+    paths:
+      - "**/actionlint"
+      - "**/hadolint"
+      - "**/gitleaks"
+    statement: Go stdlib embedded in vendor-static CI toolchain donors; refresh digests when upstream ships fixes.
+  - id: CVE-2026-56860
+    paths:
+      - "**/actionlint"
+      - "**/hadolint"
+      - "**/gitleaks"
+    statement: Go stdlib embedded in vendor-static CI toolchain donors; refresh digests when upstream ships fixes.
+  - id: CVE-2026-56862
+    paths:
+      - "**/actionlint"
+      - "**/hadolint"
+      - "**/gitleaks"
+    statement: Go stdlib embedded in vendor-static CI toolchain donors; refresh digests when upstream ships fixes.

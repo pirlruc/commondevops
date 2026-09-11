@@ -1,0 +1,10 @@
+# zizmor 1.30 flags workspace-relative uses: ./... (self-repository).
+# GitHub's replacement is uses: $/..., but actionlint 1.7.12 (latest release)
+# still rejects that form (rhysd/actionlint#732 unreleased). Ignore until then.
+#
+# common-infra-lint loads this file via -c .github/config/zizmor.yml
+rules:
+  self-repository:
+    ignore:
+      - devops-ci.yml
+      - devops-security.yml
