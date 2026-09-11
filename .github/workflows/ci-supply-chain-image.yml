@@ -41,11 +41,11 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@9a46e8437d36935df5d6563eb38c4e45f0df68ae
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
     with:
       dockerfile: docker/ci-supply-chain/Dockerfile
       working_directory: .
-      scripts_ref: 9a46e8437d36935df5d6563eb38c4e45f0df68ae
+      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
       runner_image: ""
       run_infra_lint: false
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -61,11 +61,11 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@9a46e8437d36935df5d6563eb38c4e45f0df68ae
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
     with:
       dockerfile: docker/ci-supply-chain/Dockerfile.alpine
       working_directory: .
-      scripts_ref: 9a46e8437d36935df5d6563eb38c4e45f0df68ae
+      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
       runner_image: ""
       run_infra_lint: false
       run_secrets_scan: false
@@ -83,14 +83,14 @@ jobs:
     permissions:
       contents: read
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@9a46e8437d36935df5d6563eb38c4e45f0df68ae
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
     with:
       context: docker/ci-supply-chain
       dockerfile: docker/ci-supply-chain/Dockerfile
       image_name: ci-supply-chain:ci-debian
       artifact_name: container-image-debian
       structure_test_config: docker/ci-supply-chain/container-structure-test.yml
-      scripts_ref: 9a46e8437d36935df5d6563eb38c4e45f0df68ae
+      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
       # Rootfs ~575 MB measured via du -sxm /; headroom for base churn.
       image_max_size_mb: "700"
@@ -114,14 +114,14 @@ jobs:
     permissions:
       contents: read
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@9a46e8437d36935df5d6563eb38c4e45f0df68ae
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
     with:
       context: docker/ci-supply-chain
       dockerfile: docker/ci-supply-chain/Dockerfile.alpine
       image_name: ci-supply-chain:ci-alpine
       artifact_name: container-image-alpine
       structure_test_config: docker/ci-supply-chain/container-structure-test.yml
-      scripts_ref: 9a46e8437d36935df5d6563eb38c4e45f0df68ae
+      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
       # Rootfs ~722 MB measured via du -sxm /; headroom for base churn.
       image_max_size_mb: "800"
@@ -146,13 +146,13 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@9a46e8437d36935df5d6563eb38c4e45f0df68ae
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
     with:
       image: ci-supply-chain:ci-debian
       image_artifact: container-image-debian
       results_artifact: container-scan-results-debian
       sarif_category: trivy-image-debian
-      scripts_ref: 9a46e8437d36935df5d6563eb38c4e45f0df68ae
+      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
       pkg_types: library
       ignorefile: docker/ci-supply-chain/.trivyignore.yaml
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -169,13 +169,13 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@9a46e8437d36935df5d6563eb38c4e45f0df68ae
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
     with:
       image: ci-supply-chain:ci-alpine
       image_artifact: container-image-alpine
       results_artifact: container-scan-results-alpine
       sarif_category: trivy-image-alpine
-      scripts_ref: 9a46e8437d36935df5d6563eb38c4e45f0df68ae
+      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
       pkg_types: library
       ignorefile: docker/ci-supply-chain/.trivyignore.yaml
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -193,13 +193,13 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@9a46e8437d36935df5d6563eb38c4e45f0df68ae
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
     with:
       image: ci-supply-chain:ci-debian
       image_artifact: container-image-debian
       results_artifact: container-scan-posture-debian
       sarif_category: trivy-posture-debian
-      scripts_ref: 9a46e8437d36935df5d6563eb38c4e45f0df68ae
+      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
       pkg_types: os,library
       ignorefile: none
       blocking: false
@@ -216,13 +216,13 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@9a46e8437d36935df5d6563eb38c4e45f0df68ae
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
     with:
       image: ci-supply-chain:ci-alpine
       image_artifact: container-image-alpine
       results_artifact: container-scan-posture-alpine
       sarif_category: trivy-posture-alpine
-      scripts_ref: 9a46e8437d36935df5d6563eb38c4e45f0df68ae
+      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
       pkg_types: os,library
       ignorefile: none
       blocking: false
@@ -240,13 +240,13 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@9a46e8437d36935df5d6563eb38c4e45f0df68ae
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
     with:
       context: docker/ci-supply-chain
       dockerfile: docker/ci-supply-chain/Dockerfile
       image_name: ci-supply-chain
       dockerhub_image: pirlruc/ci-supply-chain
-      scripts_ref: 9a46e8437d36935df5d6563eb38c4e45f0df68ae
+      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
       platforms: linux/amd64
       tag_suffix: -debian
       tag_alias_unsuffixed: false
@@ -282,13 +282,13 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@9a46e8437d36935df5d6563eb38c4e45f0df68ae
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
     with:
       context: docker/ci-supply-chain
       dockerfile: docker/ci-supply-chain/Dockerfile.alpine
       image_name: ci-supply-chain
       dockerhub_image: pirlruc/ci-supply-chain
-      scripts_ref: 9a46e8437d36935df5d6563eb38c4e45f0df68ae
+      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
       platforms: linux/amd64
       tag_suffix: -alpine
       tag_alias_unsuffixed: true
