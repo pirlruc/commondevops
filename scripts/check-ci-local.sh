@@ -1,103 +1,79 @@
-#!/usr/bin/env bash
+#!/bin/sh
 # Local CI parity for commondevops (CI-008).
+# POSIX sh — the default ci-lint image is Alpine and has no bash.
+#
 # Host PATH tools preferred; missing tools deferred to check-ci-docker.sh.
+# Step bodies live in ci-steps.sh (shared with the Docker path).
 #
 # Resolution table (host → Docker fallback via ci-lint):
-# | Tool       | Host preferred | Docker fallback (ci-lint / check-ci-docker) |
-# |------------|----------------|---------------------------------------------|
-# | actionlint | actionlint     | ghcr.io/pirlruc/ci-lint:latest              |
-# | shellcheck | shellcheck     | ghcr.io/pirlruc/ci-lint:latest              |
-# | hadolint   | hadolint       | ghcr.io/pirlruc/ci-lint:latest              |
-# | zizmor     | zizmor         | ghcr.io/pirlruc/ci-lint:latest              |
-# | yamllint   | yamllint       | ghcr.io/pirlruc/ci-lint:latest              |
+# | Tool       | Host preferred | Docker fallback                         |
+# |------------|----------------|-----------------------------------------|
+# | actionlint | actionlint     | ci-lint:alpine-local (or COMMONDEVOPS_CI_IMAGE) |
+# | shellcheck | shellcheck     | ci-lint:alpine-local                    |
+# | hadolint   | hadolint       | ci-lint:alpine-local                    |
+# | zizmor     | zizmor         | ci-lint:alpine-local                    |
+# | yamllint   | yamllint       | ci-lint:alpine-local                    |
 #
 # Usage:
-#   bash scripts/check-ci-local.sh
-#   bash scripts/check-ci-local.sh --no-docker
-set -euo pipefail
+#   sh scripts/check-ci-local.sh
+#   sh scripts/check-ci-local.sh --no-docker
+set -eu
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT_DIR="$(dirname "$0")"
+SCRIPT_DIR="$(cd "${SCRIPT_DIR}" && pwd)"
+ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 cd "${ROOT}"
+
+# shellcheck source=scripts/ci-steps.sh
+. "${SCRIPT_DIR}/ci-steps.sh"
 
 USE_DOCKER=1
 for arg in "$@"; do
-  if [[ "${arg}" == "--no-docker" ]]; then
+  if [ "${arg}" = "--no-docker" ]; then
     USE_DOCKER=0
   fi
 done
 
-declare -a DOCKER_STEPS=()
-declare -a EXECUTED=()
-declare -a MISSING=()
+DOCKER_STEPS=""
+EXECUTED=""
+MISSING=""
 
-run_host() {
-  local name="$1"
-  shift
-  if command -v "${name}" >/dev/null 2>&1; then
-    echo "→ ${name} (host)"
-    "$@"
-    EXECUTED+=("${name}")
-    return 0
-  fi
+queue_docker() {
+  name="$1"
   echo "→ ${name} missing on host; queue Docker"
-  DOCKER_STEPS+=("${name}")
-  MISSING+=("${name}")
-  return 0
+  DOCKER_STEPS="${DOCKER_STEPS} ${name}"
+  MISSING="${MISSING} ${name}"
 }
 
-echo "==> actionlint"
-# shellcheck disable=SC2016  # intentional: run_host body must not expand on the host
-run_host actionlint bash -c '
-  mapfile -t WFS < <(find .github/workflows -name "*.yml" -o -name "*.yaml" 2>/dev/null | head -40)
-  if [[ ${#WFS[@]} -eq 0 ]]; then
-    echo "No workflows to lint"
-    exit 0
+run_or_queue() {
+  name="$1"
+  echo "==> ${name}"
+  if command -v "${name}" >/dev/null 2>&1; then
+    echo "→ ${name} (host)"
+    dispatch_ci_step "${name}"
+    EXECUTED="${EXECUTED} ${name}"
+    return 0
   fi
-  actionlint "${WFS[@]}"
-'
+  queue_docker "${name}"
+}
 
-echo "==> shellcheck"
-# shellcheck disable=SC2016  # intentional: run_host body must not expand on the host
-run_host shellcheck bash -c '
-  mapfile -t SHS < <(find scripts -name "*.sh" 2>/dev/null)
-  if [[ ${#SHS[@]} -eq 0 ]]; then
-    echo "No shell scripts"
-    exit 0
-  fi
-  shellcheck "${SHS[@]}"
-'
-
-echo "==> hadolint"
-# shellcheck disable=SC2016
-run_host hadolint bash -c '
-  mapfile -t DFS < <(find docker -name "Dockerfile*" 2>/dev/null)
-  if [[ ${#DFS[@]} -eq 0 ]]; then
-    echo "No Dockerfiles to lint"
-    exit 0
-  fi
-  hadolint "${DFS[@]}"
-'
-
-echo "==> zizmor"
-run_host zizmor zizmor .github/workflows
-
-echo "==> yamllint"
-# shellcheck disable=SC2016
-run_host yamllint bash -c '
-  yamllint -d relaxed .github/workflows docs
-'
+run_or_queue actionlint
+run_or_queue shellcheck
+run_or_queue hadolint
+run_or_queue zizmor
+run_or_queue yamllint
 
 echo "==> license_gate dry-run (no SBOM → skip with exit 0)"
-# license_gate.py exits 0 when no SBOM is present; do not mask real failures.
 python3 scripts/license_gate.py
 
-if ((${#DOCKER_STEPS[@]} > 0)); then
-  if [[ "${USE_DOCKER}" == "1" ]]; then
-    COMMONDEVOPS_DOCKER_STEPS="${DOCKER_STEPS[*]}" bash "${ROOT}/scripts/check-ci-docker.sh"
+if [ -n "${DOCKER_STEPS}" ]; then
+  if [ "${USE_DOCKER}" = "1" ]; then
+    # shellcheck disable=SC2086
+    COMMONDEVOPS_DOCKER_STEPS="${DOCKER_STEPS}" sh "${SCRIPT_DIR}/check-ci-docker.sh"
   else
-    echo "error: --no-docker set but tools missing on host: ${MISSING[*]}" >&2
+    echo "error: --no-docker set but tools missing on host:${MISSING}" >&2
     exit 1
   fi
 fi
 
-echo "Local CI parity finished. Host tools: ${EXECUTED[*]:-none}"
+echo "Local CI parity finished. Host tools:${EXECUTED:- none}"

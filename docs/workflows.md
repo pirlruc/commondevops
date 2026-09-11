@@ -15,6 +15,26 @@ Shared inputs:
 | `scripts_ref` | string | `""` | Must match caller `uses:` SHA; falls back to `github.sha` |
 | `checkout_token` (secret) | string | — | PAT with `contents:read` on `pirlruc/commondevops` for private cross-repo callers |
 
+## Caller permission matrix
+
+Reusable workflows cannot escalate (CI-031). Grant these on the **caller job**
+or the reusable job fails at startup with no useful callee message.
+
+| Workflow | Caller job `permissions:` |
+|----------|---------------------------|
+| `common-infra-lint.yml` | `contents: read` |
+| `common-doc-verify.yml` | `contents: read` |
+| `common-scaffold-verify.yml` | `contents: read` |
+| `common-secrets-sast.yml` | `contents: read`, `security-events: write` |
+| `common-supply-chain.yml` | `contents: read`, `security-events: write` |
+| `common-scorecard.yml` | `contents: read`, `security-events: write`, `id-token: write` |
+| `common-release.yml` | `contents: write`, `id-token: write` |
+| `ci-lint-image.yml` / `ci-supply-chain-image.yml` | `contents: read`; `packages: read` on lint/scan/build jobs; `packages: write` on publish |
+
+GHCR visibility and Actions package access cannot be set via API. The dispatch-only helper
+[`.github/workflows/ghcr-package-visibility.yml`](../.github/workflows/ghcr-package-visibility.yml)
+prints the GitHub UI steps.
+
 ---
 
 ## `common-infra-lint.yml`

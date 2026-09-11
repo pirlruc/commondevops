@@ -1,19 +1,28 @@
-#!/usr/bin/env bash
-# Run CI steps that are missing on the host inside ghcr.io/pirlruc/ci-lint:latest
-# (or a locally built docker/ci-lint image).
+#!/bin/sh
+# Run CI steps that are missing on the host inside the ci-lint image.
+# POSIX sh — Alpine ci-lint has no bash (CI-036 / CMN-WF-003-T1).
 #
 # Env:
-#   COMMONDEVOPS_CI_IMAGE — image ref (default ghcr.io/pirlruc/ci-lint:latest)
+#   COMMONDEVOPS_CI_IMAGE     — ci-lint image (default digest-pinned 4.0.0 Alpine)
 #   COMMONDEVOPS_DOCKER_STEPS — space-separated step names (required)
-#   COMMONDEVOPS_BUILD_LOCAL — if 1, build docker/ci-lint when pull fails
-set -euo pipefail
+#   COMMONDEVOPS_BUILD_LOCAL  — if 1, build docker/ci-lint when pull fails (tag refs only)
+#   COMMONDEVOPS_ADVISORY     — if 1, yamllint findings are non-blocking
+#
+# Usage:
+#   COMMONDEVOPS_DOCKER_STEPS="actionlint shellcheck" sh scripts/check-ci-docker.sh
+#   COMMONDEVOPS_CI_IMAGE=ci-lint:alpine-local COMMONDEVOPS_DOCKER_STEPS="shellcheck" \
+#     sh scripts/check-ci-docker.sh
+set -eu
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-IMAGE="${COMMONDEVOPS_CI_IMAGE:-ghcr.io/pirlruc/ci-lint:latest}"
+SCRIPT_DIR="$(dirname "$0")"
+SCRIPT_DIR="$(cd "${SCRIPT_DIR}" && pwd)"
+ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# CI-026 / DOCKER-SEC-006 — digest pin; tag is documentation only.
+IMAGE="${COMMONDEVOPS_CI_IMAGE:-ghcr.io/pirlruc/ci-lint:4.0.0@sha256:0a4691ba3f505d6f4998016997adac9adcc016676b8daf572cdf2fa446d61872}"
 BUILD_LOCAL="${COMMONDEVOPS_BUILD_LOCAL:-1}"
 ADVISORY="${COMMONDEVOPS_ADVISORY:-0}"
 
-if [[ -z "${COMMONDEVOPS_DOCKER_STEPS:-}" ]]; then
+if [ -z "${COMMONDEVOPS_DOCKER_STEPS:-}" ]; then
   echo "COMMONDEVOPS_DOCKER_STEPS is required (e.g. actionlint shellcheck hadolint zizmor)" >&2
   exit 1
 fi
@@ -28,18 +37,33 @@ if ! docker info >/dev/null 2>&1; then
   exit 1
 fi
 
-if ! docker image inspect "${IMAGE}" >/dev/null 2>&1; then
-  echo "==> Pulling ${IMAGE}"
-  if ! docker pull "${IMAGE}"; then
-    if [[ "${BUILD_LOCAL}" == "1" ]]; then
-      echo "==> Pull failed; building local docker/ci-lint as ${IMAGE}"
-      docker build -t "${IMAGE}" -f "${ROOT}/docker/ci-lint/Dockerfile" "${ROOT}/docker/ci-lint"
-    else
-      echo "error: cannot pull ${IMAGE} and COMMONDEVOPS_BUILD_LOCAL!=1" >&2
-      exit 1
-    fi
+ensure_image() {
+  img="$1"
+  if docker image inspect "${img}" >/dev/null 2>&1; then
+    return 0
   fi
-fi
+  echo "==> Pulling ${img}"
+  if docker pull "${img}"; then
+    return 0
+  fi
+  case "${img}" in
+    *@*)
+      echo "error: cannot pull digest-pinned ${img}" >&2
+      echo "Set COMMONDEVOPS_CI_IMAGE to a local tag (e.g. ci-lint:alpine-local):" >&2
+      echo "  docker build -t ci-lint:alpine-local -f docker/ci-lint/Dockerfile.alpine docker/ci-lint" >&2
+      exit 1
+      ;;
+  esac
+  if [ "${BUILD_LOCAL}" = "1" ]; then
+    echo "==> Pull failed; building local docker/ci-lint as ${img}"
+    docker build -t "${img}" -f "${ROOT}/docker/ci-lint/Dockerfile.alpine" "${ROOT}/docker/ci-lint"
+    return 0
+  fi
+  echo "error: cannot pull ${img} and COMMONDEVOPS_BUILD_LOCAL!=1" >&2
+  exit 1
+}
+
+ensure_image "${IMAGE}"
 
 echo "==> Running in Docker (${IMAGE}): ${COMMONDEVOPS_DOCKER_STEPS}"
 docker run --rm \
@@ -48,44 +72,12 @@ docker run --rm \
   -e "COMMONDEVOPS_DOCKER_STEPS=${COMMONDEVOPS_DOCKER_STEPS}" \
   -e "COMMONDEVOPS_ADVISORY=${ADVISORY}" \
   "${IMAGE}" \
-  bash -lc '
-    set -euo pipefail
+  sh -c '
+    set -eu
+    # shellcheck source=scripts/ci-steps.sh
+    . ./scripts/ci-steps.sh
     for step in ${COMMONDEVOPS_DOCKER_STEPS}; do
       echo "==> ${step}"
-      case "${step}" in
-        actionlint)
-          mapfile -t WFS < <(find .github/workflows -name "*.yml" -o -name "*.yaml" 2>/dev/null | head -40)
-          actionlint "${WFS[@]}"
-          ;;
-        shellcheck)
-          mapfile -t SHS < <(find scripts -name "*.sh" 2>/dev/null)
-          shellcheck "${SHS[@]}"
-          ;;
-        hadolint)
-          mapfile -t DFS < <(find docker -name "Dockerfile*" 2>/dev/null)
-          hadolint "${DFS[@]}"
-          ;;
-        zizmor)
-          zizmor --min-severity=low .github/workflows
-          ;;
-        yamllint)
-          set +e
-          yamllint -d relaxed .github/workflows docs
-          yc=$?
-          set -e
-          if (( yc != 0 )); then
-            if [[ "${COMMONDEVOPS_ADVISORY}" == "1" ]]; then
-              echo "yamllint findings (advisory — continuing)"
-            else
-              echo "yamllint findings (blocking). Set COMMONDEVOPS_ADVISORY=1 to continue." >&2
-              exit "${yc}"
-            fi
-          fi
-          ;;
-        *)
-          echo "Unknown step: ${step}" >&2
-          exit 2
-          ;;
-      esac
+      dispatch_ci_step "${step}"
     done
   '
