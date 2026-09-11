@@ -30,6 +30,52 @@ commands inside `ghcr.io/pirlruc/ci-lint` for version lockstep.
 
 ---
 
+## `common-doc-verify.yml`
+
+Documentation-repo checks on `ubuntu-24.04`. Inline steps are POSIX `sh`.
+Needs `contents: read`. Cross-repo callers pass `checkout_token` and matching
+`scripts_ref` (same contract as `common-infra-lint.yml`).
+
+YAML parse and link lint use **caller-vendored** scripts
+(`scripts/validate-yaml.py`, `scripts/lint-doc-links.py`). Missing scripts are
+skipped with a note — this workflow does not clone sibling repos.
+
+Ruff is installed in a job-local venv at `ruff==0.14.10` (guardrails ci-python pin).
+Empty path inputs skip that tool.
+
+| Input | Default | Notes |
+|-------|---------|-------|
+| `shell_scripts` | `""` | Space-separated / glob; empty → skip shellcheck |
+| `ruff_paths` | `""` | Space-separated / glob; empty → skip ruff |
+| `yaml_files` | `""` | Space-separated paths passed to `validate-yaml.py` |
+| `yaml_globs` | `""` | Space-separated patterns passed as `--glob` (Python expands them) |
+| `run_link_lint` | `false` | Run `scripts/lint-doc-links.py` when that file exists |
+
+Doc repos still need `COMMONDEVOPS_READ_TOKEN` to fetch this private reusable
+and its `scripts/`. Ship the workflow first; wire callers after the token exists.
+
+Pin the commit that introduced this file (after commondevops PR #62 merges);
+do not reuse older consumer pins that predate it.
+
+---
+
+## `common-scaffold-verify.yml`
+
+Thin github-scaffold checks. Does **not** require `GUARDRAILS_READ_TOKEN`.
+Needs `contents: read`. Fetches tags so `git describe` works on PRs.
+
+| Check | When it runs |
+|-------|----------------|
+| `python3 scripts/issues-sync.py --yaml docs/issues.yml --validate-only` | `scripts/issues-sync.py` and `docs/issues.yml` exist |
+| `SCAFFOLD_REF` default equals `git describe --tags --abbrev=0` | `scripts/setup-library-submodules.sh` exists |
+
+`scripts_ref` must still equal the caller `uses:` pin (CI-018). This reusable
+does not sparse-checkout commondevops scripts.
+
+Pin the commit that introduced this file (after PR #62 merges).
+
+---
+
 ## `common-secrets-sast.yml`
 
 | Step | Tool |
@@ -66,7 +112,7 @@ Prefer `ghcr.io/pirlruc/ci-supply-chain` for the scanner binaries.
 
 ## `common-scorecard.yml`
 
-OpenSSF Scorecard (`ossf/scorecard-action@v2.4.3`). Skips forks and Dependabot.
+OpenSSF Scorecard (`ossf/scorecard-action@v2.4.4`). Skips forks and Dependabot.
 Permissions: `security-events: write`, `id-token: write`.
 
 | Input | Default |
@@ -140,5 +186,6 @@ reusables against this repository (`scripts_ref: ${{ github.sha }}`).
 
 Weekly secrets/SAST, supply-chain, Scorecard, and registry rescans of
 `ghcr.io/pirlruc/ci-lint:latest` and `ghcr.io/pirlruc/ci-supply-chain:latest`
-via containerdevops `container-scan.yml` (skips when the package is not yet
-pullable).
+via containerdevops `container-scan.yml@3.0.1` (skips when the package is not
+yet pullable). Not migrated to `container-published-rescan.yml` until that
+reusable exists on a released containerdevops SHA.

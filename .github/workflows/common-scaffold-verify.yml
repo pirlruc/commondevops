@@ -1,0 +1,87 @@
+name: Common Scaffold Verify (reusable)
+
+# github-scaffold-specific checks against the caller tree. Does not clone
+# pirlruc/guardrails and does not require GUARDRAILS_READ_TOKEN.
+# Skips each check when the corresponding caller script is absent.
+
+on:
+  workflow_call:
+    inputs:
+      blocking:
+        description: When false, failures are advisory only
+        required: false
+        type: boolean
+        default: false
+      scripts_ref:
+        description: "Commit/tag/branch of commondevops matching the uses: pin (contract; unused here)"
+        required: false
+        type: string
+        default: ""
+  workflow_dispatch:
+    inputs:
+      blocking:
+        type: boolean
+        default: false
+      scripts_ref:
+        type: string
+        default: ""
+
+# CI-025: default-deny; jobs grant the minimum they need.
+permissions: {}
+
+env:
+  ADVISORY: ${{ inputs.blocking == false }}
+
+jobs:
+  verify:
+    # CI-024
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    defaults:
+      run:
+        shell: sh
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: issues-sync --validate-only
+        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        env:
+          SCRIPTS_REF: ${{ inputs.scripts_ref }}
+        run: |
+          if [ -n "${SCRIPTS_REF}" ]; then
+            echo "scripts_ref=${SCRIPTS_REF} (must match caller uses: pin)"
+          fi
+          if [ ! -f scripts/issues-sync.py ]; then
+            echo "note: scripts/issues-sync.py not in caller; skipping --validate-only"
+            exit 0
+          fi
+          if [ ! -f docs/issues.yml ]; then
+            echo "note: docs/issues.yml not in caller; skipping --validate-only"
+            exit 0
+          fi
+          python3 -m venv .ci-venv
+          .ci-venv/bin/pip install -q pyyaml
+          .ci-venv/bin/python scripts/issues-sync.py --yaml docs/issues.yml --validate-only
+
+      - name: SCAFFOLD_REF default matches newest tag
+        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        run: |
+          if [ ! -f scripts/setup-library-submodules.sh ]; then
+            echo "note: scripts/setup-library-submodules.sh not in caller; skipping SCAFFOLD_REF check"
+            exit 0
+          fi
+          newest="$(git describe --tags --abbrev=0)"
+          default="$(grep -E '^SCAFFOLD_REF=' scripts/setup-library-submodules.sh | sed 's/.*:-\([^}]*\)}.*/\1/')"
+          if [ -z "${default}" ]; then
+            echo "error: could not parse SCAFFOLD_REF default from setup-library-submodules.sh" >&2
+            exit 1
+          fi
+          echo "SCAFFOLD_REF default=${default} newest tag=${newest}"
+          test "${default}" = "${newest}"

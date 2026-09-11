@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `common/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
-| **Branch** | `main` |
+| **Branch** | `feature-rescan-permissions-trivyignore` (PR #62) |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, release + `ci-lint` / `ci-supply-chain` images |
 | **Type** | CI infrastructure |
 
@@ -15,10 +15,12 @@
 Owns `.github/workflows/common-*.yml`, `devops-ci.yml`, `devops-security.yml`,
 `ci-lint-image.yml`, `ci-supply-chain-image.yml`, `scripts/`, `docker/ci-lint/`,
 `docker/ci-supply-chain/`. Consumers pin `pirlruc/commondevops@<sha|tag>` and pass
-matching `scripts_ref` + `checkout_token`.
+matching `scripts_ref` + `checkout_token`. New `common-doc-verify.yml` /
+`common-scaffold-verify.yml` (this branch) are not in older consumer pins — callers
+must re-pin after PR #62 merges.
 
-Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `2.4.0`
-→ `ea908fd0feb87…` (reusable workflows). Image tag `3.0.0` is Alpine `ci-container`
+Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `3.0.1`
+→ `9a46e8437d369…` (reusable workflows, GHCR-login scan patch). Image tag `3.0.0` is Alpine `ci-container`
 only — **do not** re-pin callers to `3.0.0` unless a reusable workflow changes.
 
 ## Delivery status
@@ -32,6 +34,8 @@ only — **do not** re-pin callers to `3.0.0` unless a reusable workflow changes
 | CMN-IMG-001 — Alpine ci-supply-chain variant | Done (`3.0.0`) |
 | CMN-IMG-002 — Remove docker/ci-base | Done (`3.0.0`) |
 | CMN-IMG-003 — Alpine ci-lint variant | Done (`4.0.0`) |
+| CMN-WF-003 — Alpine check-ci-docker.sh POSIX sh | Open (filed) |
+| CMN-DOC-001 — Caller-contract docs | Open (filed) |
 
 ## Pins
 
@@ -39,7 +43,7 @@ only — **do not** re-pin callers to `3.0.0` unless a reusable workflow changes
 |-----------|-----|
 | guardrails submodule | commit `5a7ac83…` (post ci-base ref drop) |
 | github-scaffold submodule | `f8a6ba1…` |
-| containerdevops (image callers + security rescan) | tag `2.4.0` → `ea908fd0feb87…` |
+| containerdevops (image callers + security rescan) | tag `3.0.1` → `9a46e8437d369…` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 | `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `4.0.0` → `sha256:0a4691ba…` |
 | `ghcr.io/pirlruc/ci-lint` (debian) | `4.0.0-debian` → `sha256:ed619755…` |
@@ -75,7 +79,9 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 - **Caller permissions:** reusable workflows cannot escalate. Build callers must
   grant `packages: read` (container-build declares it) or the run dies at
-  **startup_failure** before any job starts.
+  **startup_failure** before any job starts. Scan callers of a `ghcr.io/` image
+  must also grant `packages: read` once containerdevops includes GHCR login in
+  `container-scan.yml`.
 - **ignorefile:** blocking scans pass per-image files under `docker/ci-*/`. Posture
   scans must set `ignorefile: none` (containerdevops ≥ 2.2.0) or the caller-root
   fallback silently filters findings. Root `.trivyignore.yaml` was removed.
@@ -114,12 +120,29 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
-2. Refresh donor digests / drop ignorefile entries before 2026-11-11.
-3. Paste Hub Overviews (or widen `DOCKERHUB_TOKEN` to admin) — sync was Forbidden.
+1. Implement CMN-WF-003 / CMN-DOC-001 (accepted copilot findings, not yet synced).
+2. After PR #62 merges, consumers that need `common-doc-verify.yml` /
+   `common-scaffold-verify.yml` re-pin to that merge SHA (`scripts_ref` must match).
+3. Do **not** merge Dependabot #61 (containerdevops `3.0.0` `uses:` + Python 3.14,
+   CI skipped, `scripts_ref` lockstep broken). Reusables did not change 2.4.0→3.0.0.
+   Split Python 3.14 into a human-branch image rebuild. containerdevops #82
+   (commondevops 4.0.0) is the Alpine `ci-lint` consumer pin after lockstep.
+4. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
+5. Refresh donor digests / drop ignorefile entries before 2026-11-11.
 
 ## Recent history
 
+- 2026-09-11: Wave 4 — add reusable `common-doc-verify.yml` (shellcheck/ruff/YAML/link
+  lint) and `common-scaffold-verify.yml` (issues-sync `--validate-only` + SCAFFOLD_REF).
+  Doc-repo callers and `GUARDRAILS_READ_TOKEN` wiring are follow-up. Do not treat
+  older consumer pins (`74695e8`, `4fd8392`, `e4e902e`) as having these files.
+- 2026-09-11: accepted copilot ai-reviewer findings filed as CMN-WF-003 and
+  CMN-DOC-001 on `feature-rescan-permissions-trivyignore` (not committed; do
+  not run live `issues-sync.py` until approved).
+- 2026-09-11: `packages: read` on published-image rescans and ci-lint /
+  ci-supply-chain scan jobs; zizmor `self-repository` ignored until actionlint
+  supports `uses: $/…`; DHI python 3.13 donor digests refreshed (DOCKER-BUILD-006);
+  Trivy ignore extended for Go stdlib / x/crypto in donor binaries.
 - 2026-08-12: containerdevops `3.0.0` published Alpine `ci-container` on ci-lint
   `4.0.0`; reusable callers **remain** on containerdevops `2.4.0` (no reusable delta).
 - 2026-08-12: CMN-IMG-003 / release `4.0.0` — Alpine `ci-lint` owns unsuffixed,
@@ -139,4 +162,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-08-12*
+*Last updated: 2026-09-11*
