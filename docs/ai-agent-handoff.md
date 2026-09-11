@@ -123,9 +123,12 @@ python3 .github/scaffold/scripts/issues-sync.py \
 1. Implement CMN-WF-003 / CMN-DOC-001 (accepted copilot findings, not yet synced).
 2. After PR #62 merges, consumers that need `common-doc-verify.yml` /
    `common-scaffold-verify.yml` re-pin to that merge SHA (`scripts_ref` must match).
-3. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
-4. Refresh donor digests / drop ignorefile entries before 2026-11-11.
-5. Paste Hub Overviews (or widen `DOCKERHUB_TOKEN` to admin) — sync was Forbidden.
+3. Do **not** merge Dependabot #61 (containerdevops `3.0.0` `uses:` + Python 3.14,
+   CI skipped, `scripts_ref` lockstep broken). Reusables did not change 2.4.0→3.0.0.
+   Split Python 3.14 into a human-branch image rebuild. containerdevops #82
+   (commondevops 4.0.0) is the Alpine `ci-lint` consumer pin after lockstep.
+4. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
+5. Refresh donor digests / drop ignorefile entries before 2026-11-11.
 
 ## Recent history
 
