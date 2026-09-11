@@ -817,3 +817,118 @@ milestones:
               - grep -q yamllint scripts/check-ci-local.sh
             guardrail_refs:
               - DOCKER-PERF-001
+
+      - id: CMN-WF-003
+        status: open
+        title: Fix check-ci-docker.sh container shell for Alpine ci-lint and de-duplicate step logic
+        overview:
+          problem: >-
+            scripts/check-ci-docker.sh runs the fallback steps inside the toolchain
+            image via `bash -lc` and the script body uses bash-only constructs
+            (`mapfile`, `< <(...)` process substitution, `[[ ]]`, `(( ))`,
+            `set +e`/`set -e` toggling). Since CMN-IMG-003, Alpine owns the
+            unsuffixed ci-lint tags and Alpine DHI has no bash — only busybox
+            `sh` (docker/ci-lint/Dockerfile.alpine: "Alpine DHI has no bash").
+            Confirmed: a POSIX sh (dash/busybox) rejects the body with
+            "redirection unexpected". As a result the README local-parity path
+            (`bash scripts/check-ci-local.sh` → Docker fallback to
+            ghcr.io/pirlruc/ci-lint:latest) crashes the moment a host tool is
+            missing and the step is deferred to the container. The same step
+            commands are also duplicated between check-ci-local.sh and
+            check-ci-docker.sh (a case statement plus the run_host table), so the
+            two paths can drift.
+          goal: >-
+            Make the in-container runner POSIX-sh compatible so it executes under
+            busybox `sh` on Alpine and bash/sh on Debian, and remove the duplicated
+            step definitions so host and Docker paths share one source of truth.
+        architecture:
+          target: scripts/check-ci-docker.sh + scripts/check-ci-local.sh
+          modules:
+            - scripts/check-ci-docker.sh
+            - scripts/check-ci-local.sh
+        acceptance_criteria:
+          - Container command runs under `sh` (no bash-only syntax) on the Alpine ci-lint image
+          - COMMONDEVOPS_CI_IMAGE=ghcr.io/pirlruc/ci-lint:latest check-ci-docker.sh succeeds
+          - Step definitions are not duplicated across the two scripts
+          - shellcheck passes on both scripts; check-ci-local.sh completes on a clean host
+        guardrail_refs:
+          - CI-008
+        tasks:
+          - id: CMN-WF-003-T1
+            status: open
+            title: Rewrite the in-container runner as POSIX sh
+            instructions:
+              files:
+                - scripts/check-ci-docker.sh
+            verification:
+              - "! grep -q 'bash -lc' scripts/check-ci-docker.sh"
+              - "! grep -qE 'mapfile|< <\\(' scripts/check-ci-docker.sh"
+              - shellcheck scripts/check-ci-docker.sh
+            guardrail_refs:
+              - CI-008
+          - id: CMN-WF-003-T2
+            status: open
+            title: Share per-step runners between host and Docker parity paths
+            instructions:
+              files:
+                - scripts/check-ci-local.sh
+                - scripts/check-ci-docker.sh
+            verification:
+              - bash scripts/check-ci-local.sh
+              - shellcheck scripts/check-ci-local.sh scripts/check-ci-docker.sh
+            guardrail_refs:
+              - CI-008
+
+      - id: CMN-DOC-001
+        status: open
+        title: Caller-contract docs — stale Scorecard version, undiscoverable visibility helper, missing permission matrix
+        overview:
+          problem: >-
+            Three consumer-facing documentation gaps increase adoption friction and
+            risk mis-pinned or under-permissioned callers. (1) docs/workflows.md
+            Scorecard section says `ossf/scorecard-action@v2.4.3` but the tree pins
+            2.4.4 (`2d11466…`) in common-scorecard.yml. (2)
+            .github/workflows/ghcr-package-visibility.yml is a dispatch-only helper
+            that prints the manual GHCR visibility / Actions-access steps, yet it is
+            referenced nowhere in README.md or docs/, so consumers cannot discover it.
+            (3) There is no single caller-permission matrix mapping each reusable
+            workflow to the exact job permissions a caller must grant (CI-025 and the
+            no-escalation constraint); the startup_failure pitfall currently lives
+            only in the agent-facing docs/ai-agent-handoff.md.
+          goal: >-
+            Correct the stale Scorecard pin reference, surface the visibility helper,
+            and publish a consumer-facing caller-permission matrix so a consumer can
+            pin a SHA and grant the right permissions in ~10 minutes.
+        architecture:
+          target: docs/workflows.md + README.md
+          modules:
+            - docs/workflows.md
+            - README.md
+        acceptance_criteria:
+          - workflows.md Scorecard section references the pinned scorecard-action version in the tree
+          - ghcr-package-visibility.yml is linked from README.md or docs/workflows.md
+          - docs/workflows.md documents the caller job permissions required per reusable workflow
+        guardrail_refs:
+          - CI-025
+        tasks:
+          - id: CMN-DOC-001-T1
+            status: open
+            title: Fix stale scorecard-action version reference in workflows.md
+            instructions:
+              files:
+                - docs/workflows.md
+            verification:
+              - grep -q '2.4.4' docs/workflows.md
+              - "! grep -q 'scorecard-action@v2.4.3' docs/workflows.md"
+          - id: CMN-DOC-001-T2
+            status: open
+            title: Add caller-permission matrix and link ghcr-package-visibility helper
+            instructions:
+              files:
+                - docs/workflows.md
+                - README.md
+            verification:
+              - grep -q 'ghcr-package-visibility' README.md
+              - grep -q 'packages: read' docs/workflows.md
+            guardrail_refs:
+              - CI-025

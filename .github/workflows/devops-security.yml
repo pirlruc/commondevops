@@ -84,10 +84,10 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@ea908fd0feb87ab6615b71f5af1cce0637a6567b
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@9a46e8437d36935df5d6563eb38c4e45f0df68ae
     with:
       image: ghcr.io/pirlruc/ci-lint:latest
-      scripts_ref: ea908fd0feb87ab6615b71f5af1cce0637a6567b
+      scripts_ref: 9a46e8437d36935df5d6563eb38c4e45f0df68ae
       pkg_types: library
       ignorefile: docker/ci-lint/.trivyignore.yaml
       blocking: true
@@ -125,10 +125,10 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@ea908fd0feb87ab6615b71f5af1cce0637a6567b
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@9a46e8437d36935df5d6563eb38c4e45f0df68ae
     with:
       image: ghcr.io/pirlruc/ci-supply-chain:latest
-      scripts_ref: ea908fd0feb87ab6615b71f5af1cce0637a6567b
+      scripts_ref: 9a46e8437d36935df5d6563eb38c4e45f0df68ae
       pkg_types: library
       ignorefile: docker/ci-supply-chain/.trivyignore.yaml
       blocking: true

@@ -17,8 +17,8 @@ Owns `.github/workflows/common-*.yml`, `devops-ci.yml`, `devops-security.yml`,
 `docker/ci-supply-chain/`. Consumers pin `pirlruc/commondevops@<sha|tag>` and pass
 matching `scripts_ref` + `checkout_token`.
 
-Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `2.4.0`
-→ `ea908fd0feb87…` (reusable workflows). Image tag `3.0.0` is Alpine `ci-container`
+Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `3.0.1`
+→ `9a46e8437d369…` (reusable workflows, GHCR-login scan patch). Image tag `3.0.0` is Alpine `ci-container`
 only — **do not** re-pin callers to `3.0.0` unless a reusable workflow changes.
 
 ## Delivery status
@@ -32,6 +32,8 @@ only — **do not** re-pin callers to `3.0.0` unless a reusable workflow changes
 | CMN-IMG-001 — Alpine ci-supply-chain variant | Done (`3.0.0`) |
 | CMN-IMG-002 — Remove docker/ci-base | Done (`3.0.0`) |
 | CMN-IMG-003 — Alpine ci-lint variant | Done (`4.0.0`) |
+| CMN-WF-003 — Alpine check-ci-docker.sh POSIX sh | Open (filed) |
+| CMN-DOC-001 — Caller-contract docs | Open (filed) |
 
 ## Pins
 
@@ -39,7 +41,7 @@ only — **do not** re-pin callers to `3.0.0` unless a reusable workflow changes
 |-----------|-----|
 | guardrails submodule | commit `5a7ac83…` (post ci-base ref drop) |
 | github-scaffold submodule | `f8a6ba1…` |
-| containerdevops (image callers + security rescan) | tag `2.4.0` → `ea908fd0feb87…` |
+| containerdevops (image callers + security rescan) | tag `3.0.1` → `9a46e8437d369…` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 | `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `4.0.0` → `sha256:0a4691ba…` |
 | `ghcr.io/pirlruc/ci-lint` (debian) | `4.0.0-debian` → `sha256:ed619755…` |
@@ -116,12 +118,16 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
-2. Refresh donor digests / drop ignorefile entries before 2026-11-11.
-3. Paste Hub Overviews (or widen `DOCKERHUB_TOKEN` to admin) — sync was Forbidden.
+1. Implement CMN-WF-003 / CMN-DOC-001 (accepted copilot findings, not yet synced).
+2. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
+3. Refresh donor digests / drop ignorefile entries before 2026-11-11.
+4. Paste Hub Overviews (or widen `DOCKERHUB_TOKEN` to admin) — sync was Forbidden.
 
 ## Recent history
 
+- 2026-09-11: accepted copilot ai-reviewer findings filed as CMN-WF-003 and
+  CMN-DOC-001 on `feature-rescan-permissions-trivyignore` (not committed; do
+  not run live `issues-sync.py` until approved).
 - 2026-09-11: `packages: read` on published-image rescans and ci-lint /
   ci-supply-chain scan jobs; zizmor `self-repository` ignored until actionlint
   supports `uses: $/…`; DHI python 3.13 donor digests refreshed (DOCKER-BUILD-006);
