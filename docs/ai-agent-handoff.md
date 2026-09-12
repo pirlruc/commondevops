@@ -15,15 +15,16 @@
 Owns `.github/workflows/common-*.yml`, `devops-ci.yml`, `devops-security.yml`,
 `ci-lint-image.yml`, `ci-supply-chain-image.yml`, `scripts/`, `docker/ci-lint/`,
 `docker/ci-supply-chain/`. Consumers pin `pirlruc/commondevops@<sha|tag>` and pass
-matching `scripts_ref` + `checkout_token`. New `common-doc-verify.yml` /
-`common-scaffold-verify.yml` (this branch) are not in older consumer pins — callers
-must re-pin after PR #62 merges.
+matching `scripts_ref` + `checkout_token`. `common-doc-verify.yml` /
+`common-scaffold-verify.yml` ship in 4.1.0; older pins do not have them.
 
 Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `3.0.2`
 → `3607bf0809c951d6d4b832d58f625a34eb3bb75b` (`container-published-rescan.yml` +
 GHCR-login scan). Image tag `3.0.0` is Alpine `ci-container` only.
 `common-doc-verify.yml` / `common-scaffold-verify.yml` shipped on `main` in #62
-(`75d0faf…`). Callers must re-pin; `scripts_ref` must match.
+(`75d0faf…`) and remain in **4.1.0** (`dcd9ca1c4eb8faedba170fef5dbecc61d7b284b3`).
+Callers must re-pin; `scripts_ref` must match. Cross-repo callers need
+`COMMONDEVOPS_READ_TOKEN` — `GITHUB_TOKEN` cannot clone this private repo.
 
 ## Delivery status
 
@@ -36,9 +37,11 @@ GHCR-login scan). Image tag `3.0.0` is Alpine `ci-container` only.
 | CMN-IMG-001 — Alpine ci-supply-chain variant | Done (`3.0.0`) |
 | CMN-IMG-002 — Remove docker/ci-base | Done (`3.0.0`) |
 | CMN-IMG-003 — Alpine ci-lint variant | Done (`4.0.0`) |
-| CMN-WF-003 — Alpine check-ci-docker.sh POSIX sh | Done (local) |
-| CMN-DOC-001 — Caller-contract docs | Done (local); T1 was already 2.4.4 |
-| CMN-PIN-001 — guardrails 1.6.0 pin | Open (filed; do not bump this wave) |
+| CMN-WF-003 — Alpine check-ci-docker.sh POSIX sh | Done (`4.1.0`) |
+| CMN-DOC-001 — Caller-contract docs | Done (`4.1.0`); T1 was already 2.4.4 |
+| CMN-PIN-001 — guardrails 1.6.0 pin | Open (filed on `main`; do not bump this wave) |
+| CMN-WF-004 — single POSIX runner via scripts_ref | Open (filed) |
+| CMN-RESCAN-001 — rescan caller recipe | Open (filed) |
 
 ## Pins
 
@@ -50,7 +53,7 @@ GHCR-login scan). Image tag `3.0.0` is Alpine `ci-container` only.
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 | `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `4.0.0` → `sha256:0a4691ba…` |
 | `ghcr.io/pirlruc/ci-lint` (debian) | `4.0.0-debian` → `sha256:ed619755…` |
-| Release | `4.0.0` (Alpine owns unsuffixed `ci-lint`) |
+| Release | `4.1.0` (Alpine owns unsuffixed `ci-lint`) |
 
 ## Local image sizes / posture (2026-08-12, `du -sxm /`)
 
@@ -123,17 +126,18 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. Implement CMN-WF-003 / CMN-DOC-001 (filed in `docs/issues.yml`; sync with
-   `issues-sync.py --update` after approval).
-2. Doc-repo callers of `common-doc-verify.yml` need `COMMONDEVOPS_READ_TOKEN`
-   before they can switch.
-3. Do **not** merge containerdevops #82 as-is (commondevops 4.0.0 pin must
-   lockstep `scripts_ref`; Python 3.14 untested). #61/#50 already closed.
+1. `issues-sync.py` write to close CMN-WF-003 / CMN-DOC-001 and create CMN-PIN-001 / CMN-WF-004 / CMN-RESCAN-001 (dry-run first; publishing is gated).
+2. Doc-repo callers of `common-doc-verify.yml` need Actions secret `COMMONDEVOPS_READ_TOKEN`
+   (contents:read on this private repo). github-scaffold / guardrails / methodologies conversion
+   failed 2026-09-11 with `repository not found` using `GITHUB_TOKEN`.
+3. Implement CMN-WF-004 / CMN-RESCAN-001; bump containerdevops callers after 3.1.0.
 4. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
-5. Refresh donor digests / drop ignorefile entries before 2026-11-11.
 
 ## Recent history
 
+- 2026-09-11: Filed CMN-WF-004 (promote POSIX `check-ci-docker.sh` via `scripts_ref`)
+  and CMN-RESCAN-001 (`container-published-rescan` caller recipe). Tag `4.1.0` is
+  current. Doc-repo `common-doc-verify` adoption is blocked on `COMMONDEVOPS_READ_TOKEN`.
 - 2026-09-11: CMN-WF-003 POSIX `check-ci-docker.sh` + shared `scripts/ci-steps.sh`;
   CMN-DOC-001 permission matrix and `ghcr-package-visibility` link; filed
   CMN-PIN-001 (stale non-tag guardrails pin vs 1.6.0). Digest-pinned default

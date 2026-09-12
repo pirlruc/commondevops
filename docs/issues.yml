@@ -968,3 +968,68 @@ milestones:
               - git -C docs/guardrails describe --tags --exact-match
             guardrail_refs:
               - SC-DEP-004
+
+      - id: CMN-WF-004
+        status: open
+        title: Promote POSIX check-ci-docker.sh as the single scripts_ref implementation
+        overview:
+          problem: >-
+            After CMN-WF-003, five near-identical check-ci-docker.sh copies remain
+            (this repo COMMONDEVOPS_*, guardrails GR_*, github-scaffold SCAFFOLD_*
+            with --root, cppdevops, methodologies MTH_*). Consumers duplicate
+            digest pins and Alpine-vs-bash fixes.
+          goal: >-
+            One POSIX implementation consumed via scripts_ref; per-repo wrappers
+            reduced to env prefixes.
+        architecture:
+          target: scripts/check-ci-docker.sh + callers
+          modules:
+            - scripts/check-ci-docker.sh
+            - scripts/ci-steps.sh
+        acceptance_criteria:
+          - Documented recipe for consuming this script via scripts_ref
+          - Remaining copies are thin env wrappers or deleted
+        guardrail_refs:
+          - CI-008
+          - CI-036
+        tasks:
+          - id: CMN-WF-004-T1
+            status: open
+            title: Publish the POSIX runner as the scripts_ref local-parity recipe
+            instructions:
+              files:
+                - scripts/check-ci-docker.sh
+                - docs/workflows.md
+            verification:
+              - rg -n 'ci-steps.sh|POSIX' docs/workflows.md
+            guardrail_refs:
+              - CI-008
+
+      - id: CMN-RESCAN-001
+        status: open
+        title: Document the container-published-rescan caller pattern as a recipe
+        overview:
+          problem: >-
+            commondevops and cppdevops duplicate the container-published-rescan
+            caller (schedule, packages: read, unique artifacts, probe skip).
+          goal: >-
+            One documented recipe in docs/workflows.md that cppdevops/pydevops
+            can copy without forking job bodies.
+        architecture:
+          target: docs/workflows.md
+          modules:
+            - docs/workflows.md
+            - .github/workflows/devops-security.yml
+        acceptance_criteria:
+          - workflows.md has a copy-ready caller example pinned at a tag SHA
+        guardrail_refs:
+          - CI-018
+        tasks:
+          - id: CMN-RESCAN-001-T1
+            status: open
+            title: Add a container-published-rescan caller recipe to workflows.md
+            instructions:
+              files:
+                - docs/workflows.md
+            verification:
+              - rg -n 'container-published-rescan' docs/workflows.md
