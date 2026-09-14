@@ -107,6 +107,17 @@ jobs:
             scripts
           sparse-checkout-cone-mode: false
 
+      - name: Require scripts_ref for cross-repo callers (CI-034)
+        env:
+          SCRIPTS_REF: ${{ inputs.scripts_ref }}
+          REPO: ${{ github.repository }}
+        working-directory: ${{ github.workspace }}
+        run: |
+          if [ "${REPO}" != "pirlruc/commondevops" ] && [ -z "${SCRIPTS_REF}" ]; then
+            echo "CI-034: cross-repo callers must pass scripts_ref matching the uses: pin" >&2
+            exit 1
+          fi
+
       - name: Install shellcheck
         if: inputs.shell_scripts != ''
         working-directory: ${{ github.workspace }}
@@ -115,8 +126,9 @@ jobs:
         run: bash _commondevops/scripts/install-common-tools.sh
 
       - name: shellcheck
+        id: shellcheck
         if: inputs.shell_scripts != ''
-        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        continue-on-error: true
         env:
           SHELL_SCRIPTS: ${{ inputs.shell_scripts }}
         run: |
@@ -131,8 +143,9 @@ jobs:
           .ci-venv/bin/pip install -q 'ruff==0.14.10'
 
       - name: ruff
+        id: ruff
         if: inputs.ruff_paths != ''
-        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        continue-on-error: true
         env:
           RUFF_PATHS: ${{ inputs.ruff_paths }}
         run: |
@@ -141,16 +154,16 @@ jobs:
           .ci-venv/bin/ruff check ${RUFF_PATHS}
 
       - name: Parse YAML manifests
+        id: yaml
         if: inputs.yaml_files != '' || inputs.yaml_globs != ''
-        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        continue-on-error: true
         env:
           YAML_FILES: ${{ inputs.yaml_files }}
           YAML_GLOBS: ${{ inputs.yaml_globs }}
         run: |
           if [ ! -f scripts/validate-yaml.py ]; then
-            echo "note: scripts/validate-yaml.py not in caller; skipping YAML parse"
-            echo "Vendored the script from github-scaffold/guardrails if this check should run."
-            exit 0
+            echo "error: scripts/validate-yaml.py not in caller (CI-035)" >&2
+            exit 1
           fi
           if [ ! -x .ci-venv/bin/python ]; then
             python3 -m venv .ci-venv
@@ -169,11 +182,29 @@ jobs:
           .ci-venv/bin/python scripts/validate-yaml.py "$@"
 
       - name: Lint relative markdown links
+        id: links
         if: inputs.run_link_lint
-        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        continue-on-error: true
         run: |
           if [ ! -f scripts/lint-doc-links.py ]; then
-            echo "note: scripts/lint-doc-links.py not in caller; skipping link lint"
-            exit 0
+            echo "error: scripts/lint-doc-links.py not in caller (CI-035)" >&2
+            exit 1
           fi
           python3 scripts/lint-doc-links.py
+
+      - name: Gate — docs
+        if: always()
+        working-directory: ${{ github.workspace }}
+        env:
+          ADVISORY: ${{ env.ADVISORY }}
+          SHELLCHECK: ${{ steps.shellcheck.outcome }}
+          RUFF: ${{ steps.ruff.outcome }}
+          YAML: ${{ steps.yaml.outcome }}
+          LINKS: ${{ steps.links.outcome }}
+        run: |
+          set --
+          if [ "${SHELLCHECK}" != "skipped" ] && [ -n "${SHELLCHECK}" ]; then set -- "$@" "shellcheck=${SHELLCHECK}"; fi
+          if [ "${RUFF}" != "skipped" ] && [ -n "${RUFF}" ]; then set -- "$@" "ruff=${RUFF}"; fi
+          if [ "${YAML}" != "skipped" ] && [ -n "${YAML}" ]; then set -- "$@" "yaml=${YAML}"; fi
+          if [ "${LINKS}" != "skipped" ] && [ -n "${LINKS}" ]; then set -- "$@" "links=${LINKS}"; fi
+          bash _commondevops/scripts/gate-aggregate.sh "$@"

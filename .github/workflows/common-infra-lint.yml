@@ -68,7 +68,7 @@ jobs:
     defaults:
       run:
         working-directory: ${{ inputs.working_directory }}
-    # Prefer ghcr.io/pirlruc/ci-lint:latest once Actions package access is granted.
+    # Prefer ghcr.io/pirlruc/ci-lint@sha256:0a4691ba… (4.0.0 Alpine) once Actions package access is granted.
     # v1: bare ubuntu-24.04 + install-common-tools.sh from this repo.
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -88,6 +88,18 @@ jobs:
             scripts
           sparse-checkout-cone-mode: false
 
+      - name: Require scripts_ref for cross-repo callers (CI-034)
+        env:
+          SCRIPTS_REF: ${{ inputs.scripts_ref }}
+          REPO: ${{ github.repository }}
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -euo pipefail
+          if [[ "${REPO}" != "pirlruc/commondevops" && -z "${SCRIPTS_REF}" ]]; then
+            echo "CI-034: cross-repo callers must pass scripts_ref matching the uses: pin" >&2
+            exit 1
+          fi
+
       - name: Install tooling
         working-directory: ${{ github.workspace }}
         env:
@@ -101,21 +113,29 @@ jobs:
           echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
 
       - name: actionlint
-        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        id: actionlint
+        continue-on-error: true
         working-directory: ${{ github.workspace }}
         run: |
-          mapfile -t WFS < <(find .github/workflows -name '*.yml' -o -name '*.yaml' 2>/dev/null | head -40)
+          set -euo pipefail
+          mapfile -t WFS < <(find .github/workflows \( -name '*.yml' -o -name '*.yaml' \) 2>/dev/null)
           if [[ ${#WFS[@]} -eq 0 ]]; then
             echo "No workflows to lint"
             exit 0
           fi
+          if (( ${#WFS[@]} > 40 )); then
+            echo "CI-035: ${#WFS[@]} workflow files exceeds actionlint cap of 40" >&2
+            exit 1
+          fi
           actionlint "${WFS[@]}"
 
       - name: shellcheck
-        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        id: shellcheck
+        continue-on-error: true
         env:
           SHELL_SCRIPTS: ${{ inputs.shell_scripts }}
         run: |
+          set -euo pipefail
           if [[ -n "${SHELL_SCRIPTS}" ]]; then
             # shellcheck disable=SC2086
             shellcheck ${SHELL_SCRIPTS}
@@ -129,10 +149,12 @@ jobs:
           fi
 
       - name: hadolint
-        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        id: hadolint
+        continue-on-error: true
         env:
           DOCKERFILES: ${{ inputs.dockerfiles }}
         run: |
+          set -euo pipefail
           if [[ -n "${DOCKERFILES}" ]]; then
             # shellcheck disable=SC2086
             hadolint ${DOCKERFILES}
@@ -146,9 +168,11 @@ jobs:
           fi
 
       - name: zizmor
-        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        id: zizmor
+        continue-on-error: true
         working-directory: ${{ github.workspace }}
         run: |
+          set -euo pipefail
           if [[ -d .github/workflows ]]; then
             # Informational findings (e.g. superfluous-actions) must not fail blocking CI.
             CFG=()
@@ -157,3 +181,20 @@ jobs:
           else
             echo "No workflows for zizmor"
           fi
+
+      - name: Gate — lint
+        if: always()
+        working-directory: ${{ github.workspace }}
+        env:
+          ADVISORY: ${{ env.ADVISORY }}
+          ACTIONLINT: ${{ steps.actionlint.outcome }}
+          SHELLCHECK: ${{ steps.shellcheck.outcome }}
+          HADOLINT: ${{ steps.hadolint.outcome }}
+          ZIZMOR: ${{ steps.zizmor.outcome }}
+        run: |
+          set -euo pipefail
+          bash _commondevops/scripts/gate-aggregate.sh \
+            actionlint="${ACTIONLINT}" \
+            shellcheck="${SHELLCHECK}" \
+            hadolint="${HADOLINT}" \
+            zizmor="${ZIZMOR}"

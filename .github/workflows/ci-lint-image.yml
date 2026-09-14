@@ -1,7 +1,7 @@
 ---
 # Thin caller — publishes ghcr.io/pirlruc/ci-lint (+ Docker Hub when secrets set).
 # Debian and Alpine variants; Alpine owns unsuffixed tags (lower vuln posture as of 2026-08).
-# containerdevops pin: tag 2.4.0 (variant cache scopes + Hub Overview gating).
+# containerdevops pin: tag 4.0.0 (size_class=ci_toolchain, fail-closed thresholds).
 name: CI Lint Image
 
 on:
@@ -41,11 +41,11 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
     with:
       dockerfile: docker/ci-lint/Dockerfile
       working_directory: .
-      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
+      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
       runner_image: ""
       run_infra_lint: false
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -61,11 +61,11 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
     with:
       dockerfile: docker/ci-lint/Dockerfile.alpine
       working_directory: .
-      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
+      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
       runner_image: ""
       run_infra_lint: false
       run_secrets_scan: false
@@ -83,17 +83,16 @@ jobs:
     permissions:
       contents: read
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile
       image_name: ci-lint:ci-debian
       artifact_name: container-image-debian
       structure_test_config: docker/ci-lint/container-structure-test.yml
-      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
+      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
-      # Rootfs ~545 MB measured via du -sxm /; headroom for base churn.
-      image_max_size_mb: "700"
+      size_class: ci_toolchain
       image_title: ci-lint
       image_description: >-
         Short-lived CI toolchain image for lint and secrets/SAST: actionlint,
@@ -114,17 +113,16 @@ jobs:
     permissions:
       contents: read
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile.alpine
       image_name: ci-lint:ci-alpine
       artifact_name: container-image-alpine
       structure_test_config: docker/ci-lint/container-structure-test.yml
-      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
+      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
-      # Rootfs ~752 MB measured via du -sxm /; headroom for base churn.
-      image_max_size_mb: "850"
+      size_class: ci_toolchain
       image_title: ci-lint
       image_description: >-
         Short-lived CI toolchain image for lint and secrets/SAST: actionlint,
@@ -146,13 +144,13 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
     with:
       image: ci-lint:ci-debian
       image_artifact: container-image-debian
       results_artifact: container-scan-results-debian
       sarif_category: trivy-image-debian
-      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
+      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
       pkg_types: library
       ignorefile: docker/ci-lint/.trivyignore.yaml
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -169,13 +167,13 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
     with:
       image: ci-lint:ci-alpine
       image_artifact: container-image-alpine
       results_artifact: container-scan-results-alpine
       sarif_category: trivy-image-alpine
-      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
+      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
       pkg_types: library
       ignorefile: docker/ci-lint/.trivyignore.yaml
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -193,13 +191,13 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
     with:
       image: ci-lint:ci-debian
       image_artifact: container-image-debian
       results_artifact: container-scan-posture-debian
       sarif_category: trivy-posture-debian
-      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
+      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
       pkg_types: os,library
       ignorefile: none
       blocking: false
@@ -216,13 +214,13 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
     with:
       image: ci-lint:ci-alpine
       image_artifact: container-image-alpine
       results_artifact: container-scan-posture-alpine
       sarif_category: trivy-posture-alpine
-      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
+      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
       pkg_types: os,library
       ignorefile: none
       blocking: false
@@ -240,13 +238,13 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile
       image_name: ci-lint
       dockerhub_image: pirlruc/ci-lint
-      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
+      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
       platforms: linux/amd64
       tag_suffix: -debian
       tag_alias_unsuffixed: false
@@ -282,13 +280,13 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile.alpine
       image_name: ci-lint
       dockerhub_image: pirlruc/ci-lint
-      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
+      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
       platforms: linux/amd64
       tag_suffix: -alpine
       tag_alias_unsuffixed: true

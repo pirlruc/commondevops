@@ -8,7 +8,7 @@ Scorecard, and release gates.
 |---|---|
 | **Remote** | https://github.com/pirlruc/commondevops |
 | **Role** | Cross-language CI infrastructure (pairs with [containerdevops](https://github.com/pirlruc/containerdevops) and [pydevops](https://github.com/pirlruc/pydevops)) |
-| **Guardrails** | Pinned at `docs/guardrails/` ([pirlruc/guardrails](https://github.com/pirlruc/guardrails) tag `1.1.0`) |
+| **Guardrails** | Pinned at `docs/guardrails/` ([pirlruc/guardrails](https://github.com/pirlruc/guardrails) tag `1.6.0`) |
 
 ## Reusable workflows
 
@@ -72,8 +72,8 @@ Alpine owns the unsuffixed tags.
 
 | Path | Remote | Pin |
 |------|--------|-----|
-| `docs/guardrails` | https://github.com/pirlruc/guardrails.git | tag `1.1.0` → commit `6fe580c…` |
-| `.github/scaffold` | https://github.com/pirlruc/github-scaffold.git | `f8a6ba1…` |
+| `docs/guardrails` | https://github.com/pirlruc/guardrails.git | tag `1.6.0` → commit `77cf16eb…` |
+| `.github/scaffold` | https://github.com/pirlruc/github-scaffold.git | tag `1.5.0` → commit `9e04ed53…` |
 
 ```bash
 git submodule update --init --recursive

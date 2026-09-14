@@ -50,13 +50,32 @@ jobs:
 
       - name: Run OpenSSF Scorecard
         id: scorecard
-        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        continue-on-error: true
         uses: ossf/scorecard-action@2d1146689b8cda280b9bc96326124645441f03bc # v2.4.4
         with:
           results_file: results.sarif
           results_format: sarif
           publish_results: ${{ inputs.publish_results }}
           repo_token: ${{ secrets.repo_token }}
+
+      - name: Gate — scorecard
+        if: always()
+        env:
+          ADVISORY: ${{ env.ADVISORY }}
+          SCORECARD: ${{ steps.scorecard.outcome }}
+        run: |
+          set -euo pipefail
+          if [[ "${SCORECARD}" == "skipped" || "${SCORECARD}" == "cancelled" || "${SCORECARD}" == "success" ]]; then
+            echo "All collected gates passed."
+            exit 0
+          fi
+          echo "Collected gate failures: scorecard(${SCORECARD})"
+          if [[ "${ADVISORY}" == "true" ]]; then
+            echo "advisory — not failing the job (pass blocking=true to enforce findings)."
+            exit 0
+          fi
+          echo "::error::Quality gates failed: scorecard(${SCORECARD})"
+          exit 1
 
       - name: Upload Scorecard SARIF
         if: always() && hashFiles('results.sarif') != ''

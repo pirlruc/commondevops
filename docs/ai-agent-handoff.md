@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `common/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
-| **Branch** | `main` |
+| **Branch** | `feature-guardrails-16` (from `main` tag **4.1.0**) |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, release + `ci-lint` / `ci-supply-chain` images |
 | **Type** | CI infrastructure |
 
@@ -18,12 +18,12 @@ Owns `.github/workflows/common-*.yml`, `devops-ci.yml`, `devops-security.yml`,
 matching `scripts_ref` + `checkout_token`. `common-doc-verify.yml` /
 `common-scaffold-verify.yml` ship in 4.1.0; older pins do not have them.
 
-Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `3.0.2`
-→ `3607bf0809c951d6d4b832d58f625a34eb3bb75b` (`container-published-rescan.yml` +
-GHCR-login scan). Image tag `3.0.0` is Alpine `ci-container` only.
-`common-doc-verify.yml` / `common-scaffold-verify.yml` shipped on `main` in #62
-(`75d0faf…`) and remain in **4.1.0** (`dcd9ca1c4eb8faedba170fef5dbecc61d7b284b3`).
-Callers must re-pin; `scripts_ref` must match. Cross-repo callers need
+Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `4.0.0`
+→ `a29ebe54d321e25e639ff34b704da1a0ddd45655` (`size_class`, fail-closed
+thresholds, collect-then-fail). Image tag `3.0.0` is Alpine `ci-container`.
+`common-doc-verify.yml` / `common-scaffold-verify.yml` shipped in **4.1.0**
+(`dcd9ca1c4eb8faedba170fef5dbecc61d7b284b3`) and remain. Callers must re-pin
+after **5.0.0**; `scripts_ref` must match. Cross-repo callers need
 `COMMONDEVOPS_READ_TOKEN` — `GITHUB_TOKEN` cannot clone this private repo.
 
 ## Delivery status
@@ -39,30 +39,31 @@ Callers must re-pin; `scripts_ref` must match. Cross-repo callers need
 | CMN-IMG-003 — Alpine ci-lint variant | Done (`4.0.0`) |
 | CMN-WF-003 — Alpine check-ci-docker.sh POSIX sh | Done (`4.1.0`) |
 | CMN-DOC-001 — Caller-contract docs | Done (`4.1.0`); T1 was already 2.4.4 |
-| CMN-PIN-001 — guardrails 1.6.0 pin | Open (filed on `main`; do not bump this wave) |
-| CMN-WF-004 — single POSIX runner via scripts_ref | Open (filed) |
-| CMN-RESCAN-001 — rescan caller recipe | Open (filed) |
+| CMN-PIN-001 — guardrails 1.6.0 pin | Done (this wave) |
+| CMN-WF-004 — single POSIX runner via scripts_ref | Done (this wave) |
+| CMN-RESCAN-001 — rescan caller recipe | Done (this wave) |
 
 ## Pins
 
 | Component | Ref |
 |-----------|-----|
-| guardrails submodule | commit `5a7ac83…` (post ci-base ref drop) |
-| github-scaffold submodule | `f8a6ba1…` |
-| containerdevops (image callers + security rescan) | tag `3.0.2` → `3607bf0809c951…` |
+| guardrails submodule | tag **1.6.0** → `77cf16eb…` |
+| github-scaffold submodule | tag **1.5.0** → `9e04ed53…` |
+| containerdevops (image callers + security rescan) | tag `4.0.0` → `a29ebe54d321e25e639ff34b704da1a0ddd45655` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 | `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `4.0.0` → `sha256:0a4691ba…` |
 | `ghcr.io/pirlruc/ci-lint` (debian) | `4.0.0-debian` → `sha256:ed619755…` |
-| Release | `4.1.0` (Alpine owns unsuffixed `ci-lint`) |
+| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `3.0.0` → `sha256:5d25d0c3…` |
+| Release | `4.1.0` until **5.0.0** lands |
 
 ## Local image sizes / posture (2026-08-12, `du -sxm /`)
 
 | Image | Rootfs | Posture (os+library, no ignore) | Notes |
 |-------|--------|----------------------------------|-------|
-| ci-lint debian | ~545 MB | 28 HIGH / 4 CRITICAL (20 OS) | size gate 700 |
-| ci-lint alpine | ~752 MB | 12 HIGH / 0 CRITICAL (0 OS) | size gate 850; **owns unsuffixed** |
-| ci-supply-chain debian | ~575 MB | — | size gate 700 |
-| ci-supply-chain alpine | ~722 MB | — | size gate 800; owns unsuffixed |
+| ci-lint debian | ~545 MB | 28 HIGH / 4 CRITICAL (20 OS) | `size_class: ci_toolchain` |
+| ci-lint alpine | ~752 MB | 12 HIGH / 0 CRITICAL (0 OS) | **owns unsuffixed** |
+| ci-supply-chain debian | ~575 MB | — | `size_class: ci_toolchain` |
+| ci-supply-chain alpine | ~722 MB | — | owns unsuffixed |
 
 ## Commands
 
@@ -83,6 +84,10 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Known pitfalls
 
+- **Size class:** CI toolchain images pass `size_class: ci_toolchain` so
+  container-build reads `ci_image_max_size_mb` (2000, DOCKER-PERF-002). Do not
+  re-record DOCKER-PERF-001 deviations for ci-lint / ci-supply-chain.
+  REL-CHG-001 records no root CHANGELOG (GitHub Releases; GR-CHG-001).
 - **Caller permissions:** reusable workflows cannot escalate. Build callers must
   grant `packages: read` (container-build declares it) or the run dies at
   **startup_failure** before any job starts. Scan callers of a `ghcr.io/` image
@@ -126,15 +131,17 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. `issues-sync.py` write to close CMN-WF-003 / CMN-DOC-001 and create CMN-PIN-001 / CMN-WF-004 / CMN-RESCAN-001 (dry-run first; publishing is gated).
+1. Callers re-pin to tag **5.0.0** with matching `scripts_ref` after it lands.
 2. Doc-repo callers of `common-doc-verify.yml` need Actions secret `COMMONDEVOPS_READ_TOKEN`
-   (contents:read on this private repo). github-scaffold / guardrails / methodologies conversion
-   failed 2026-09-11 with `repository not found` using `GITHUB_TOKEN`.
-3. Implement CMN-WF-004 / CMN-RESCAN-001; bump containerdevops callers after 3.1.0.
-4. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
+   (contents:read on this private repo).
+3. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
 
 ## Recent history
 
+- 2026-09-14: CMN-PIN-001 / CMN-WF-004 / CMN-RESCAN-001 — guardrails `1.6.0` +
+  scaffold `1.5.0`; containerdevops `4.0.0` + `size_class: ci_toolchain`;
+  fail-closed threshold reader; collect-then-fail; digest-pinned rescans;
+  POSIX `scripts_ref` recipe; REL-CHG-001 deviation.
 - 2026-09-11: Filed CMN-WF-004 (promote POSIX `check-ci-docker.sh` via `scripts_ref`)
   and CMN-RESCAN-001 (`container-published-rescan` caller recipe). Tag `4.1.0` is
   current. Doc-repo `common-doc-verify` adoption is blocked on `COMMONDEVOPS_READ_TOKEN`.
@@ -175,4 +182,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-09-11*
+*Last updated: 2026-09-14*
