@@ -16,8 +16,8 @@ runtime — no `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `3.0.0` / `3.0.0-alpine` | Immutable Alpine release (default unsuffixed = Alpine) |
-| `3.0.0-debian` | Immutable Debian 13 release |
+| `5.1.0` / `5.1.0-alpine` | Immutable Alpine release (default unsuffixed = Alpine) |
+| `5.1.0-debian` | Immutable Debian 13 release |
 | `latest` / `latest-alpine` | Latest non-prerelease Alpine publish |
 | `latest-debian` | Latest non-prerelease Debian publish |
 | `sha-<git>` / `sha-<git>-alpine` / `sha-<git>-debian` | Exact git SHA of the published commit |
@@ -27,8 +27,8 @@ posture on the DHI catalog. Prefer an explicit `-alpine` / `-debian` suffix when
 libc matters; prefer a digest in production.
 
 ```bash
-docker pull pirlruc/ci-supply-chain:3.0.0
-docker pull pirlruc/ci-supply-chain:3.0.0-debian
+docker pull pirlruc/ci-supply-chain:5.1.0
+docker pull pirlruc/ci-supply-chain:5.1.0-debian
 # or
 docker pull pirlruc/ci-supply-chain@sha256:<digest>
 ```
@@ -37,7 +37,7 @@ docker pull pirlruc/ci-supply-chain@sha256:<digest>
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-supply-chain:3.0.0 \
+  pirlruc/ci-supply-chain:5.1.0 \
   syft . -o spdx-json
 ```
 
@@ -50,7 +50,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-supply-chain:3.0.0 \
+  pirlruc/ci-supply-chain:5.1.0 \
   trivy fs --scanners vuln --severity HIGH,CRITICAL .
 ```
 

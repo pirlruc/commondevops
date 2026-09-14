@@ -31,3 +31,7 @@ license_allow_list:                              # SC-LIC-001 (grant)
   - "BlueOak-1.0.0"
   - "MPL-2.0"
   - "LGPL-*"
+
+# commondevops extension: filesystem vuln gate (Grype/Trivy) aligned with
+# DOCKER-SEC-001. Not in the org supply-chain numeric pack.
+vuln_fail_on_severity: high

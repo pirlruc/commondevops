@@ -105,6 +105,13 @@ jobs:
             exit 1
           fi
           echo "THRESHOLDS_PATH=${THR}" >> "${GITHUB_ENV}"
+          SEV="$(bash _commondevops/scripts/read-thresholds.sh vuln_fail_on_severity "${THR}")"
+          SEV_UP="$(printf '%s' "${SEV}" | tr '[:lower:]' '[:upper:]')"
+          SEV_LO="$(printf '%s' "${SEV}" | tr '[:upper:]' '[:lower:]')"
+          {
+            echo "SEV_UP=${SEV_UP}"
+            echo "SEV_LO=${SEV_LO}"
+          } >> "${GITHUB_ENV}"
 
       - name: Install tooling
         working-directory: ${{ github.workspace }}
@@ -127,13 +134,17 @@ jobs:
         continue-on-error: true
         run: |
           set -euo pipefail
+          if [[ -z "${SEV_LO}" ]]; then
+            echo "empty vuln_fail_on_severity" >&2
+            exit 1
+          fi
           CFG=()
           [[ -f .grype.yaml ]] && CFG=(--config .grype.yaml)
           if [[ -f scan-results/sbom-cdx.json ]]; then
-            grype "sbom:scan-results/sbom-cdx.json" "${CFG[@]}" --fail-on high \
+            grype "sbom:scan-results/sbom-cdx.json" "${CFG[@]}" --fail-on "${SEV_LO}" \
               -o json=scan-results/grype.json
           else
-            grype dir:. "${CFG[@]}" --fail-on high -o json=scan-results/grype.json
+            grype dir:. "${CFG[@]}" --fail-on "${SEV_LO}" -o json=scan-results/grype.json
           fi
 
       - name: Trivy filesystem
@@ -141,13 +152,17 @@ jobs:
         continue-on-error: true
         run: |
           set -euo pipefail
+          if [[ -z "${SEV_UP}" ]]; then
+            echo "empty vuln_fail_on_severity" >&2
+            exit 1
+          fi
           mkdir -p scan-results
           CFG=()
           [[ -f trivy.yaml ]] && CFG=(--config trivy.yaml)
-          trivy fs --scanners vuln --severity HIGH,CRITICAL \
+          trivy fs --scanners vuln --severity "CRITICAL,${SEV_UP}" \
             --format sarif --output scan-results/trivy.sarif \
             "${CFG[@]}" .
-          trivy fs --scanners vuln --severity HIGH,CRITICAL \
+          trivy fs --scanners vuln --severity "CRITICAL,${SEV_UP}" \
             --exit-code 1 "${CFG[@]}" .
 
       - name: License gate (grant)

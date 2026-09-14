@@ -51,7 +51,8 @@ jobs:
           fetch-tags: true
 
       - name: issues-sync --validate-only
-        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        id: issues
+        continue-on-error: true
         env:
           SCRIPTS_REF: ${{ inputs.scripts_ref }}
         run: |
@@ -71,7 +72,8 @@ jobs:
           .ci-venv/bin/python scripts/issues-sync.py --yaml docs/issues.yml --validate-only
 
       - name: SCAFFOLD_REF default matches newest tag
-        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        id: scaffold_ref
+        continue-on-error: true
         run: |
           if [ ! -f scripts/setup-library-submodules.sh ]; then
             echo "note: scripts/setup-library-submodules.sh not in caller; skipping SCAFFOLD_REF check"
@@ -85,3 +87,25 @@ jobs:
           fi
           echo "SCAFFOLD_REF default=${default} newest tag=${newest}"
           test "${default}" = "${newest}"
+
+      - name: Gate — scaffold
+        if: always()
+        env:
+          ADVISORY: ${{ env.ADVISORY }}
+          ISSUES: ${{ steps.issues.outcome }}
+          SCAFFOLD: ${{ steps.scaffold_ref.outcome }}
+        run: |
+          failed=""
+          [ "${ISSUES}" = "success" ] || [ "${ISSUES}" = "skipped" ] || failed="${failed} issues(${ISSUES})"
+          [ "${SCAFFOLD}" = "success" ] || [ "${SCAFFOLD}" = "skipped" ] || failed="${failed} scaffold_ref(${SCAFFOLD})"
+          if [ -z "${failed}" ]; then
+            echo "All collected gates passed."
+            exit 0
+          fi
+          echo "Collected gate failures:${failed}"
+          if [ "${ADVISORY}" = "true" ]; then
+            echo "advisory — not failing the job (pass blocking=true to enforce findings)."
+            exit 0
+          fi
+          echo "::error::Quality gates failed:${failed}"
+          exit 1

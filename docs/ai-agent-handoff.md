@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `common/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
-| **Branch** | `main` tag **5.0.0** |
+| **Branch** | `feature-containerdevops-5.1.0` → tag **5.1.0** |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, release + `ci-lint` / `ci-supply-chain` images |
 | **Type** | CI infrastructure |
 
@@ -18,9 +18,8 @@ Owns `.github/workflows/common-*.yml`, `devops-ci.yml`, `devops-security.yml`,
 matching `scripts_ref` + `checkout_token`. `common-doc-verify.yml` /
 `common-scaffold-verify.yml` ship in 4.1.0; older pins do not have them.
 
-Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `4.0.0`
-→ `a29ebe54d321e25e639ff34b704da1a0ddd45655` (`size_class`, fail-closed
-thresholds, collect-then-fail). Image tag `3.0.0` is Alpine `ci-container`.
+Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `5.0.0`
+→ `f5a3a6327bb64fbf208130ba6b46be41678367e4` (GHCR digest handoff, `flavor: latest=false`).
 `common-doc-verify.yml` / `common-scaffold-verify.yml` shipped in **4.1.0**
 (`dcd9ca1c4eb8faedba170fef5dbecc61d7b284b3`) and remain. Callers must re-pin
 after **5.0.0**; `scripts_ref` must match. Cross-repo callers need
@@ -49,12 +48,12 @@ after **5.0.0**; `scripts_ref` must match. Cross-repo callers need
 |-----------|-----|
 | guardrails submodule | tag **1.6.0** → `77cf16eb…` |
 | github-scaffold submodule | tag **1.5.0** → `9e04ed53…` |
-| containerdevops (image callers + security rescan) | tag `4.0.0` → `a29ebe54d321e25e639ff34b704da1a0ddd45655` |
+| containerdevops (image callers + security rescan) | tag `5.0.0` → `f5a3a6327bb64fbf208130ba6b46be41678367e4` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
-| `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `4.0.0` → `sha256:0a4691ba…` |
-| `ghcr.io/pirlruc/ci-lint` (debian) | `4.0.0-debian` → `sha256:ed619755…` |
-| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `3.0.0` → `sha256:5d25d0c3…` |
-| Release | **5.0.0** → `bcddb5db4ba5d291aa7f434d447e43175f14136c` |
+| `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `5.1.0` (digest after Release publish) |
+| `ghcr.io/pirlruc/ci-lint` (debian) | `5.1.0-debian` (digest after Release publish) |
+| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.1.0` (digest after Release publish) |
+| Release | **5.1.0** (SHA after merge) |
 
 ## Local image sizes / posture (2026-08-12, `du -sxm /`)
 
@@ -87,12 +86,14 @@ python3 .github/scaffold/scripts/issues-sync.py \
 - **Size class:** CI toolchain images pass `size_class: ci_toolchain` so
   container-build reads `ci_image_max_size_mb` (2000, DOCKER-PERF-002). Do not
   re-record DOCKER-PERF-001 deviations for ci-lint / ci-supply-chain.
-  REL-CHG-001 records no root CHANGELOG (GitHub Releases; GR-CHG-001).
+  REL-CHG-001 is closed by root `CHANGELOG.md`. Unsigned private publish is
+  recorded as SC-SIGN-001 / SC-PROV-001.
 - **Caller permissions:** reusable workflows cannot escalate. Build callers must
-  grant `packages: read` (container-build declares it) or the run dies at
-  **startup_failure** before any job starts. Scan callers of a `ghcr.io/` image
-  must also grant `packages: read` once containerdevops includes GHCR login in
-  `container-scan.yml`.
+  grant `packages: write` (ephemeral GHCR handoff) or the run dies at
+  **startup_failure**. Scan callers of a `ghcr.io/` image must grant
+  `packages: read` and pass `image: ${{ needs.build.outputs.image_ref }}`.
+  Do **not** delete published GHCR versions; PR cleanup may delete `ci-run-*`
+  only when that is the version's sole tag.
 - **ignorefile:** blocking scans pass per-image files under `docker/ci-*/`. Posture
   scans must set `ignorefile: none` (containerdevops ≥ 2.2.0) or the caller-root
   fallback silently filters findings. Root `.trivyignore.yaml` was removed.
@@ -131,13 +132,16 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. Callers re-pin to tag **5.0.0** with matching `scripts_ref` after it lands.
-2. Doc-repo callers of `common-doc-verify.yml` need Actions secret `COMMONDEVOPS_READ_TOKEN`
-   (contents:read on this private repo).
+1. After the 5.1.0 GitHub Release, write alpine/debian digests into
+   `devops-security.yml` and this pins table.
+2. cppdevops / pydevops re-pin `uses:` + `scripts_ref` to this 5.1.0 SHA.
 3. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
 
 ## Recent history
 
+- 2026-09-14: **5.1.0** — re-pin containerdevops 5.0.0 GHCR handoff, CHANGELOG,
+  SC-SIGN/SC-PROV, zizmor config parity, Alpine secrets scan, threshold-driven
+  supply-chain severity.
 - 2026-09-14: Tagged **5.0.0** + GitHub Release (`bcddb5db…`, #88).
 - 2026-09-14: CMN-PIN-001 / CMN-WF-004 / CMN-RESCAN-001 — guardrails `1.6.0` +
   scaffold `1.5.0`; containerdevops `4.0.0` + `size_class: ci_toolchain`;

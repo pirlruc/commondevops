@@ -9,6 +9,7 @@ Scorecard, and release gates.
 | **Remote** | https://github.com/pirlruc/commondevops |
 | **Role** | Cross-language CI infrastructure (pairs with [containerdevops](https://github.com/pirlruc/containerdevops) and [pydevops](https://github.com/pirlruc/pydevops)) |
 | **Guardrails** | Pinned at `docs/guardrails/` ([pirlruc/guardrails](https://github.com/pirlruc/guardrails) tag `1.6.0`) |
+| **Changelog** | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Reusable workflows
 
@@ -25,6 +26,7 @@ Pin every `uses:` to a **commit SHA** (not `@main`). Pass the same SHA as
 | [`common-supply-chain.yml`](.github/workflows/common-supply-chain.yml) | Syft SBOM, Grype, Trivy fs, license gate |
 | [`common-scorecard.yml`](.github/workflows/common-scorecard.yml) | OpenSSF Scorecard |
 | [`common-release.yml`](.github/workflows/common-release.yml) | Tag validation + GitHub Release |
+| [`artifact-sweep.yml`](.github/workflows/artifact-sweep.yml) | Scheduled delete of leftover `container-image*` artifacts |
 
 See [docs/workflows.md](docs/workflows.md) for inputs, secrets, the caller-permission
 matrix, and examples.
