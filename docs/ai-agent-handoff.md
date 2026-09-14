@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `common/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
-| **Branch** | `feature-guardrails-16` (from `main` tag **4.1.0**) |
+| **Branch** | `main` tag **5.0.0** |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, release + `ci-lint` / `ci-supply-chain` images |
 | **Type** | CI infrastructure |
 
@@ -54,7 +54,7 @@ after **5.0.0**; `scripts_ref` must match. Cross-repo callers need
 | `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `4.0.0` → `sha256:0a4691ba…` |
 | `ghcr.io/pirlruc/ci-lint` (debian) | `4.0.0-debian` → `sha256:ed619755…` |
 | `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `3.0.0` → `sha256:5d25d0c3…` |
-| Release | `4.1.0` until **5.0.0** lands |
+| Release | **5.0.0** → `bcddb5db4ba5d291aa7f434d447e43175f14136c` |
 
 ## Local image sizes / posture (2026-08-12, `du -sxm /`)
 
@@ -138,6 +138,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
+- 2026-09-14: Tagged **5.0.0** + GitHub Release (`bcddb5db…`, #88).
 - 2026-09-14: CMN-PIN-001 / CMN-WF-004 / CMN-RESCAN-001 — guardrails `1.6.0` +
   scaffold `1.5.0`; containerdevops `4.0.0` + `size_class: ci_toolchain`;
   fail-closed threshold reader; collect-then-fail; digest-pinned rescans;
