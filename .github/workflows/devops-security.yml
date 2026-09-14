@@ -59,14 +59,14 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
+    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
     with:
-      image: ghcr.io/pirlruc/ci-lint:latest
-      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
+      image: ghcr.io/pirlruc/ci-lint:4.0.0@sha256:0a4691ba3f505d6f4998016997adac9adcc016676b8daf572cdf2fa446d61872
+      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
       pkg_types: library
       ignorefile: docker/ci-lint/.trivyignore.yaml
       results_artifact: published-ci-lint-scan
-      sarif_category: trivy-ci-lint-latest
+      sarif_category: trivy-ci-lint
       blocking: true
     secrets:
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
@@ -77,14 +77,14 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@3607bf0809c951d6d4b832d58f625a34eb3bb75b
+    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
     with:
-      image: ghcr.io/pirlruc/ci-supply-chain:latest
-      scripts_ref: 3607bf0809c951d6d4b832d58f625a34eb3bb75b
+      image: ghcr.io/pirlruc/ci-supply-chain:3.0.0@sha256:5d25d0c38250a737368ca277402c401fa5b3c53d471e68631f0d8863ffc45fac
+      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
       pkg_types: library
       ignorefile: docker/ci-supply-chain/.trivyignore.yaml
       results_artifact: published-ci-supply-chain-scan
-      sarif_category: trivy-ci-supply-chain-latest
+      sarif_category: trivy-ci-supply-chain
       blocking: true
     secrets:
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}

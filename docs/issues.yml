@@ -1,7 +1,7 @@
 # Authored backlog for commondevops.
 #
 # Schema: https://github.com/pirlruc/github-scaffold/blob/main/docs/issues-schema.md
-# Methodology: https://github.com/pirlruc/methodologies/tree/1.1.0/github-issue-adr
+# Methodology: https://github.com/pirlruc/methodologies/tree/1.5.0/github-issue-adr
 
 milestones:
   - name: Phase 1 — Foundation
@@ -934,7 +934,7 @@ milestones:
               - CI-025
 
       - id: CMN-PIN-001
-        status: open
+        status: done
         title: Bump docs/guardrails from a non-tag 1.1.0-4 SHA to tag 1.6.0
         overview:
           problem: >-
@@ -959,7 +959,7 @@ milestones:
           - SC-DEP-004
         tasks:
           - id: CMN-PIN-001-T1
-            status: open
+            status: done
             title: Re-pin docs/guardrails at guardrails 1.6.0 and remediate gates
             instructions:
               files:
@@ -970,7 +970,7 @@ milestones:
               - SC-DEP-004
 
       - id: CMN-WF-004
-        status: open
+        status: done
         title: Promote POSIX check-ci-docker.sh as the single scripts_ref implementation
         overview:
           problem: >-
@@ -994,7 +994,7 @@ milestones:
           - CI-036
         tasks:
           - id: CMN-WF-004-T1
-            status: open
+            status: done
             title: Publish the POSIX runner as the scripts_ref local-parity recipe
             instructions:
               files:
@@ -1006,7 +1006,7 @@ milestones:
               - CI-008
 
       - id: CMN-RESCAN-001
-        status: open
+        status: done
         title: Document the container-published-rescan caller pattern as a recipe
         overview:
           problem: >-
@@ -1026,7 +1026,7 @@ milestones:
           - CI-018
         tasks:
           - id: CMN-RESCAN-001-T1
-            status: open
+            status: done
             title: Add a container-published-rescan caller recipe to workflows.md
             instructions:
               files:

@@ -5,10 +5,15 @@
 # shellcheck shell=sh
 
 run_actionlint() {
-  files="$(find .github/workflows \( -name "*.yml" -o -name "*.yaml" \) 2>/dev/null | head -40)"
+  files="$(find .github/workflows \( -name "*.yml" -o -name "*.yaml" \) 2>/dev/null)"
   if [ -z "${files}" ]; then
     echo "No workflows to lint"
     return 0
+  fi
+  n="$(printf '%s\n' "${files}" | grep -c .)"
+  if [ "${n}" -gt 40 ]; then
+    echo "CI-035: ${n} workflow files exceeds actionlint cap of 40" >&2
+    return 1
   fi
   # shellcheck disable=SC2086
   actionlint ${files}

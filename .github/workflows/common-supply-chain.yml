@@ -83,6 +83,18 @@ jobs:
             scripts
           sparse-checkout-cone-mode: false
 
+      - name: Require scripts_ref for cross-repo callers (CI-034)
+        env:
+          SCRIPTS_REF: ${{ inputs.scripts_ref }}
+          REPO: ${{ github.repository }}
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -euo pipefail
+          if [[ "${REPO}" != "pirlruc/commondevops" && -z "${SCRIPTS_REF}" ]]; then
+            echo "CI-034: cross-repo callers must pass scripts_ref matching the uses: pin" >&2
+            exit 1
+          fi
+
       - name: Require vendored supply-chain thresholds
         working-directory: ${{ github.workspace }}
         run: |
@@ -101,16 +113,20 @@ jobs:
         run: bash _commondevops/scripts/install-common-tools.sh
 
       - name: Syft SBOM (CycloneDX + SPDX)
-        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        id: syft
+        continue-on-error: true
         run: |
+          set -euo pipefail
           mkdir -p scan-results
           syft dir:. \
             -o cyclonedx-json=scan-results/sbom-cdx.json \
             -o spdx-json=scan-results/sbom-spdx.json
 
       - name: Grype (SBOM)
-        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        id: grype
+        continue-on-error: true
         run: |
+          set -euo pipefail
           CFG=()
           [[ -f .grype.yaml ]] && CFG=(--config .grype.yaml)
           if [[ -f scan-results/sbom-cdx.json ]]; then
@@ -121,8 +137,10 @@ jobs:
           fi
 
       - name: Trivy filesystem
-        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        id: trivy
+        continue-on-error: true
         run: |
+          set -euo pipefail
           mkdir -p scan-results
           CFG=()
           [[ -f trivy.yaml ]] && CFG=(--config trivy.yaml)
@@ -133,8 +151,9 @@ jobs:
             --exit-code 1 "${CFG[@]}" .
 
       - name: License gate (grant)
+        id: grant
         if: inputs.license_engine == 'grant'
-        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        continue-on-error: true
         env:
           THRESHOLDS_PATH: ${{ env.THRESHOLDS_PATH }}
           GRANT_CONFIG_PATH: .grant.yaml
@@ -148,13 +167,34 @@ jobs:
           grant check scan-results/sbom-spdx.json --disable-file-search -c .grant.yaml "${DRY[@]}"
 
       - name: License gate (spdx-deny)
+        id: spdx_deny
         if: inputs.license_engine == 'spdx-deny'
-        continue-on-error: ${{ env.ADVISORY == 'true' }}
+        continue-on-error: true
         env:
           SPDX_SBOM_PATH: scan-results/sbom-spdx.json
           LICENSE_DENY_LIST: ${{ inputs.license_deny_list }}
           THRESHOLDS_PATH: ${{ env.THRESHOLDS_PATH }}
         run: python3 "${{ github.workspace }}/_commondevops/scripts/license_gate.py"
+
+      - name: Gate — supply-chain
+        if: always()
+        working-directory: ${{ github.workspace }}
+        env:
+          ADVISORY: ${{ env.ADVISORY }}
+          SYFT: ${{ steps.syft.outcome }}
+          GRYPE: ${{ steps.grype.outcome }}
+          TRIVY: ${{ steps.trivy.outcome }}
+          GRANT: ${{ steps.grant.outcome }}
+          SPDX: ${{ steps.spdx_deny.outcome }}
+        run: |
+          set -euo pipefail
+          args=()
+          if [[ "${SYFT}" != "skipped" && -n "${SYFT}" ]]; then args+=(syft="${SYFT}"); fi
+          if [[ "${GRYPE}" != "skipped" && -n "${GRYPE}" ]]; then args+=(grype="${GRYPE}"); fi
+          if [[ "${TRIVY}" != "skipped" && -n "${TRIVY}" ]]; then args+=(trivy="${TRIVY}"); fi
+          if [[ "${GRANT}" != "skipped" && -n "${GRANT}" ]]; then args+=(grant="${GRANT}"); fi
+          if [[ "${SPDX}" != "skipped" && -n "${SPDX}" ]]; then args+=(spdx_deny="${SPDX}"); fi
+          bash _commondevops/scripts/gate-aggregate.sh "${args[@]}"
 
       - name: Upload scan results
         if: always()

@@ -119,8 +119,9 @@ gitleaks ranges. Prefer `ghcr.io/pirlruc/ci-lint` for the same toolset.
 
 | Input | Default | Notes |
 |-------|---------|-------|
-| `license_deny_list` | `"[]"` | JSON array string |
+| `license_deny_list` | `"[]"` | JSON array string for `spdx-deny` |
 | `license_engine` | `grant` | `grant` or `spdx-deny` |
+| `license_allow_list` | vendored | Grant patterns in `scripts/supply-chain.profile.thresholds.yml` (SC-LIC-001) |
 
 Thresholds are **vendored** at `scripts/supply-chain.profile.thresholds.yml`
 (not `docs/guardrails/…` — the submodule is often deinitialized for consumers).
@@ -137,10 +138,13 @@ Permissions: `security-events: write`, `id-token: write`.
 
 | Input | Default |
 |-------|---------|
+| `blocking` | `false` |
 | `publish_results` | `true` |
 
-Private Free-plan repos: pass optional `SCORECARD_TOKEN` (classic PAT, `repo`
-scope) or Scorecard stays advisory when `repository.private` is true.
+The reusable secret is **`repo_token`**. Callers map their repo secret
+(`SCORECARD_TOKEN`, classic PAT, `repo` scope) into `secrets.repo_token`.
+Private Free-plan repos stay advisory when `blocking` is false; without
+`repo_token`, Scorecard cannot list commits on private repos.
 
 ---
 
@@ -167,8 +171,8 @@ Permissions: `contents: write`; `id-token: write` when signing is requested
 Thin callers into containerdevops for lint/build/scan/publish of
 `docker/ci-lint` and `docker/ci-supply-chain`. Secrets:
 `CONTAINERDEVOPS_READ_TOKEN`, `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`.
-`dhi_login: true`. `image_max_size_mb: "700"` (rootfs via `du -sxm /`).
-Optional Hub push via `dockerhub_image`. Caller must grant `packages: read` on
+`dhi_login: true`. `size_class: ci_toolchain` (DOCKER-PERF-002,
+`ci_image_max_size_mb` 2000). Optional Hub push via `dockerhub_image`. Caller must grant `packages: read` on
 the build job (container-build declares it).
 
 Trivy ignorefile contract (containerdevops ≥ `2.2.0`):
@@ -205,7 +209,62 @@ reusables against this repository (`scripts_ref: ${{ github.sha }}`).
 ## `devops-security.yml` (scheduled)
 
 Weekly secrets/SAST, supply-chain, Scorecard, and registry rescans of
-`ghcr.io/pirlruc/ci-lint:latest` and `ghcr.io/pirlruc/ci-supply-chain:latest`
-via containerdevops `container-published-rescan.yml@3.0.2` (`3607bf0…`; probe
-skips the scan when the package is not yet pullable). Image CI (`ci-lint-image.yml`,
-`ci-supply-chain-image.yml`) still calls `container-scan.yml` at the same SHA.
+digest-pinned `ghcr.io/pirlruc/ci-lint:4.0.0` and
+`ghcr.io/pirlruc/ci-supply-chain:3.0.0` via containerdevops
+`container-published-rescan.yml@4.0.0` (`a29ebe54…`). Image CI still calls
+`container-scan.yml` at the same SHA.
+
+---
+
+## Local parity via `scripts_ref` (CMN-WF-004)
+
+Consumers should not copy `check-ci-docker.sh`. Pin this repo, sparse-checkout
+`scripts/`, and wrap with env prefixes:
+
+```sh
+# After checking out pirlruc/commondevops@<sha> into _commondevops/scripts
+COMMONDEVOPS_CI_IMAGE="${MY_CI_IMAGE:-ghcr.io/pirlruc/ci-lint:4.0.0@sha256:0a4691ba3f505d6f4998016997adac9adcc016676b8daf572cdf2fa446d61872}"
+COMMONDEVOPS_DOCKER_STEPS="actionlint shellcheck hadolint zizmor yamllint"
+export COMMONDEVOPS_CI_IMAGE COMMONDEVOPS_DOCKER_STEPS
+sh _commondevops/scripts/check-ci-docker.sh
+```
+
+`check-ci-docker.sh` sources `ci-steps.sh` (POSIX `sh`, Alpine has no bash).
+Host-available tools stay on PATH via `check-ci-local.sh`; missing tools run
+in the digest-pinned image. Per-repo wrappers should only set the env prefix
+and optional local image tag.
+
+`scripts_ref` on reusable workflows must equal the caller `uses:` pin (CI-034).
+The same SHA is the sparse-checkout ref for this runner.
+
+---
+
+## Published-image rescan caller (CMN-RESCAN-001)
+
+Copy-ready job. Pin containerdevops **4.0.0**
+(`a29ebe54d321e25e639ff34b704da1a0ddd45655`) for both `uses:` and `scripts_ref`.
+Digest-pin the image (CI-026); do not float on `:latest`.
+
+```yaml
+  published-rescan:
+    if: github.actor != 'dependabot[bot]'
+    permissions:
+      contents: read
+      security-events: write
+      packages: read
+    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
+    with:
+      image: ghcr.io/pirlruc/<image>@sha256:<digest>
+      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
+      pkg_types: library
+      ignorefile: docker/<image>/.trivyignore.yaml
+      results_artifact: published-<image>-scan
+      sarif_category: trivy-<image>
+      blocking: true
+    secrets:
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+```
+
+Model: [cppdevops-security.yml](https://github.com/pirlruc/cppdevops/blob/main/.github/workflows/cppdevops-security.yml)
+published-ci-cpp-rescan job. Probe skips the scan when GHCR is not pullable.
+
