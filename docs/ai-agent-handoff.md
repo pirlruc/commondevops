@@ -18,11 +18,13 @@ Owns `.github/workflows/common-*.yml`, `devops-ci.yml`, `devops-security.yml`,
 matching `scripts_ref` + `checkout_token`. `common-doc-verify.yml` /
 `common-scaffold-verify.yml` ship in 4.1.0; older pins do not have them.
 
-Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `5.0.0`
-→ `f5a3a6327bb64fbf208130ba6b46be41678367e4` (GHCR digest handoff, `flavor: latest=false`).
+Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `5.0.1`
+→ `2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd` (GHCR digest handoff with
+non-empty reusable `image_ref`; `flavor: latest=false`). Do not pin 5.0.0
+(`f5a3a632…`) — job outputs from the handoff `always()` step were empty.
 `common-doc-verify.yml` / `common-scaffold-verify.yml` shipped in **4.1.0**
 (`dcd9ca1c4eb8faedba170fef5dbecc61d7b284b3`) and remain. Callers must re-pin
-after **5.0.0**; `scripts_ref` must match. Cross-repo callers need
+after **5.1.0**; `scripts_ref` must match. Cross-repo callers need
 `COMMONDEVOPS_READ_TOKEN` — `GITHUB_TOKEN` cannot clone this private repo.
 
 ## Delivery status
@@ -48,7 +50,7 @@ after **5.0.0**; `scripts_ref` must match. Cross-repo callers need
 |-----------|-----|
 | guardrails submodule | tag **1.6.0** → `77cf16eb…` |
 | github-scaffold submodule | tag **1.5.0** → `9e04ed53…` |
-| containerdevops (image callers + security rescan) | tag `5.0.0` → `f5a3a6327bb64fbf208130ba6b46be41678367e4` |
+| containerdevops (image callers + security rescan) | tag `5.0.1` → `2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 | `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `5.1.0` (digest after Release publish) |
 | `ghcr.io/pirlruc/ci-lint` (debian) | `5.1.0-debian` (digest after Release publish) |
@@ -139,7 +141,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
-- 2026-09-14: **5.1.0** — re-pin containerdevops 5.0.0 GHCR handoff, CHANGELOG,
+- 2026-09-14: **5.1.0** — re-pin containerdevops 5.0.1 GHCR handoff, CHANGELOG,
   SC-SIGN/SC-PROV, zizmor config parity, Alpine secrets scan, threshold-driven
   supply-chain severity.
 - 2026-09-14: Tagged **5.0.0** + GitHub Release (`bcddb5db…`, #88).
