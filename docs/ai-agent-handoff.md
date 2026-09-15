@@ -93,7 +93,9 @@ python3 .github/scaffold/scripts/issues-sync.py \
 - **Caller permissions:** reusable workflows cannot escalate. Build callers must
   grant `packages: write` (ephemeral GHCR handoff) or the run dies at
   **startup_failure**. Scan callers of a `ghcr.io/` image must grant
-  `packages: read` and pass `image: ${{ needs.build.outputs.image_ref }}`.
+  `packages: read` and compose
+  `ghcr.io/<owner>/<handoff_package>@<digest>` (do not pass `image_ref`:
+  Actions strips it when `DOCKERHUB_USERNAME` equals the owner).
   Do **not** delete published GHCR versions; PR cleanup may delete `ci-run-*`
   only when that is the version's sole tag.
 - **ignorefile:** blocking scans pass per-image files under `docker/ci-*/`. Posture

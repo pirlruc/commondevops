@@ -11,10 +11,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 - Image callers pin [containerdevops 5.0.1](https://github.com/pirlruc/containerdevops)
   (`2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd`). Build jobs need
-  `packages: write` and pass `image: ${{ needs.build.outputs.image_ref }}`
-  into scan; publish retags `source_image`. Image tarballs are no longer
-  the default handoff. Do not pin 5.0.0 (`f5a3a632…`): reusable-workflow
-  `image_ref` outputs were empty.
+  `packages: write` and compose scan/publish refs from `handoff_package` +
+  `digest` (`image_ref` is secret-masked when the Hub username equals the
+  owner). Image tarballs are no longer the default handoff. Do not pin 5.0.0
+  (`f5a3a632…`).
 
 ### Added
 

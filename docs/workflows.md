@@ -173,7 +173,8 @@ Thin callers into containerdevops for lint/build/scan/publish of
 `CONTAINERDEVOPS_READ_TOKEN`, `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`.
 `dhi_login: true`. `size_class: ci_toolchain` (DOCKER-PERF-002,
 `ci_image_max_size_mb` 2000). Optional Hub push via `dockerhub_image`. Caller must grant `packages: write` on
-the build job (GHCR digest handoff). Scan uses `needs.build.outputs.image_ref`.
+the build job (GHCR digest handoff). Scan composes
+`ghcr.io/<owner>/<handoff_package>@<digest>` (not `image_ref`).
 
 Trivy ignorefile contract (containerdevops ≥ `2.2.0`):
 
