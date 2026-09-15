@@ -1,7 +1,7 @@
 ---
 # Thin caller — publishes ghcr.io/pirlruc/ci-supply-chain (+ Docker Hub when secrets set).
 # Debian and Alpine variants; Alpine owns unsuffixed tags (lower vuln posture as of 2026-08).
-# containerdevops pin: tag 4.0.0 (size_class=ci_toolchain, fail-closed thresholds).
+# containerdevops pin: tag 5.0.1 (GHCR digest handoff, fail-closed empty image_ref).
 name: CI Supply Chain Image
 
 on:
@@ -41,11 +41,11 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
     with:
       dockerfile: docker/ci-supply-chain/Dockerfile
       working_directory: .
-      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
+      scripts_ref: 2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
       runner_image: ""
       run_infra_lint: false
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -61,14 +61,14 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
     with:
       dockerfile: docker/ci-supply-chain/Dockerfile.alpine
       working_directory: .
-      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
+      scripts_ref: 2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
       runner_image: ""
       run_infra_lint: false
-      run_secrets_scan: false
+      run_secrets_scan: true
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
     secrets:
       checkout_token: ${{ github.token }}
@@ -82,15 +82,16 @@ jobs:
        github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
-      packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
+      packages: write
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
     with:
       context: docker/ci-supply-chain
       dockerfile: docker/ci-supply-chain/Dockerfile
       image_name: ci-supply-chain:ci-debian
       artifact_name: container-image-debian
+      handoff_package: ci-supply-chain
       structure_test_config: docker/ci-supply-chain/container-structure-test.yml
-      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
+      scripts_ref: 2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
       size_class: ci_toolchain
       image_title: ci-supply-chain
@@ -112,15 +113,16 @@ jobs:
        github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
-      packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
+      packages: write
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
     with:
       context: docker/ci-supply-chain
       dockerfile: docker/ci-supply-chain/Dockerfile.alpine
       image_name: ci-supply-chain:ci-alpine
       artifact_name: container-image-alpine
+      handoff_package: ci-supply-chain
       structure_test_config: docker/ci-supply-chain/container-structure-test.yml
-      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
+      scripts_ref: 2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
       size_class: ci_toolchain
       image_title: ci-supply-chain
@@ -144,13 +146,12 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
     with:
-      image: ci-supply-chain:ci-debian
-      image_artifact: container-image-debian
+      image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build.outputs.handoff_package, needs.build.outputs.digest) }}
       results_artifact: container-scan-results-debian
       sarif_category: trivy-image-debian
-      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
+      scripts_ref: 2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
       pkg_types: library
       ignorefile: docker/ci-supply-chain/.trivyignore.yaml
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -167,13 +168,12 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
     with:
-      image: ci-supply-chain:ci-alpine
-      image_artifact: container-image-alpine
+      image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build-alpine.outputs.handoff_package, needs.build-alpine.outputs.digest) }}
       results_artifact: container-scan-results-alpine
       sarif_category: trivy-image-alpine
-      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
+      scripts_ref: 2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
       pkg_types: library
       ignorefile: docker/ci-supply-chain/.trivyignore.yaml
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -191,13 +191,12 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
     with:
-      image: ci-supply-chain:ci-debian
-      image_artifact: container-image-debian
+      image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build.outputs.handoff_package, needs.build.outputs.digest) }}
       results_artifact: container-scan-posture-debian
       sarif_category: trivy-posture-debian
-      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
+      scripts_ref: 2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
       pkg_types: os,library
       ignorefile: none
       blocking: false
@@ -214,13 +213,12 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
     with:
-      image: ci-supply-chain:ci-alpine
-      image_artifact: container-image-alpine
+      image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build-alpine.outputs.handoff_package, needs.build-alpine.outputs.digest) }}
       results_artifact: container-scan-posture-alpine
       sarif_category: trivy-posture-alpine
-      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
+      scripts_ref: 2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
       pkg_types: os,library
       ignorefile: none
       blocking: false
@@ -238,13 +236,13 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
     with:
       context: docker/ci-supply-chain
       dockerfile: docker/ci-supply-chain/Dockerfile
       image_name: ci-supply-chain
       dockerhub_image: pirlruc/ci-supply-chain
-      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
+      scripts_ref: 2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
       platforms: linux/amd64
       tag_suffix: -debian
       tag_alias_unsuffixed: false
@@ -264,6 +262,7 @@ jobs:
       dhi_login: true
       tag_latest: ${{ github.event_name != 'release' || github.event.release.prerelease == false }}
       verify_command: /bin/true
+      source_image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build.outputs.handoff_package, needs.build.outputs.digest) }}
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -280,13 +279,13 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
     with:
       context: docker/ci-supply-chain
       dockerfile: docker/ci-supply-chain/Dockerfile.alpine
       image_name: ci-supply-chain
       dockerhub_image: pirlruc/ci-supply-chain
-      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
+      scripts_ref: 2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
       platforms: linux/amd64
       tag_suffix: -alpine
       tag_alias_unsuffixed: true
@@ -306,7 +305,29 @@ jobs:
       dhi_login: true
       tag_latest: ${{ github.event_name != 'release' || github.event.release.prerelease == false }}
       verify_command: /bin/true
+      source_image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build-alpine.outputs.handoff_package, needs.build-alpine.outputs.digest) }}
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  # PR-only: ci-run-* is not also a release tag. After publish retag, never delete.
+  cleanup:
+    needs: [build, scan]
+    if: always() && github.event_name == 'pull_request' && needs.build.outputs.handoff_tag != ''
+    permissions:
+      packages: write
+    uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
+    with:
+      package: ${{ needs.build.outputs.handoff_package }}
+      tag: ${{ needs.build.outputs.handoff_tag }}
+
+  cleanup-alpine:
+    needs: [build-alpine, scan-alpine]
+    if: always() && github.event_name == 'pull_request' && needs.build-alpine.outputs.handoff_tag != ''
+    permissions:
+      packages: write
+    uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
+    with:
+      package: ${{ needs.build-alpine.outputs.handoff_package }}
+      tag: ${{ needs.build-alpine.outputs.handoff_tag }}

@@ -31,7 +31,7 @@ ENV UV_SYSTEM_PYTHON=1 \
 # (CVE floor >=1.28.1) — mcp 2.x drops FastMCP and breaks semgrep's MCP command.
 RUN printf 'mcp==1.29.0\n' > /tmp/uv-overrides.txt \
  && uv pip install --system --no-cache --override /tmp/uv-overrides.txt \
-      'zizmor>=1.0' \
+      'zizmor==1.29.0' \
       'yamllint>=1.35' \
       'semgrep==1.172.0' \
       'mcp==1.29.0' \

@@ -16,8 +16,8 @@ and semgrep. Not a product runtime — no `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `4.0.0` / `4.0.0-alpine` | Immutable Alpine release (default unsuffixed = Alpine) |
-| `4.0.0-debian` | Immutable Debian 13 release |
+| `5.1.0` / `5.1.0-alpine` | Immutable Alpine release (default unsuffixed = Alpine) |
+| `5.1.0-debian` | Immutable Debian 13 release |
 | `latest` / `latest-alpine` | Latest non-prerelease Alpine publish |
 | `latest-debian` | Latest non-prerelease Debian publish |
 | `sha-<git>` / `sha-<git>-alpine` / `sha-<git>-debian` | Exact git SHA of the published commit |
@@ -31,14 +31,14 @@ libc matters; prefer a digest in production.
 If the package is public, anonymous pulls work:
 
 ```bash
-docker pull ghcr.io/pirlruc/ci-lint:4.0.0
+docker pull ghcr.io/pirlruc/ci-lint:5.1.0
 ```
 
 If the package is private, authenticate with a PAT that has `read:packages`:
 
 ```bash
 echo "$CR_PAT" | docker login ghcr.io -u USERNAME --password-stdin
-docker pull ghcr.io/pirlruc/ci-lint:4.0.0
+docker pull ghcr.io/pirlruc/ci-lint:5.1.0
 # or
 docker pull ghcr.io/pirlruc/ci-lint@sha256:<digest>
 ```
@@ -50,7 +50,7 @@ jobs:
   lint:
     runs-on: ubuntu-24.04
     container:
-      image: ghcr.io/pirlruc/ci-lint:4.0.0
+      image: ghcr.io/pirlruc/ci-lint:5.1.0
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -66,7 +66,7 @@ Grant the package **Actions** Read access for the calling repository when using
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  ghcr.io/pirlruc/ci-lint:4.0.0 \
+  ghcr.io/pirlruc/ci-lint:5.1.0 \
   actionlint .github/workflows/*.yml
 ```
 
@@ -79,7 +79,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  ghcr.io/pirlruc/ci-lint:4.0.0 \
+  ghcr.io/pirlruc/ci-lint:5.1.0 \
   semgrep scan --config auto --error .
 ```
 

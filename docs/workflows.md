@@ -29,7 +29,7 @@ or the reusable job fails at startup with no useful callee message.
 | `common-supply-chain.yml` | `contents: read`, `security-events: write` |
 | `common-scorecard.yml` | `contents: read`, `security-events: write`, `id-token: write` |
 | `common-release.yml` | `contents: write`, `id-token: write` |
-| `ci-lint-image.yml` / `ci-supply-chain-image.yml` | `contents: read`; `packages: read` on lint/scan/build jobs; `packages: write` on publish |
+| `ci-lint-image.yml` / `ci-supply-chain-image.yml` | `contents: read`; `packages: write` on build; `packages: read` on scan; `packages: write` on publish |
 
 GHCR visibility and Actions package access cannot be set via API. The dispatch-only helper
 [`.github/workflows/ghcr-package-visibility.yml`](../.github/workflows/ghcr-package-visibility.yml)
@@ -172,8 +172,9 @@ Thin callers into containerdevops for lint/build/scan/publish of
 `docker/ci-lint` and `docker/ci-supply-chain`. Secrets:
 `CONTAINERDEVOPS_READ_TOKEN`, `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`.
 `dhi_login: true`. `size_class: ci_toolchain` (DOCKER-PERF-002,
-`ci_image_max_size_mb` 2000). Optional Hub push via `dockerhub_image`. Caller must grant `packages: read` on
-the build job (container-build declares it).
+`ci_image_max_size_mb` 2000). Optional Hub push via `dockerhub_image`. Caller must grant `packages: write` on
+the build job (GHCR digest handoff). Scan composes
+`ghcr.io/<owner>/<handoff_package>@<digest>` (not `image_ref`).
 
 Trivy ignorefile contract (containerdevops ≥ `2.2.0`):
 
@@ -211,8 +212,8 @@ reusables against this repository (`scripts_ref: ${{ github.sha }}`).
 Weekly secrets/SAST, supply-chain, Scorecard, and registry rescans of
 digest-pinned `ghcr.io/pirlruc/ci-lint:4.0.0` and
 `ghcr.io/pirlruc/ci-supply-chain:3.0.0` via containerdevops
-`container-published-rescan.yml@4.0.0` (`a29ebe54…`). Image CI still calls
-`container-scan.yml` at the same SHA.
+`container-published-rescan.yml@5.0.1` (`2f33d910…`). Image CI still calls
+`container-scan.yml` at the same SHA. Update those image tags after 5.1.0 publish.
 
 ---
 
@@ -241,8 +242,8 @@ The same SHA is the sparse-checkout ref for this runner.
 
 ## Published-image rescan caller (CMN-RESCAN-001)
 
-Copy-ready job. Pin containerdevops **4.0.0**
-(`a29ebe54d321e25e639ff34b704da1a0ddd45655`) for both `uses:` and `scripts_ref`.
+Copy-ready job. Pin containerdevops **5.0.1**
+(`2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd`) for both `uses:` and `scripts_ref`.
 Digest-pin the image (CI-026); do not float on `:latest`.
 
 ```yaml
@@ -252,10 +253,10 @@ Digest-pin the image (CI-026); do not float on `:latest`.
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@a29ebe54d321e25e639ff34b704da1a0ddd45655
+    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
     with:
       image: ghcr.io/pirlruc/<image>@sha256:<digest>
-      scripts_ref: a29ebe54d321e25e639ff34b704da1a0ddd45655
+      scripts_ref: 2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
       pkg_types: library
       ignorefile: docker/<image>/.trivyignore.yaml
       results_artifact: published-<image>-scan

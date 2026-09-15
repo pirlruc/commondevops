@@ -42,11 +42,11 @@ ENV PATH="/usr/local/bin:${PATH}" \
 # purge leaves behind (Trivy otherwise reports phantom linux-libc-dev CVEs).
 USER root
 RUN set -eu; \
-    apt-get purge -y --auto-remove \
-      linux-libc-dev libc6-dev libexpat1-dev libpython-3.13-dev \
-      python-3.13-dev zlib1g-dev rpcsvc-proto 2>/dev/null || true; \
     for p in linux-libc-dev libc6-dev libexpat1-dev libpython-3.13-dev \
              python-3.13-dev zlib1g-dev rpcsvc-proto; do \
+      if dpkg-query -W "$p" >/dev/null 2>&1; then \
+        apt-get purge -y --auto-remove "$p"; \
+      fi; \
       rm -f "/var/lib/dpkg/status.d/${p}" "/var/lib/dpkg/status.d/${p}.md5sums"; \
     done; \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/*
