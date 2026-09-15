@@ -131,6 +131,10 @@ python3 .github/scaffold/scripts/issues-sync.py \
   (not installed). Prefer `actionlint`/`zizmor`/disposable install tests before push.
 - **GHCR inspect locally:** packages:read often missing on user tokens → 403; use
   Actions publish logs for digest/tag verification.
+- **Quota (2026-09-15):** leftover `container-image-*` Actions artifacts were
+  deleted. Image builds inherit containerdevops BuildKit
+  `cache-to: type=gha,mode=min`. Do **not** delete published GHCR/Hub tags or
+  bulk-delete GHA cache entries.
 - **check-ci-local.sh:** `--no-docker` fails when tools are missing (no silent pass);
   license_gate is no longer masked with `|| true`.
 
@@ -143,6 +147,8 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
+- 2026-09-15: Quota sweep — leftover `container-image-*` artifacts deleted.
+  GHA cache remains `mode=min` via containerdevops (no GHCR published-tag delete).
 - 2026-09-14: **5.1.0** — re-pin containerdevops 5.0.1 GHCR handoff, CHANGELOG,
   SC-SIGN/SC-PROV, zizmor config parity, Alpine secrets scan, threshold-driven
   supply-chain severity.
@@ -191,4 +197,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-09-14*
+*Last updated: 2026-09-15*
