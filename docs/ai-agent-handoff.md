@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `common/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
-| **Branch** | `feature-digest-5.1.1` → tag **5.1.1** |
+| **Branch** | `feature-digest-5.1.2` → tag **5.1.2** |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, release + `ci-lint` / `ci-supply-chain` images |
 | **Type** | CI infrastructure |
 
@@ -24,7 +24,7 @@ Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `5.
 (`f5a3a632…`) — job outputs from the handoff `always()` step were empty.
 `common-doc-verify.yml` / `common-scaffold-verify.yml` shipped in **4.1.0**
 (`dcd9ca1c4eb8faedba170fef5dbecc61d7b284b3`) and remain. Callers must re-pin
-after **5.1.2** digest writeback; `scripts_ref` must match. Cross-repo callers need
+after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 `COMMONDEVOPS_READ_TOKEN` — `GITHUB_TOKEN` cannot clone this private repo.
 
 ## Delivery status
@@ -52,10 +52,11 @@ after **5.1.2** digest writeback; `scripts_ref` must match. Cross-repo callers n
 | github-scaffold submodule | tag **1.5.0** → `9e04ed53…` |
 | containerdevops (image callers + security rescan) | tag `5.0.2` → `32384866e5669dbde8bdecde153a6ae6ead728ed` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
-| `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `5.1.0` `sha256:fc7d91c3ad2ca946e50395227b86396ac92d90afa14e9ca8c301909a5424085c` (5.1.1 digest after Release) |
-| `ghcr.io/pirlruc/ci-lint` (debian) | `5.1.0-debian` `sha256:c46d04b224d6a7e3227c02aa693c6cce277614be9432f6a6bcc88e8dbbbe1a7d` |
-| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.1.0` `sha256:1bbe1ff600e0b1b9bb05e5f3acd512776bf65d48728a883dc074e6d52af10b07` |
-| Release | **5.1.1** (SHA after merge) |
+| `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `5.1.1` `sha256:35a82a43839e0969dc7c44d63c36b5c97cdefb20c6d3112255f52c09444042a1` (`latest` == alpine) |
+| `ghcr.io/pirlruc/ci-lint` (debian) | `5.1.1-debian` `sha256:6834b69583a9f67ac21bd06167672e793ce2cba1c14e646a98108e0fc9512dcd` |
+| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.1.1` `sha256:10c82137edb980db080e682def182d236f40d042afd403bf025848838e9515ce` |
+| Release (reusables) | **5.1.2** (SHA after merge; no GitHub Release) |
+| Release (images) | **5.1.1** |
 
 ## Local image sizes / posture (2026-08-12, `du -sxm /`)
 
@@ -140,15 +141,15 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. After the 5.1.1 GitHub Release, write alpine/debian digests into
-   `devops-security.yml`, Hub/Packages pages, `check-ci-docker.sh`, and this
-   pins table (tag-only **5.1.2** — no GitHub Release).
-2. cppdevops / pydevops / containerdevops re-pin `uses:` + `scripts_ref` to
+1. cppdevops / pydevops / containerdevops re-pin `uses:` + `scripts_ref` to
    the **5.1.2** SHA.
-3. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
+2. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
 
 ## Recent history
 
+- 2026-09-15: **5.1.2** (tag-only) — write 5.1.1 alpine/debian Hub digests
+  (`ci-lint` `35a82a43…` / `6834b695…`, `ci-supply-chain` `10c82137…` /
+  `ad653b38…`). Hub `latest` == `5.1.1` alpine.
 - 2026-09-15: **5.1.1** — containerdevops 5.0.2 nested pin, scheduled rescans
   off `ci-lint:4.0.0` / `ci-supply-chain:3.0.0` onto 5.1.0 Hub digests,
   Hub/Packages target 5.1.1. Hub `latest` == `latest-alpine` (flavor fix);

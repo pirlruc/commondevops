@@ -16,8 +16,8 @@ runtime — no `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `5.1.1` / `5.1.1-alpine` | Immutable Alpine release (default unsuffixed = Alpine; digest after this Release) |
-| `5.1.1-debian` | Immutable Debian 13 release (digest after this Release) |
+| `5.1.1` / `5.1.1-alpine` | Immutable Alpine `sha256:10c82137edb980db080e682def182d236f40d042afd403bf025848838e9515ce` |
+| `5.1.1-debian` | Immutable Debian `sha256:ad653b38a199064d9a0d75cbd7c489618229c2eb2f8f9ae8b2d768cf8304f687` |
 | `5.1.0` / `5.1.0-alpine` | Previous Alpine `sha256:1bbe1ff600e0b1b9bb05e5f3acd512776bf65d48728a883dc074e6d52af10b07` |
 | `5.1.0-debian` | Previous Debian `sha256:b2827c388dccbfdd60538d33bfe58df1fda356bfb39de31076291b67414c5d31` |
 | `latest` / `latest-alpine` | Latest non-prerelease Alpine publish |
@@ -33,8 +33,7 @@ move `latest` off the SemVer tag — pin the digest, not `latest`.
 ```bash
 docker pull pirlruc/ci-supply-chain:5.1.1
 docker pull pirlruc/ci-supply-chain:5.1.1-debian
-# previous Alpine (known digest until 5.1.2 writeback)
-docker pull pirlruc/ci-supply-chain@sha256:1bbe1ff600e0b1b9bb05e5f3acd512776bf65d48728a883dc074e6d52af10b07
+docker pull pirlruc/ci-supply-chain@sha256:10c82137edb980db080e682def182d236f40d042afd403bf025848838e9515ce
 ```
 
 ## Quick start
@@ -74,12 +73,12 @@ semgrep (see `ci-lint`), cosign (installed on the publish runner), dive (see
 ## Verify a publish
 
 ```bash
-docker pull pirlruc/ci-supply-chain@sha256:<digest>
+docker pull pirlruc/ci-supply-chain@sha256:10c82137edb980db080e682def182d236f40d042afd403bf025848838e9515ce
 
 cosign verify \
   --certificate-identity-regexp 'https://github.com/pirlruc/commondevops/.github/workflows/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  pirlruc/ci-supply-chain@sha256:<digest>
+  pirlruc/ci-supply-chain@sha256:10c82137edb980db080e682def182d236f40d042afd403bf025848838e9515ce
 ```
 
 Signing runs only when the source repository is public.

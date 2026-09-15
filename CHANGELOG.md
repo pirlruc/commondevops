@@ -5,6 +5,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.1.2] - 2026-09-15
+
+### Changed
+
+- Write 5.1.1 alpine/debian Hub digests into published rescans, Hub/Packages
+  pages, and `check-ci-docker.sh`. No GitHub Release (does not republish images).
+
 ## [5.1.1] - 2026-09-15
 
 ### Changed
