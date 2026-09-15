@@ -5,6 +5,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.1.1] - 2026-09-15
+
+### Changed
+
+- Nested [containerdevops](https://github.com/pirlruc/containerdevops) pin is
+  **5.0.2** (`32384866e5669dbde8bdecde153a6ae6ead728ed`) for image callers and
+  published rescans (`handoff_package` + `digest`).
+- Scheduled rescans pin `ci-lint:5.1.0@sha256:fc7d91c3…` and
+  `ci-supply-chain:5.1.0@sha256:1bbe1ff6…` (was `ci-lint:4.0.0` /
+  `ci-supply-chain:3.0.0`). Hub / GHCR docs target **5.1.1**; 5.1.0 alpine/debian
+  digests are recorded as the previous immutable tags until 5.1.2 writeback.
+- `scripts/check-ci-docker.sh` default image is the 5.1.0 Alpine digest.
+
 ## [5.1.0] - 2026-09-14
 
 ### Breaking

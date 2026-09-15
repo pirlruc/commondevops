@@ -16,8 +16,10 @@ and semgrep. Not a product runtime — no `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `5.1.0` / `5.1.0-alpine` | Immutable Alpine release (default unsuffixed = Alpine) |
-| `5.1.0-debian` | Immutable Debian 13 release |
+| `5.1.1` / `5.1.1-alpine` | Immutable Alpine release (default unsuffixed = Alpine; digest after this Release) |
+| `5.1.1-debian` | Immutable Debian 13 release (digest after this Release) |
+| `5.1.0` / `5.1.0-alpine` | Previous Alpine `sha256:fc7d91c3ad2ca946e50395227b86396ac92d90afa14e9ca8c301909a5424085c` |
+| `5.1.0-debian` | Previous Debian `sha256:c46d04b224d6a7e3227c02aa693c6cce277614be9432f6a6bcc88e8dbbbe1a7d` |
 | `latest` / `latest-alpine` | Latest non-prerelease Alpine publish |
 | `latest-debian` | Latest non-prerelease Debian publish |
 | `sha-<git>` / `sha-<git>-alpine` / `sha-<git>-debian` | Exact git SHA of the published commit |
@@ -25,20 +27,22 @@ and semgrep. Not a product runtime — no `HEALTHCHECK`.
 Alpine owns the unsuffixed tags because it currently has the lower OS vulnerability
 posture on the DHI catalog (0 CRITICAL OS findings vs Debian). Prefer an explicit
 `-alpine` / `-debian` suffix when the libc matters; prefer a digest in production.
+`latest` equals `latest-alpine` (`flavor: latest=false`). A monthly rebuild may
+move `latest` off the SemVer tag — pin the digest, not `latest`.
 
 ```bash
-docker pull pirlruc/ci-lint:5.1.0
+docker pull pirlruc/ci-lint:5.1.1
 # or
-docker pull pirlruc/ci-lint:5.1.0-debian
-# or
-docker pull pirlruc/ci-lint@sha256:<digest>
+docker pull pirlruc/ci-lint:5.1.1-debian
+# previous Alpine (known digest until 5.1.2 writeback)
+docker pull pirlruc/ci-lint@sha256:fc7d91c3ad2ca946e50395227b86396ac92d90afa14e9ca8c301909a5424085c
 ```
 
 ## Quick start
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-lint:5.1.0 \
+  pirlruc/ci-lint:5.1.1 \
   actionlint .github/workflows/*.yml
 ```
 
@@ -51,7 +55,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-lint:5.1.0 \
+  pirlruc/ci-lint:5.1.1 \
   semgrep scan --config auto --error .
 ```
 

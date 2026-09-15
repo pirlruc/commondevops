@@ -210,10 +210,13 @@ reusables against this repository (`scripts_ref: ${{ github.sha }}`).
 ## `devops-security.yml` (scheduled)
 
 Weekly secrets/SAST, supply-chain, Scorecard, and registry rescans of
-digest-pinned `ghcr.io/pirlruc/ci-lint:4.0.0` and
-`ghcr.io/pirlruc/ci-supply-chain:3.0.0` via containerdevops
-`container-published-rescan.yml@5.0.1` (`2f33d910…`). Image CI still calls
-`container-scan.yml` at the same SHA. Update those image tags after 5.1.0 publish.
+digest-pinned `ghcr.io/pirlruc/ci-lint:5.1.0@sha256:fc7d91c3ad2ca946e50395227b86396ac92d90afa14e9ca8c301909a5424085c`
+and
+`ghcr.io/pirlruc/ci-supply-chain:5.1.0@sha256:1bbe1ff600e0b1b9bb05e5f3acd512776bf65d48728a883dc074e6d52af10b07`
+via containerdevops
+`container-published-rescan.yml@5.0.2` (`32384866…`). Image CI still calls
+`container-scan.yml` at the same SHA. After the 5.1.1 GitHub Release, write
+the new alpine digests (tag-only 5.1.2).
 
 ---
 
@@ -224,7 +227,7 @@ Consumers should not copy `check-ci-docker.sh`. Pin this repo, sparse-checkout
 
 ```sh
 # After checking out pirlruc/commondevops@<sha> into _commondevops/scripts
-COMMONDEVOPS_CI_IMAGE="${MY_CI_IMAGE:-ghcr.io/pirlruc/ci-lint:4.0.0@sha256:0a4691ba3f505d6f4998016997adac9adcc016676b8daf572cdf2fa446d61872}"
+COMMONDEVOPS_CI_IMAGE="${MY_CI_IMAGE:-ghcr.io/pirlruc/ci-lint:5.1.0@sha256:fc7d91c3ad2ca946e50395227b86396ac92d90afa14e9ca8c301909a5424085c}"
 COMMONDEVOPS_DOCKER_STEPS="actionlint shellcheck hadolint zizmor yamllint"
 export COMMONDEVOPS_CI_IMAGE COMMONDEVOPS_DOCKER_STEPS
 sh _commondevops/scripts/check-ci-docker.sh
@@ -242,8 +245,8 @@ The same SHA is the sparse-checkout ref for this runner.
 
 ## Published-image rescan caller (CMN-RESCAN-001)
 
-Copy-ready job. Pin containerdevops **5.0.1**
-(`2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd`) for both `uses:` and `scripts_ref`.
+Copy-ready job. Pin containerdevops **5.0.2**
+(`32384866e5669dbde8bdecde153a6ae6ead728ed`) for both `uses:` and `scripts_ref`.
 Digest-pin the image (CI-026); do not float on `:latest`.
 
 ```yaml
@@ -253,10 +256,10 @@ Digest-pin the image (CI-026); do not float on `:latest`.
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
+    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
     with:
       image: ghcr.io/pirlruc/<image>@sha256:<digest>
-      scripts_ref: 2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd
+      scripts_ref: 32384866e5669dbde8bdecde153a6ae6ead728ed
       pkg_types: library
       ignorefile: docker/<image>/.trivyignore.yaml
       results_artifact: published-<image>-scan

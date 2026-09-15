@@ -16,8 +16,10 @@ runtime — no `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `5.1.0` / `5.1.0-alpine` | Immutable Alpine release (default unsuffixed = Alpine) |
-| `5.1.0-debian` | Immutable Debian 13 release |
+| `5.1.1` / `5.1.1-alpine` | Immutable Alpine release (default unsuffixed = Alpine; digest after this Release) |
+| `5.1.1-debian` | Immutable Debian 13 release (digest after this Release) |
+| `5.1.0` / `5.1.0-alpine` | Previous Alpine `sha256:1bbe1ff600e0b1b9bb05e5f3acd512776bf65d48728a883dc074e6d52af10b07` |
+| `5.1.0-debian` | Previous Debian `sha256:b2827c388dccbfdd60538d33bfe58df1fda356bfb39de31076291b67414c5d31` |
 | `latest` / `latest-alpine` | Latest non-prerelease Alpine publish |
 | `latest-debian` | Latest non-prerelease Debian publish |
 | `sha-<git>` / `sha-<git>-alpine` / `sha-<git>-debian` | Exact git SHA of the published commit |
@@ -25,19 +27,21 @@ runtime — no `HEALTHCHECK`.
 Alpine owns the unsuffixed tags because it currently has the lower OS vulnerability
 posture on the DHI catalog. Prefer an explicit `-alpine` / `-debian` suffix when the
 libc matters; prefer a digest in production.
+`latest` equals `latest-alpine` (`flavor: latest=false`). A monthly rebuild may
+move `latest` off the SemVer tag — pin the digest, not `latest`.
 
 ```bash
-docker pull pirlruc/ci-supply-chain:5.1.0
-docker pull pirlruc/ci-supply-chain:5.1.0-debian
-# or
-docker pull pirlruc/ci-supply-chain@sha256:<digest>
+docker pull pirlruc/ci-supply-chain:5.1.1
+docker pull pirlruc/ci-supply-chain:5.1.1-debian
+# previous Alpine (known digest until 5.1.2 writeback)
+docker pull pirlruc/ci-supply-chain@sha256:1bbe1ff600e0b1b9bb05e5f3acd512776bf65d48728a883dc074e6d52af10b07
 ```
 
 ## Quick start
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-supply-chain:5.1.0 \
+  pirlruc/ci-supply-chain:5.1.1 \
   syft . -o spdx-json
 ```
 
@@ -50,7 +54,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-supply-chain:5.1.0 \
+  pirlruc/ci-supply-chain:5.1.1 \
   trivy fs --scanners vuln --severity HIGH,CRITICAL .
 ```
 
