@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `common/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
-| **Branch** | `feature-containerdevops-5.1.0` → tag **5.1.0** |
+| **Branch** | `feature-digest-5.1.1` → tag **5.1.1** |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, release + `ci-lint` / `ci-supply-chain` images |
 | **Type** | CI infrastructure |
 
@@ -18,13 +18,13 @@ Owns `.github/workflows/common-*.yml`, `devops-ci.yml`, `devops-security.yml`,
 matching `scripts_ref` + `checkout_token`. `common-doc-verify.yml` /
 `common-scaffold-verify.yml` ship in 4.1.0; older pins do not have them.
 
-Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `5.0.1`
-→ `2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd` (GHCR digest handoff with
-non-empty reusable `image_ref`; `flavor: latest=false`). Do not pin 5.0.0
+Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `5.0.2`
+→ `32384866e5669dbde8bdecde153a6ae6ead728ed` (compose GHCR refs from
+`handoff_package` + `digest`; `flavor: latest=false`). Do not pin 5.0.0
 (`f5a3a632…`) — job outputs from the handoff `always()` step were empty.
 `common-doc-verify.yml` / `common-scaffold-verify.yml` shipped in **4.1.0**
 (`dcd9ca1c4eb8faedba170fef5dbecc61d7b284b3`) and remain. Callers must re-pin
-after **5.1.0**; `scripts_ref` must match. Cross-repo callers need
+after **5.1.2** digest writeback; `scripts_ref` must match. Cross-repo callers need
 `COMMONDEVOPS_READ_TOKEN` — `GITHUB_TOKEN` cannot clone this private repo.
 
 ## Delivery status
@@ -50,12 +50,12 @@ after **5.1.0**; `scripts_ref` must match. Cross-repo callers need
 |-----------|-----|
 | guardrails submodule | tag **1.6.0** → `77cf16eb…` |
 | github-scaffold submodule | tag **1.5.0** → `9e04ed53…` |
-| containerdevops (image callers + security rescan) | tag `5.0.1` → `2f33d910dbaf5bc0a9b5d6cabc56037a43077ebd` |
+| containerdevops (image callers + security rescan) | tag `5.0.2` → `32384866e5669dbde8bdecde153a6ae6ead728ed` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
-| `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `5.1.0` (digest after Release publish) |
-| `ghcr.io/pirlruc/ci-lint` (debian) | `5.1.0-debian` (digest after Release publish) |
-| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.1.0` (digest after Release publish) |
-| Release | **5.1.0** (SHA after merge) |
+| `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `5.1.0` `sha256:fc7d91c3ad2ca946e50395227b86396ac92d90afa14e9ca8c301909a5424085c` (5.1.1 digest after Release) |
+| `ghcr.io/pirlruc/ci-lint` (debian) | `5.1.0-debian` `sha256:c46d04b224d6a7e3227c02aa693c6cce277614be9432f6a6bcc88e8dbbbe1a7d` |
+| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.1.0` `sha256:1bbe1ff600e0b1b9bb05e5f3acd512776bf65d48728a883dc074e6d52af10b07` |
+| Release | **5.1.1** (SHA after merge) |
 
 ## Local image sizes / posture (2026-08-12, `du -sxm /`)
 
@@ -140,13 +140,21 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. After the 5.1.0 GitHub Release, write alpine/debian digests into
-   `devops-security.yml` and this pins table.
-2. cppdevops / pydevops re-pin `uses:` + `scripts_ref` to this 5.1.0 SHA.
+1. After the 5.1.1 GitHub Release, write alpine/debian digests into
+   `devops-security.yml`, Hub/Packages pages, `check-ci-docker.sh`, and this
+   pins table (tag-only **5.1.2** — no GitHub Release).
+2. cppdevops / pydevops / containerdevops re-pin `uses:` + `scripts_ref` to
+   the **5.1.2** SHA.
 3. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
 
 ## Recent history
 
+- 2026-09-15: **5.1.1** — containerdevops 5.0.2 nested pin, scheduled rescans
+  off `ci-lint:4.0.0` / `ci-supply-chain:3.0.0` onto 5.1.0 Hub digests,
+  Hub/Packages target 5.1.1. Hub `latest` == `latest-alpine` (flavor fix);
+  monthly rebuild on the 15th moved `latest` off the 5.1.0 SemVer tag — pin
+  digests. GHCR pulls 403 without `read:packages`; Hub digests used for
+  writeback.
 - 2026-09-15: Quota sweep — leftover `container-image-*` artifacts deleted.
   GHA cache remains `mode=min` via containerdevops (no GHCR published-tag delete).
 - 2026-09-14: **5.1.0** — re-pin containerdevops 5.0.1 GHCR handoff, CHANGELOG,
