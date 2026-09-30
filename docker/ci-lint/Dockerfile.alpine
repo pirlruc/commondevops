@@ -15,7 +15,7 @@
 # No HEALTHCHECK: short-lived CI toolchain (CLI job container), not a supervised
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
-ARG BASE=dhi.io/python:3.13-alpine3.24-dev@sha256:7ee8eb32679a5729d91a30554b8791b5750e2491c04024b0b005ca226c4a0f7b
+ARG BASE=dhi.io/python:3.13-alpine3.24-dev@sha256:b638b0f214ccf84e1bf0814dfcb81774e470f7aaa206f7bf77edd8ba357ee79a
 
 # ---------------------------------------------------------------------------
 # pybuild — install Python CLIs; uv stays out of the final image (~53 MB).
