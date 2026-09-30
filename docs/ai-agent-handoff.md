@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Folder** | `common/commondevops/` |
+| **Folder** | `ops/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
 | **Branch** | `feature-digest-5.1.2` → tag **5.1.2** |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, release + `ci-lint` / `ci-supply-chain` images |
@@ -19,7 +19,7 @@ matching `scripts_ref` + `checkout_token`. `common-doc-verify.yml` /
 `common-scaffold-verify.yml` ship in 4.1.0; older pins do not have them.
 
 Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `5.0.2`
-→ `32384866e5669dbde8bdecde153a6ae6ead728ed` (compose GHCR refs from
+→ `c01b12a999ab2f17bc7352e2611d36a68e55a08e` (compose GHCR refs from
 `handoff_package` + `digest`; `flavor: latest=false`). Do not pin 5.0.0
 (`f5a3a632…`) — job outputs from the handoff `always()` step were empty.
 `common-doc-verify.yml` / `common-scaffold-verify.yml` shipped in **4.1.0**
@@ -48,10 +48,10 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 
 | Component | Ref |
 |-----------|-----|
-| guardrails submodule | tag **1.8.0** → `aa5184ce…` |
-| github-scaffold submodule | tag **1.7.0** → `e76bb3fd…` |
-| methodologies (links only; not a submodule) | tag **1.6.0** |
-| containerdevops (image callers + security rescan) | tag `5.0.2` → `32384866e5669dbde8bdecde153a6ae6ead728ed` |
+| guardrails submodule | tag **1.9.0** → `16a2c95c…` |
+| github-scaffold submodule | tag **1.8.0** → `ac9059fd…` |
+| methodologies (links only; not a submodule) | tag **1.8.0** |
+| containerdevops (image callers + security rescan) | tag `6.0.1` → `c01b12a999ab2f17bc7352e2611d36a68e55a08e` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 | `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `5.1.1` `sha256:35a82a43839e0969dc7c44d63c36b5c97cdefb20c6d3112255f52c09444042a1` (`latest` == alpine) |
 | `ghcr.io/pirlruc/ci-lint` (debian) | `5.1.1-debian` `sha256:6834b69583a9f67ac21bd06167672e793ce2cba1c14e646a98108e0fc9512dcd` |

@@ -5,12 +5,32 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.2.0] - 2026-09-30
+
+### Added
+
+- `common-infra-lint` reads `shellcheck_failure_threshold` and
+  `hadolint_failure_threshold` and fails closed when the key is missing.
+  `run_shfmt` runs `shfmt --diff` (off by default).
+- `common-doc-verify` can run markdownlint-cli2 and lychee. YAML and link
+  scripts fall back to `.github/scaffold/scripts/`.
+- `common-scaffold-verify` runs on Dependabot pull requests. The done-vs-open
+  lookup is skipped there and is token-optional otherwise.
+- `common-ansible-verify` for yamllint, ansible-lint, and Molecule.
+- `semgrep_config` on `common-secrets-sast` (default `auto`).
+- Deviations CI-032, REL-PUB-004, and SC-DEP-003 (Python stays on 3.13 until
+  2027-04).
+
 ### Changed
 
-- `docs/guardrails` tag **1.8.0** (`aa5184ce…`); `.github/scaffold` tag **1.7.0**
-  (`e76bb3fd…`). Synced issue templates, Cursor rules, `AGENTS.md`, `SKILLS.md`,
-  and `CLAUDE.md`. Decision links cite methodologies **1.6.0** (not a submodule
-  in this repo).
+- `docs/guardrails` tag **1.9.0** (`16a2c95c…`); `.github/scaffold` tag **1.8.0**
+  (`ac9059fd…`). Decision links cite methodologies **1.8.0**.
+- CI-024 uses `github.event.pull_request.user.login`.
+- codeql-action upload-sarif **4.38.1**. Supply-chain result artifacts keep
+  1 day. The sweeper also deletes `*.dockerbuild`.
+- Debian image lint sets `run_secrets_scan: true`. Scans skip the
+  `_commondevops` script checkout.
+- containerdevops callers pin **6.0.0** (`8e806128…`).
 
 ## [5.1.2] - 2026-09-15
 

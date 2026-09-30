@@ -35,19 +35,20 @@ permissions:
 jobs:
   lint:
     if: >-
-      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@c01b12a999ab2f17bc7352e2611d36a68e55a08e
     with:
       dockerfile: docker/ci-lint/Dockerfile
       working_directory: .
-      scripts_ref: 32384866e5669dbde8bdecde153a6ae6ead728ed
+      scripts_ref: c01b12a999ab2f17bc7352e2611d36a68e55a08e
       runner_image: ""
       run_infra_lint: false
+      run_secrets_scan: true
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
     secrets:
       checkout_token: ${{ github.token }}
@@ -55,17 +56,17 @@ jobs:
 
   lint-alpine:
     if: >-
-      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@c01b12a999ab2f17bc7352e2611d36a68e55a08e
     with:
       dockerfile: docker/ci-lint/Dockerfile.alpine
       working_directory: .
-      scripts_ref: 32384866e5669dbde8bdecde153a6ae6ead728ed
+      scripts_ref: c01b12a999ab2f17bc7352e2611d36a68e55a08e
       runner_image: ""
       run_infra_lint: false
       run_secrets_scan: true
@@ -77,13 +78,13 @@ jobs:
   build:
     needs: [lint, lint-alpine]
     if: >-
-      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
       packages: write
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@c01b12a999ab2f17bc7352e2611d36a68e55a08e
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile
@@ -91,7 +92,7 @@ jobs:
       artifact_name: container-image-debian
       handoff_package: ci-lint
       structure_test_config: docker/ci-lint/container-structure-test.yml
-      scripts_ref: 32384866e5669dbde8bdecde153a6ae6ead728ed
+      scripts_ref: c01b12a999ab2f17bc7352e2611d36a68e55a08e
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
       size_class: ci_toolchain
       image_title: ci-lint
@@ -108,13 +109,13 @@ jobs:
   build-alpine:
     needs: [lint, lint-alpine]
     if: >-
-      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
       packages: write
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@c01b12a999ab2f17bc7352e2611d36a68e55a08e
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile.alpine
@@ -122,7 +123,7 @@ jobs:
       artifact_name: container-image-alpine
       handoff_package: ci-lint
       structure_test_config: docker/ci-lint/container-structure-test.yml
-      scripts_ref: 32384866e5669dbde8bdecde153a6ae6ead728ed
+      scripts_ref: c01b12a999ab2f17bc7352e2611d36a68e55a08e
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
       size_class: ci_toolchain
       image_title: ci-lint
@@ -139,19 +140,19 @@ jobs:
   scan:
     needs: build
     if: >-
-      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@c01b12a999ab2f17bc7352e2611d36a68e55a08e
     with:
       image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build.outputs.handoff_package, needs.build.outputs.digest) }}
       results_artifact: container-scan-results-debian
       sarif_category: trivy-image-debian
-      scripts_ref: 32384866e5669dbde8bdecde153a6ae6ead728ed
+      scripts_ref: c01b12a999ab2f17bc7352e2611d36a68e55a08e
       pkg_types: library
       ignorefile: docker/ci-lint/.trivyignore.yaml
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -161,19 +162,19 @@ jobs:
   scan-alpine:
     needs: build-alpine
     if: >-
-      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@c01b12a999ab2f17bc7352e2611d36a68e55a08e
     with:
       image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build-alpine.outputs.handoff_package, needs.build-alpine.outputs.digest) }}
       results_artifact: container-scan-results-alpine
       sarif_category: trivy-image-alpine
-      scripts_ref: 32384866e5669dbde8bdecde153a6ae6ead728ed
+      scripts_ref: c01b12a999ab2f17bc7352e2611d36a68e55a08e
       pkg_types: library
       ignorefile: docker/ci-lint/.trivyignore.yaml
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -184,19 +185,19 @@ jobs:
   scan-posture:
     needs: build
     if: >-
-      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@c01b12a999ab2f17bc7352e2611d36a68e55a08e
     with:
       image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build.outputs.handoff_package, needs.build.outputs.digest) }}
       results_artifact: container-scan-posture-debian
       sarif_category: trivy-posture-debian
-      scripts_ref: 32384866e5669dbde8bdecde153a6ae6ead728ed
+      scripts_ref: c01b12a999ab2f17bc7352e2611d36a68e55a08e
       pkg_types: os,library
       ignorefile: none
       blocking: false
@@ -206,19 +207,19 @@ jobs:
   scan-posture-alpine:
     needs: build-alpine
     if: >-
-      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
     permissions:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@c01b12a999ab2f17bc7352e2611d36a68e55a08e
     with:
       image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build-alpine.outputs.handoff_package, needs.build-alpine.outputs.digest) }}
       results_artifact: container-scan-posture-alpine
       sarif_category: trivy-posture-alpine
-      scripts_ref: 32384866e5669dbde8bdecde153a6ae6ead728ed
+      scripts_ref: c01b12a999ab2f17bc7352e2611d36a68e55a08e
       pkg_types: os,library
       ignorefile: none
       blocking: false
@@ -228,7 +229,7 @@ jobs:
   publish:
     needs: [build, scan]
     if: >-
-      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name == 'release' ||
        github.event_name == 'schedule' ||
        (github.event_name == 'workflow_dispatch' && inputs.publish))
@@ -236,13 +237,14 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+      attestations: write
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@c01b12a999ab2f17bc7352e2611d36a68e55a08e
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile
       image_name: ci-lint
       dockerhub_image: pirlruc/ci-lint
-      scripts_ref: 32384866e5669dbde8bdecde153a6ae6ead728ed
+      scripts_ref: c01b12a999ab2f17bc7352e2611d36a68e55a08e
       platforms: linux/amd64
       tag_suffix: -debian
       tag_alias_unsuffixed: false
@@ -271,7 +273,7 @@ jobs:
   publish-alpine:
     needs: [build-alpine, scan-alpine]
     if: >-
-      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name == 'release' ||
        github.event_name == 'schedule' ||
        (github.event_name == 'workflow_dispatch' && inputs.publish))
@@ -279,13 +281,14 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+      attestations: write
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@c01b12a999ab2f17bc7352e2611d36a68e55a08e
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile.alpine
       image_name: ci-lint
       dockerhub_image: pirlruc/ci-lint
-      scripts_ref: 32384866e5669dbde8bdecde153a6ae6ead728ed
+      scripts_ref: c01b12a999ab2f17bc7352e2611d36a68e55a08e
       platforms: linux/amd64
       tag_suffix: -alpine
       tag_alias_unsuffixed: true
@@ -317,7 +320,7 @@ jobs:
     if: always() && github.event_name == 'pull_request' && needs.build.outputs.handoff_tag != ''
     permissions:
       packages: write
-    uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@c01b12a999ab2f17bc7352e2611d36a68e55a08e
     with:
       package: ${{ needs.build.outputs.handoff_package }}
       tag: ${{ needs.build.outputs.handoff_tag }}
@@ -327,7 +330,7 @@ jobs:
     if: always() && github.event_name == 'pull_request' && needs.build-alpine.outputs.handoff_tag != ''
     permissions:
       packages: write
-    uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@c01b12a999ab2f17bc7352e2611d36a68e55a08e
     with:
       package: ${{ needs.build-alpine.outputs.handoff_package }}
       tag: ${{ needs.build-alpine.outputs.handoff_tag }}

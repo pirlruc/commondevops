@@ -28,6 +28,11 @@ on:
         required: false
         type: string
         default: ""
+      results_retention_days:
+        description: Retention for the SBOM and scan artifact. The release attach happens in the same run.
+        required: false
+        type: number
+        default: 1
     secrets:
       checkout_token:
         required: false
@@ -57,7 +62,7 @@ env:
 jobs:
   supply-chain:
     # CI-024
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
@@ -125,7 +130,12 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p scan-results
-          syft dir:. \
+          # scripts/requirements.txt is the CI tool lock. semgrep==1.172.0
+          # requires mcp==1.23.3; the published image overrides mcp to 1.29.0.
+          syft dir:. --exclude './_commondevops/**' \
+            --exclude './scripts/requirements.txt' \
+            --exclude './scripts/ci-requirements.in' \
+            --exclude './scripts/markdownlint/**' \
             -o cyclonedx-json=scan-results/sbom-cdx.json \
             -o spdx-json=scan-results/sbom-spdx.json
 
@@ -144,7 +154,11 @@ jobs:
             grype "sbom:scan-results/sbom-cdx.json" "${CFG[@]}" --fail-on "${SEV_LO}" \
               -o json=scan-results/grype.json
           else
-            grype dir:. "${CFG[@]}" --fail-on "${SEV_LO}" -o json=scan-results/grype.json
+            grype dir:. --exclude './_commondevops/**' \
+              --exclude './scripts/requirements.txt' \
+              --exclude './scripts/ci-requirements.in' \
+              --exclude './scripts/markdownlint/**' \
+              "${CFG[@]}" --fail-on "${SEV_LO}" -o json=scan-results/grype.json
           fi
 
       - name: Trivy filesystem
@@ -160,9 +174,13 @@ jobs:
           CFG=()
           [[ -f trivy.yaml ]] && CFG=(--config trivy.yaml)
           trivy fs --scanners vuln --severity "CRITICAL,${SEV_UP}" \
+            --skip-dirs _commondevops,scripts/markdownlint \
+            --skip-files scripts/requirements.txt,scripts/ci-requirements.in \
             --format sarif --output scan-results/trivy.sarif \
             "${CFG[@]}" .
           trivy fs --scanners vuln --severity "CRITICAL,${SEV_UP}" \
+            --skip-dirs _commondevops,scripts/markdownlint \
+            --skip-files scripts/requirements.txt,scripts/ci-requirements.in \
             --exit-code 1 "${CFG[@]}" .
 
       - name: License gate (grant)
@@ -218,12 +236,12 @@ jobs:
           name: common-supply-chain-results
           path: ${{ inputs.working_directory }}/scan-results/
           if-no-files-found: ignore
-          retention-days: 7
+          retention-days: ${{ inputs.results_retention_days }}
 
       - name: Upload Trivy SARIF
         if: always() && hashFiles(format('{0}/scan-results/trivy.sarif', inputs.working_directory)) != ''
         continue-on-error: true
-        uses: github/codeql-action/upload-sarif@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
+        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
         with:
           sarif_file: ${{ inputs.working_directory }}/scan-results/trivy.sarif
           category: trivy-fs

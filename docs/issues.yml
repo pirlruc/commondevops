@@ -1,7 +1,7 @@
 # Authored backlog for commondevops.
 #
 # Schema: https://github.com/pirlruc/github-scaffold/blob/main/docs/issues-schema.md
-# Methodology: https://github.com/pirlruc/methodologies/tree/1.6.0/github-issue-adr
+# Methodology: https://github.com/pirlruc/methodologies/tree/1.8.0/github-issue-adr
 
 milestones:
   - name: Phase 1 — Foundation
@@ -1035,7 +1035,7 @@ milestones:
               - rg -n 'container-published-rescan' docs/workflows.md
 
       - id: CMN-SHFMT-001
-        status: open
+        status: done
         title: Format shell with shfmt beside shellcheck
         overview:
           problem: >-
@@ -1064,7 +1064,7 @@ milestones:
           - CI-023
         tasks:
           - id: CMN-SHFMT-001-T1
-            status: open
+            status: done
             title: Add an shfmt step to the shared shell gate
             instructions:
               files:
@@ -1075,7 +1075,7 @@ milestones:
               - SHELL-LANG-003
 
       - id: CMN-DOC-002
-        status: open
+        status: done
         title: Add markdownlint and lychee to common-doc-verify
         overview:
           problem: >-
@@ -1105,7 +1105,7 @@ milestones:
           - DOC-LINT-001
         tasks:
           - id: CMN-DOC-002-T1
-            status: open
+            status: done
             title: Add markdownlint and lychee steps
             instructions:
               files:
@@ -1114,3 +1114,282 @@ milestones:
               - rg -n 'markdownlint|lychee' .github/workflows/common-doc-verify.yml
             guardrail_refs:
               - DOC-LINT-001
+
+      - id: CMN-PIN-018
+        status: done
+        title: Pin guardrails 1.8.0 and scaffold 1.7.0
+        overview:
+          problem: Gitlinks were still guardrails 1.6.0 and scaffold 1.5.0.
+          goal: Those tags landed before this 1.9.0 bump.
+        decision: >-
+          In the context of the 1.8.0 and 1.7.0 pins, facing stale gitlinks,
+          we decided one bump, to achieve SC-DEP-004, accepting that 5.2.0
+          moves the pins to 1.9.0 and 1.8.0.
+        architecture:
+          target: submodule gitlinks
+          modules:
+            - docs/guardrails
+            - .github/scaffold
+        acceptance_criteria:
+          - The 1.8.0 and 1.7.0 gitlinks landed before 5.2.0
+        guardrail_refs:
+          - SC-DEP-004
+        tasks:
+          - id: CMN-PIN-018-T1
+            status: done
+            title: Bump the guardrails and scaffold gitlinks
+            instructions:
+              files:
+                - docs/guardrails
+                - .github/scaffold
+            verification:
+              - git -C docs/guardrails describe --tags --exact-match
+            guardrail_refs:
+              - SC-DEP-004
+
+      - id: CMN-PIN-019
+        status: done
+        title: Record Free-plan deviations and keep Python 3.13
+        overview:
+          problem: >-
+            Guardrails 1.9.0 requires branch protection and tag Environments.
+            This repository returns to private on the Free plan. PY-RUN-003
+            keeps Python 3.13 until 2027-04.
+          goal: Record CI-032, REL-PUB-004, and SC-DEP-003. Do not add public-only settings.
+        decision: >-
+          In the context of a repository that returns to private, facing gates
+          the Free plan cannot meet, we decided to record deviations, to achieve
+          a private-compatible pin, accepting that publish tokens stay in repository secrets.
+        architecture:
+          target: docs/guardrail-deviations.yml
+          modules:
+            - docs/guardrail-deviations.yml
+            - .github/dependabot.yml
+        acceptance_criteria:
+          - CI-032, REL-PUB-004, and SC-DEP-003 are recorded
+          - Dependabot ignores python >= 3.14
+        guardrail_refs:
+          - CI-032
+          - REL-PUB-004
+          - SC-DEP-003
+        tasks:
+          - id: CMN-PIN-019-T1
+            status: done
+            title: Add the Free-plan and Python deviations
+            instructions:
+              files:
+                - docs/guardrail-deviations.yml
+            verification:
+              - grep -q CI-032 docs/guardrail-deviations.yml
+            guardrail_refs:
+              - CI-032
+
+      - id: CMN-SHELL-001
+        status: done
+        title: Run ShellCheck at shellcheck_failure_threshold
+        overview:
+          problem: ShellCheck defaulted to style, so info findings failed blocking callers.
+          goal: Pass --severity from the threshold and fail closed when it is missing.
+        decision: >-
+          In the context of a blocking common-infra-lint caller, facing ShellCheck's
+          style default, we decided to read shellcheck_failure_threshold, to achieve
+          SHELL-LINT-001, accepting that a caller file can still be stricter.
+        architecture:
+          target: common-infra-lint
+          modules:
+            - .github/workflows/common-infra-lint.yml
+        acceptance_criteria:
+          - shellcheck receives --severity from the threshold
+          - A missing threshold fails closed
+          - The Dependabot skip does not use github.actor
+        guardrail_refs:
+          - SHELL-LINT-001
+          - CI-022
+          - CI-024
+        tasks:
+          - id: CMN-SHELL-001-T1
+            status: done
+            title: Pass the shellcheck threshold
+            instructions:
+              files:
+                - .github/workflows/common-infra-lint.yml
+            verification:
+              - grep -q shellcheck_failure_threshold .github/workflows/common-infra-lint.yml
+            guardrail_refs:
+              - SHELL-LINT-001
+
+      - id: CMN-RECON-001
+        status: done
+        title: Fail common-scaffold-verify when a done manifest id is still open
+        overview:
+          problem: The verify job was skipped entirely on Dependabot pull requests.
+          goal: Run the token-free checks there, and the issue lookup only when a token is present.
+        decision: >-
+          In the context of manifest drift, facing a skipped verify job, we decided
+          a token-optional done-vs-open check, to achieve a real merge signal,
+          accepting that Dependabot skips the GitHub lookup.
+        architecture:
+          target: common-scaffold-verify
+          modules:
+            - .github/workflows/common-scaffold-verify.yml
+            - scripts/check-done-open.py
+        acceptance_criteria:
+          - Dependabot runs validate-only and the SCAFFOLD_REF check
+          - The issue lookup is skipped for Dependabot
+          - A missing token records the gap and does not fail closed
+        guardrail_refs:
+          - CI-024
+        tasks:
+          - id: CMN-RECON-001-T1
+            status: done
+            title: Add the token-optional done-vs-open check
+            instructions:
+              files:
+                - .github/workflows/common-scaffold-verify.yml
+                - scripts/check-done-open.py
+            verification:
+              - test -f scripts/check-done-open.py
+            guardrail_refs:
+              - CI-024
+          - id: CMN-RECON-001-T2
+            status: done
+            title: Run the token-free checks on Dependabot pull requests
+            instructions:
+              files:
+                - .github/workflows/common-scaffold-verify.yml
+            verification:
+              - grep -q dependabot .github/workflows/common-scaffold-verify.yml
+            guardrail_refs:
+              - CI-024
+
+      - id: CMN-DOC-CALL
+        status: done
+        title: Resolve doc-verify scripts from the scaffold submodule
+        overview:
+          problem: YAML and link scripts live in .github/scaffold/scripts, not scripts/.
+          goal: Try the scaffold path and fail closed when neither copy exists.
+        decision: >-
+          In the context of common-doc-verify, facing scripts that live in the
+          scaffold checkout, we decided to try that path, to achieve the checks
+          for a normal scaffold consumer, accepting a fail-closed miss.
+        architecture:
+          target: common-doc-verify and common-scaffold-verify
+          modules:
+            - .github/workflows/common-doc-verify.yml
+            - .github/workflows/common-scaffold-verify.yml
+        acceptance_criteria:
+          - Both workflows try .github/scaffold/scripts
+        guardrail_refs:
+          - DOC-LINT-001
+          - CI-035
+        tasks:
+          - id: CMN-DOC-CALL-T1
+            status: done
+            title: Fall back to the scaffold script path
+            instructions:
+              files:
+                - .github/workflows/common-doc-verify.yml
+            verification:
+              - grep -q scaffold/scripts .github/workflows/common-doc-verify.yml
+            guardrail_refs:
+              - CI-035
+
+      - id: CMN-SCAN-001
+        status: done
+        title: Exclude the commondevops script checkout from caller scans
+        overview:
+          problem: Semgrep, Syft, Grype, and Trivy scanned the sparse _commondevops checkout.
+          goal: Exclude that path from caller scans.
+        decision: >-
+          In the context of cross-repo scans, facing findings in the script checkout,
+          we decided to exclude _commondevops, to achieve a scan of the caller tree,
+          accepting that gitleaks stays on git history.
+        architecture:
+          target: secrets and supply-chain workflows
+          modules:
+            - .github/workflows/common-secrets-sast.yml
+            - .github/workflows/common-supply-chain.yml
+        acceptance_criteria:
+          - semgrep, syft, grype, and trivy skip _commondevops
+        guardrail_refs:
+          - CI-035
+        tasks:
+          - id: CMN-SCAN-001-T1
+            status: done
+            title: Exclude the script checkout
+            instructions:
+              files:
+                - .github/workflows/common-secrets-sast.yml
+                - .github/workflows/common-supply-chain.yml
+            verification:
+              - grep -q _commondevops .github/workflows/common-secrets-sast.yml
+            guardrail_refs:
+              - CI-035
+
+      - id: CMN-WF-005
+        status: done
+        title: Add common-ansible-verify for ansible-lint and Molecule
+        overview:
+          problem: ansible-roles inlines ansible-lint and Molecule.
+          goal: One workflow_call with the scenario list, requirements, blocking, and scripts_ref.
+        decision: >-
+          In the context of inlined Ansible jobs, facing a private copy of the job
+          body, we decided a workflow_call in commondevops, to achieve one implementation,
+          accepting that Ansible rules stay in this workflow.
+        architecture:
+          target: common-ansible-verify.yml
+          modules:
+            - .github/workflows/common-ansible-verify.yml
+            - docs/workflows.md
+        acceptance_criteria:
+          - The workflow runs yamllint, ansible-lint, the caller script, and molecule
+          - Default permissions are empty
+        guardrail_refs:
+          - CI-034
+          - ANSIBLE-LINT-001
+          - ANSIBLE-TEST-001
+        tasks:
+          - id: CMN-WF-005-T1
+            status: done
+            title: Publish common-ansible-verify
+            instructions:
+              files:
+                - .github/workflows/common-ansible-verify.yml
+                - docs/workflows.md
+            verification:
+              - test -f .github/workflows/common-ansible-verify.yml
+            guardrail_refs:
+              - ANSIBLE-LINT-001
+
+      - id: CMN-PUB-001
+        status: done
+        title: Document public callers and the jobs that are not Kotlin gates
+        overview:
+          problem: Public callers cannot uses a private host, and some jobs are not Kotlin gates.
+          goal: workflows.md states both limits.
+        decision: >-
+          In the context of a public Android app, facing private reusable workflows,
+          we decided to document the callable subset and the mismatches, to achieve
+          CI-019 without a false green scan, accepting that product repos keep local gates.
+        architecture:
+          target: docs/workflows.md
+          modules:
+            - docs/workflows.md
+        acceptance_criteria:
+          - workflows.md names the private-host limit and the non-Kotlin jobs
+        guardrail_refs:
+          - CI-018
+          - CI-019
+          - KT-SEC-002
+          - KT-SEC-004
+        tasks:
+          - id: CMN-PUB-001-T1
+            status: done
+            title: Document the caller contract
+            instructions:
+              files:
+                - docs/workflows.md
+            verification:
+              - grep -q p/kotlin docs/workflows.md
+            guardrail_refs:
+              - KT-SEC-002

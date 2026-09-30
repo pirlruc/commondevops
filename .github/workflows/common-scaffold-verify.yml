@@ -13,10 +13,14 @@ on:
         type: boolean
         default: false
       scripts_ref:
-        description: "Commit/tag/branch of commondevops matching the uses: pin (contract; unused here)"
+        description: "Commit/tag/branch of commondevops matching the uses: pin"
         required: false
         type: string
         default: ""
+    secrets:
+      checkout_token:
+        description: Token to read this repo when the done-vs-open script is checked out cross-repo
+        required: false
   workflow_dispatch:
     inputs:
       blocking:
@@ -34,8 +38,8 @@ env:
 
 jobs:
   verify:
-    # CI-024
-    if: github.actor != 'dependabot[bot]'
+    # Token-free checks run on Dependabot PRs (CMN-RECON-001 / CI-024).
+    # The done-vs-open lookup is a later step and stays skipped for Dependabot.
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
@@ -59,8 +63,12 @@ jobs:
           if [ -n "${SCRIPTS_REF}" ]; then
             echo "scripts_ref=${SCRIPTS_REF} (must match caller uses: pin)"
           fi
-          if [ ! -f scripts/issues-sync.py ]; then
-            echo "note: scripts/issues-sync.py not in caller; skipping --validate-only"
+          sync=scripts/issues-sync.py
+          if [ ! -f "${sync}" ]; then
+            sync=.github/scaffold/scripts/issues-sync.py
+          fi
+          if [ ! -f "${sync}" ]; then
+            echo "note: issues-sync.py not in scripts/ or .github/scaffold/scripts/; skipping --validate-only"
             exit 0
           fi
           if [ ! -f docs/issues.yml ]; then
@@ -69,18 +77,22 @@ jobs:
           fi
           python3 -m venv .ci-venv
           .ci-venv/bin/pip install -q pyyaml
-          .ci-venv/bin/python scripts/issues-sync.py --yaml docs/issues.yml --validate-only
+          .ci-venv/bin/python "${sync}" --yaml docs/issues.yml --validate-only
 
       - name: SCAFFOLD_REF default matches newest tag
         id: scaffold_ref
         continue-on-error: true
         run: |
-          if [ ! -f scripts/setup-library-submodules.sh ]; then
-            echo "note: scripts/setup-library-submodules.sh not in caller; skipping SCAFFOLD_REF check"
+          setup=scripts/setup-library-submodules.sh
+          if [ ! -f "${setup}" ]; then
+            setup=.github/scaffold/scripts/setup-library-submodules.sh
+          fi
+          if [ ! -f "${setup}" ]; then
+            echo "note: setup-library-submodules.sh not in scripts/ or .github/scaffold/scripts/; skipping SCAFFOLD_REF check"
             exit 0
           fi
           newest="$(git describe --tags --abbrev=0)"
-          default="$(grep -E '^SCAFFOLD_REF=' scripts/setup-library-submodules.sh | sed 's/.*:-\([^}]*\)}.*/\1/')"
+          default="$(grep -E '^SCAFFOLD_REF=' "${setup}" | sed 's/.*:-\([^}]*\)}.*/\1/')"
           if [ -z "${default}" ]; then
             echo "error: could not parse SCAFFOLD_REF default from setup-library-submodules.sh" >&2
             exit 1
@@ -88,16 +100,44 @@ jobs:
           echo "SCAFFOLD_REF default=${default} newest tag=${newest}"
           test "${default}" = "${newest}"
 
+      - name: Checkout done-vs-open script
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pirlruc/commondevops
+          ref: ${{ inputs.scripts_ref || github.sha }}
+          token: ${{ secrets.checkout_token || github.token }}
+          persist-credentials: false
+          path: _commondevops
+          sparse-checkout: |
+            scripts/check-done-open.py
+          sparse-checkout-cone-mode: false
+
+      - name: Done manifest ids are not still open
+        id: recon
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ ! -x .ci-venv/bin/python ]; then
+            python3 -m venv .ci-venv
+            .ci-venv/bin/pip install -q pyyaml
+          fi
+          .ci-venv/bin/python _commondevops/scripts/check-done-open.py docs/issues.yml
+
       - name: Gate — scaffold
         if: always()
         env:
           ADVISORY: ${{ env.ADVISORY }}
           ISSUES: ${{ steps.issues.outcome }}
           SCAFFOLD: ${{ steps.scaffold_ref.outcome }}
+          RECON: ${{ steps.recon.outcome }}
         run: |
           failed=""
           [ "${ISSUES}" = "success" ] || [ "${ISSUES}" = "skipped" ] || failed="${failed} issues(${ISSUES})"
           [ "${SCAFFOLD}" = "success" ] || [ "${SCAFFOLD}" = "skipped" ] || failed="${failed} scaffold_ref(${SCAFFOLD})"
+          [ "${RECON}" = "success" ] || [ "${RECON}" = "skipped" ] || [ -z "${RECON}" ] || failed="${failed} recon(${RECON})"
           if [ -z "${failed}" ]; then
             echo "All collected gates passed."
             exit 0

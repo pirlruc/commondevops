@@ -2,7 +2,7 @@
 # Cadence: docs/guardrails/supply-chain/profile.thresholds.yml
 # Multi-ecosystem docs:
 # https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/configuring-multi-ecosystem-updates
-# Process: https://github.com/pirlruc/methodologies/blob/1.6.0/github-issue-adr/docs/process/dependency-updates.md
+# Process: https://github.com/pirlruc/methodologies/blob/1.8.0/github-issue-adr/docs/process/dependency-updates.md
 #
 # Personal-account private access (Dependabot secrets — not Actions):
 #   DEPENDABOT_GITHUB_TOKEN — Contents: Read on this repo, private submodules,
@@ -54,6 +54,10 @@ updates:
       - dhi
     cooldown:
       default-days: 7
+    ignore:
+      # PY-RUN-003 keeps Python 3.13 until 2027-04. Recorded as SC-DEP-003.
+      - dependency-name: "python"
+        versions: [">= 3.14"]
 
   - package-ecosystem: docker
     directory: /docker/ci-supply-chain
@@ -62,5 +66,16 @@ updates:
     registries:
       - github-private
       - dhi
+    cooldown:
+      default-days: 7
+    ignore:
+      # PY-RUN-003 keeps Python 3.13 until 2027-04. Recorded as SC-DEP-003.
+      - dependency-name: "python"
+        versions: [">= 3.14"]
+
+  - package-ecosystem: pip
+    directory: /scripts
+    patterns: ["*"]
+    multi-ecosystem-group: all-dependencies
     cooldown:
       default-days: 7

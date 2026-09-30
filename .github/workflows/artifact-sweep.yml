@@ -1,6 +1,6 @@
-name: Artifact sweep (container-image*)
+name: Artifact sweep (container-image* and build records)
 
-# Safety net for leftover image-tar artifacts from pre-handoff runs.
+# Safety net for leftover image-tar artifacts and docker build records.
 # Does not delete GHCR packages, container-scan-*, or common-supply-chain-results.
 
 on:
@@ -24,7 +24,7 @@ jobs:
         run: |
           set -euo pipefail
           mapfile -t rows < <(gh api --paginate "/repos/${REPO}/actions/artifacts?per_page=100" \
-            --jq '.artifacts[] | select(.expired|not) | select(.name|startswith("container-image")) | [.id,.name] | @tsv')
+            --jq '.artifacts[] | select(.expired|not) | select(.name|startswith("container-image") or contains(".dockerbuild")) | [.id,.name] | @tsv')
           deleted=0
           for row in "${rows[@]}"; do
             [[ -z "${row}" ]] && continue
