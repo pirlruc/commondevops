@@ -1033,3 +1033,84 @@ milestones:
                 - docs/workflows.md
             verification:
               - rg -n 'container-published-rescan' docs/workflows.md
+
+      - id: CMN-SHFMT-001
+        status: open
+        title: Format shell with shfmt beside shellcheck
+        overview:
+          problem: >-
+            common-doc-verify and common-infra-lint run shellcheck. Nothing
+            formats shell, so style drifts and SHELL-LANG-003 has no shared job.
+          goal: >-
+            A reusable doc or infra job runs shfmt --diff on the caller's shell
+            scripts and fails when the tree is not formatted.
+        decision: >-
+          In the context of shared shell gates, facing shellcheck without a
+          formatter, we decided shfmt belongs in commondevops next to
+          shellcheck, to achieve one job every caller can pin, accepting that
+          the guardrails pack does not require it until this job exists.
+        out_of_scope:
+          - Rewriting consumer scripts in this change
+        architecture:
+          target: common-doc-verify or common-infra-lint
+          modules:
+            - .github/workflows/common-doc-verify.yml
+            - .github/workflows/common-infra-lint.yml
+        acceptance_criteria:
+          - A reusable workflow runs shfmt --diff
+          - The job is token-free
+        guardrail_refs:
+          - SHELL-LANG-003
+          - CI-023
+        tasks:
+          - id: CMN-SHFMT-001-T1
+            status: open
+            title: Add an shfmt step to the shared shell gate
+            instructions:
+              files:
+                - .github/workflows/common-doc-verify.yml
+            verification:
+              - rg -n 'shfmt' .github/workflows
+            guardrail_refs:
+              - SHELL-LANG-003
+
+      - id: CMN-DOC-002
+        status: open
+        title: Add markdownlint and lychee to common-doc-verify
+        overview:
+          problem: >-
+            common-doc-verify checks relative links only. markdownlint and
+            external-link checks are not in the reusable. heimdall runs
+            markdownlint-cli2 in its own quality job, so other repos invent
+            another copy.
+          goal: >-
+            common-doc-verify runs markdownlint and lychee. Callers can drop
+            a private copy once the reusable covers them.
+        decision: >-
+          In the context of shared documentation gates, facing a relative-link
+          check and a one-off markdownlint in heimdall, we decided both tools
+          belong in common-doc-verify, to achieve one pin, accepting that
+          heimdall keeps its job until it calls the reusable.
+        out_of_scope:
+          - Removing heimdall's markdownlint job in this change
+        architecture:
+          target: common-doc-verify
+          modules:
+            - .github/workflows/common-doc-verify.yml
+        acceptance_criteria:
+          - common-doc-verify can run markdownlint
+          - common-doc-verify can run lychee on markdown links
+          - Both steps are token-free
+        guardrail_refs:
+          - DOC-LINT-001
+        tasks:
+          - id: CMN-DOC-002-T1
+            status: open
+            title: Add markdownlint and lychee steps
+            instructions:
+              files:
+                - .github/workflows/common-doc-verify.yml
+            verification:
+              - rg -n 'markdownlint|lychee' .github/workflows/common-doc-verify.yml
+            guardrail_refs:
+              - DOC-LINT-001
