@@ -130,7 +130,12 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p scan-results
+          # scripts/requirements.txt is the CI tool lock. semgrep==1.172.0
+          # requires mcp==1.23.3; the published image overrides mcp to 1.29.0.
           syft dir:. --exclude './_commondevops/**' \
+            --exclude './scripts/requirements.txt' \
+            --exclude './scripts/ci-requirements.in' \
+            --exclude './scripts/markdownlint/**' \
             -o cyclonedx-json=scan-results/sbom-cdx.json \
             -o spdx-json=scan-results/sbom-spdx.json
 
@@ -149,7 +154,11 @@ jobs:
             grype "sbom:scan-results/sbom-cdx.json" "${CFG[@]}" --fail-on "${SEV_LO}" \
               -o json=scan-results/grype.json
           else
-            grype dir:. --exclude './_commondevops/**' "${CFG[@]}" --fail-on "${SEV_LO}" -o json=scan-results/grype.json
+            grype dir:. --exclude './_commondevops/**' \
+              --exclude './scripts/requirements.txt' \
+              --exclude './scripts/ci-requirements.in' \
+              --exclude './scripts/markdownlint/**' \
+              "${CFG[@]}" --fail-on "${SEV_LO}" -o json=scan-results/grype.json
           fi
 
       - name: Trivy filesystem
@@ -165,11 +174,13 @@ jobs:
           CFG=()
           [[ -f trivy.yaml ]] && CFG=(--config trivy.yaml)
           trivy fs --scanners vuln --severity "CRITICAL,${SEV_UP}" \
-            --skip-dirs _commondevops \
+            --skip-dirs _commondevops,scripts/markdownlint \
+            --skip-files scripts/requirements.txt,scripts/ci-requirements.in \
             --format sarif --output scan-results/trivy.sarif \
             "${CFG[@]}" .
           trivy fs --scanners vuln --severity "CRITICAL,${SEV_UP}" \
-            --skip-dirs _commondevops \
+            --skip-dirs _commondevops,scripts/markdownlint \
+            --skip-files scripts/requirements.txt,scripts/ci-requirements.in \
             --exit-code 1 "${CFG[@]}" .
 
       - name: License gate (grant)

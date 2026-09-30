@@ -47,7 +47,8 @@ def open_titles(repo: str, token: str) -> list[str]:
                 "User-Agent": "commondevops-check-done-open",
             },
         )
-        with urllib.request.urlopen(request, timeout=30) as response:
+        # URL is the GitHub API for GITHUB_REPOSITORY, not a caller-controlled path.
+        with urllib.request.urlopen(request, timeout=30) as response:  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
             payload = json.load(response)
             link = response.headers.get("Link", "")
         if not isinstance(payload, list):
