@@ -41,7 +41,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@2dd60d34418051fb0505f476d926b20550becfad
     with:
       dockerfile: docker/ci-supply-chain/Dockerfile
       working_directory: .
@@ -61,7 +61,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@2dd60d34418051fb0505f476d926b20550becfad
     with:
       dockerfile: docker/ci-supply-chain/Dockerfile.alpine
       working_directory: .
@@ -83,7 +83,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@2dd60d34418051fb0505f476d926b20550becfad
     with:
       context: docker/ci-supply-chain
       dockerfile: docker/ci-supply-chain/Dockerfile
@@ -114,7 +114,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@2dd60d34418051fb0505f476d926b20550becfad
     with:
       context: docker/ci-supply-chain
       dockerfile: docker/ci-supply-chain/Dockerfile.alpine
@@ -146,7 +146,7 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@2dd60d34418051fb0505f476d926b20550becfad
     with:
       image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build.outputs.handoff_package, needs.build.outputs.digest) }}
       results_artifact: container-scan-results-debian
@@ -168,7 +168,7 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@2dd60d34418051fb0505f476d926b20550becfad
     with:
       image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build-alpine.outputs.handoff_package, needs.build-alpine.outputs.digest) }}
       results_artifact: container-scan-results-alpine
@@ -191,7 +191,7 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@2dd60d34418051fb0505f476d926b20550becfad
     with:
       image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build.outputs.handoff_package, needs.build.outputs.digest) }}
       results_artifact: container-scan-posture-debian
@@ -213,7 +213,7 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@2dd60d34418051fb0505f476d926b20550becfad
     with:
       image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build-alpine.outputs.handoff_package, needs.build-alpine.outputs.digest) }}
       results_artifact: container-scan-posture-alpine
@@ -236,7 +236,7 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@2dd60d34418051fb0505f476d926b20550becfad
     with:
       context: docker/ci-supply-chain
       dockerfile: docker/ci-supply-chain/Dockerfile
@@ -279,7 +279,7 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@2dd60d34418051fb0505f476d926b20550becfad
     with:
       context: docker/ci-supply-chain
       dockerfile: docker/ci-supply-chain/Dockerfile.alpine
@@ -317,7 +317,7 @@ jobs:
     if: always() && github.event_name == 'pull_request' && needs.build.outputs.handoff_tag != ''
     permissions:
       packages: write
-    uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@2dd60d34418051fb0505f476d926b20550becfad
     with:
       package: ${{ needs.build.outputs.handoff_package }}
       tag: ${{ needs.build.outputs.handoff_tag }}
@@ -327,7 +327,7 @@ jobs:
     if: always() && github.event_name == 'pull_request' && needs.build-alpine.outputs.handoff_tag != ''
     permissions:
       packages: write
-    uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@32384866e5669dbde8bdecde153a6ae6ead728ed
+    uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@2dd60d34418051fb0505f476d926b20550becfad
     with:
       package: ${{ needs.build-alpine.outputs.handoff_package }}
       tag: ${{ needs.build-alpine.outputs.handoff_tag }}
