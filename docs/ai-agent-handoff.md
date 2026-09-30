@@ -53,11 +53,11 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | methodologies (links only; not a submodule) | tag **1.8.0** |
 | containerdevops (image callers + security rescan) | tag `6.0.1` → `c01b12a999ab2f17bc7352e2611d36a68e55a08e` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
-| `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `5.1.1` `sha256:35a82a43839e0969dc7c44d63c36b5c97cdefb20c6d3112255f52c09444042a1` (`latest` == alpine) |
-| `ghcr.io/pirlruc/ci-lint` (debian) | `5.1.1-debian` `sha256:6834b69583a9f67ac21bd06167672e793ce2cba1c14e646a98108e0fc9512dcd` |
-| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.1.1` `sha256:10c82137edb980db080e682def182d236f40d042afd403bf025848838e9515ce` |
+| `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `5.2.0` `sha256:33dbcc7be28ffef2a6cf3cf4b611cf862a8f246c6d6932c4055772d73d697674` (`latest` == alpine) |
+| `ghcr.io/pirlruc/ci-lint` (debian) | `5.2.0-debian` `sha256:543043009f3359db03457ead5ff866920c857933855a415d22e3aa354dbd46a8` |
+| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.2.0` `sha256:f880c137677d703ec84ab0f386ceb0363d9e69aaf77bc3da40c0644dd7d9c784` |
 | Release (reusables) | **5.1.2** (SHA after merge; no GitHub Release) |
-| Release (images) | **5.1.1** |
+| Release (images) | **5.2.0** |
 
 ## Local image sizes / posture (2026-08-12, `du -sxm /`)
 
@@ -152,7 +152,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
   links cite **1.6.0** (no methodologies submodule). Synced scaffold templates.
 - 2026-09-15: **5.1.2** (tag-only) — write 5.1.1 alpine/debian Hub digests
   (`ci-lint` `35a82a43…` / `6834b695…`, `ci-supply-chain` `10c82137…` /
-  `ad653b38…`). Hub `latest` == `5.1.1` alpine.
+  `ad653b38…`). Hub `latest` == `5.2.0` alpine.
 - 2026-09-15: **5.1.1** — containerdevops 5.0.2 nested pin, scheduled rescans
   off `ci-lint:4.0.0` / `ci-supply-chain:3.0.0` onto 5.1.0 Hub digests,
   Hub/Packages target 5.1.1. Hub `latest` == `latest-alpine` (flavor fix);
@@ -209,4 +209,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-09-30*
+*Last updated: 2026-09-30 (5.2.1 digest writeback)*
