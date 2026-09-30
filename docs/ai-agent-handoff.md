@@ -48,8 +48,9 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 
 | Component | Ref |
 |-----------|-----|
-| guardrails submodule | tag **1.6.0** → `77cf16eb…` |
-| github-scaffold submodule | tag **1.5.0** → `9e04ed53…` |
+| guardrails submodule | tag **1.8.0** → `aa5184ce…` |
+| github-scaffold submodule | tag **1.7.0** → `e76bb3fd…` |
+| methodologies (links only; not a submodule) | tag **1.6.0** |
 | containerdevops (image callers + security rescan) | tag `5.0.2` → `32384866e5669dbde8bdecde153a6ae6ead728ed` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 | `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `5.1.1` `sha256:35a82a43839e0969dc7c44d63c36b5c97cdefb20c6d3112255f52c09444042a1` (`latest` == alpine) |
@@ -147,6 +148,8 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
+- 2026-09-30: guardrails **1.8.0** / scaffold **1.7.0**. Methodology decision
+  links cite **1.6.0** (no methodologies submodule). Synced scaffold templates.
 - 2026-09-15: **5.1.2** (tag-only) — write 5.1.1 alpine/debian Hub digests
   (`ci-lint` `35a82a43…` / `6834b695…`, `ci-supply-chain` `10c82137…` /
   `ad653b38…`). Hub `latest` == `5.1.1` alpine.
@@ -206,4 +209,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-09-15*
+*Last updated: 2026-09-30*
