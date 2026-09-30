@@ -137,7 +137,7 @@ Provenance after human merge+sync uses these prefixes and the PR description; do
 | `scripts/` | Install, local/docker parity, license gate, DHI pin refresh |
 | `docker/ci-lint/` / `docker/ci-supply-chain/` | Split CI toolchain images (Debian + Alpine supply-chain variants) |
 | `docs/` | Handoff, workflows reference, Docker Hub and GitHub Packages pages, this prompt, `issues.yml`, deviations |
-| `.trivyignore.yaml` | Path-scoped donor CVE ignores (plus per-image copies) |
+| `docker/*/.trivyignore.yaml` | Per-image path-scoped donor CVE ignores |
 | `.github/dependabot.yml` | Multi-ecosystem dependency updates |
 
 Ecosystem (URL only): [guardrails](https://github.com/pirlruc/guardrails),

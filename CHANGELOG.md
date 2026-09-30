@@ -5,6 +5,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.2.2] - 2026-09-30
+
+### Changed
+
+- Refresh the DHI Python 3.13 base digests. The Alpine digest has no HIGH or
+  CRITICAL OS findings, which clears expat CVE-2026-93990. Debian openssl
+  HIGH remains: the newest DHI digest still does not ship deb13u3.
+
 ## [5.2.1] - 2026-09-30
 
 ### Changed
