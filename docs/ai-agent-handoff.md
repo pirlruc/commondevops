@@ -53,9 +53,9 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | methodologies (links only; not a submodule) | tag **1.8.0** |
 | containerdevops (image callers + security rescan) | tag `6.0.1` → `c01b12a999ab2f17bc7352e2611d36a68e55a08e` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
-| `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `5.2.0` `sha256:33dbcc7be28ffef2a6cf3cf4b611cf862a8f246c6d6932c4055772d73d697674` (`latest` == alpine) |
-| `ghcr.io/pirlruc/ci-lint` (debian) | `5.2.0-debian` `sha256:543043009f3359db03457ead5ff866920c857933855a415d22e3aa354dbd46a8` |
-| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.2.0` `sha256:f880c137677d703ec84ab0f386ceb0363d9e69aaf77bc3da40c0644dd7d9c784` |
+| `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `5.2.2` `sha256:fd24e836c677e044163aab19e1e7d49d92ce34576deb7970b1ae16ea52b36d1b` (`latest` == alpine) |
+| `ghcr.io/pirlruc/ci-lint` (debian) | `5.2.2-debian` `sha256:2cb20ba2d39f55ccc4195acc162013162682cb3bcccc31c300261965ca9b30c1` |
+| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.2.2` `sha256:2ea8da1b95fd393e8b2897fb0d11eba97d9036d9df011519bed058df172a9257` |
 | Release (reusables) | **5.1.2** (SHA after merge; no GitHub Release) |
 | Release (images) | **5.2.0** |
 
@@ -152,7 +152,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
   links cite **1.6.0** (no methodologies submodule). Synced scaffold templates.
 - 2026-09-15: **5.1.2** (tag-only) — write 5.1.1 alpine/debian Hub digests
   (`ci-lint` `35a82a43…` / `6834b695…`, `ci-supply-chain` `10c82137…` /
-  `ad653b38…`). Hub `latest` == `5.2.0` alpine.
+  `ad653b38…`). Hub `latest` == `5.1.1` alpine.
 - 2026-09-15: **5.1.1** — containerdevops 5.0.2 nested pin, scheduled rescans
   off `ci-lint:4.0.0` / `ci-supply-chain:3.0.0` onto 5.1.0 Hub digests,
   Hub/Packages target 5.1.1. Hub `latest` == `latest-alpine` (flavor fix);
