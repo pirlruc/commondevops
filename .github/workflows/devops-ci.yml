@@ -1,6 +1,7 @@
 name: DevOps CI (self)
 
 on:
+  # CI-024: push stays on main. Do not add dependabot/**.
   push:
     branches: [main]
   pull_request:
@@ -33,8 +34,16 @@ jobs:
       - name: SC-DEP-004 submodule pin assert
         run: sh scripts/check-submodule-pins.sh
 
+  scaffold:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/common-scaffold-verify.yml
+    with:
+      blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
+      scripts_ref: ${{ github.sha }}
+
   docs:
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     permissions:
       contents: read
     uses: ./.github/workflows/common-doc-verify.yml
@@ -48,7 +57,7 @@ jobs:
       scripts_ref: ${{ github.sha }}
 
   infra-lint:
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     permissions:
       contents: read
     uses: ./.github/workflows/common-infra-lint.yml
@@ -61,10 +70,9 @@ jobs:
       scripts_ref: ${{ github.sha }}
 
   secrets-sast:
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     permissions:
       contents: read
-      security-events: write
     uses: ./.github/workflows/common-secrets-sast.yml
     with:
       blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
@@ -72,7 +80,7 @@ jobs:
       scripts_ref: ${{ github.sha }}
 
   supply-chain:
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     permissions:
       contents: read
       security-events: write
@@ -85,7 +93,7 @@ jobs:
 
   scorecard:
     if: >-
-      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
       github.event.repository.fork == false
     permissions:
       contents: read
@@ -98,3 +106,30 @@ jobs:
       publish_results: false
     secrets:
       repo_token: ${{ secrets.SCORECARD_TOKEN }}
+
+  lint-dependabot:
+    # Token-free merge signal (CI-024). No Actions secrets and no submodules.
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install host linters
+        env:
+          INSTALL_ONLY: actionlint,shellcheck,hadolint
+        run: bash scripts/install-common-tools.sh
+      - name: actionlint
+        run: actionlint -color=false .github/workflows/*.yml
+      - name: shellcheck
+        run: find scripts -name '*.sh' -print0 | xargs -0 shellcheck --severity=error
+      - name: hadolint
+        run: |
+          set -euo pipefail
+          thr="$(bash scripts/read-thresholds.sh hadolint_failure_threshold scripts/docker.profile.thresholds.yml)"
+          hadolint --failure-threshold "${thr}" \
+            docker/ci-lint/Dockerfile docker/ci-lint/Dockerfile.alpine \
+            docker/ci-supply-chain/Dockerfile docker/ci-supply-chain/Dockerfile.alpine

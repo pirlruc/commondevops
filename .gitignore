@@ -1,0 +1,11 @@
+.venv/
+.tools/
+__pycache__/
+*.pyc
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.ci-venv/
+scripts/markdownlint/node_modules/

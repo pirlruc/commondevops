@@ -1,0 +1,3 @@
+# Vendored from guardrails 1.9.0 docker/profile.thresholds.yml.
+# Only the keys common-infra-lint reads. Callers with docs/guardrails win.
+hadolint_failure_threshold: warning    # DOCKER-LINT-001

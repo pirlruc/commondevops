@@ -4,7 +4,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Folder** | `common/commondevops/` |
+| **Folder** | `ops/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
 | **Branch** | `feature-digest-5.1.2` → tag **5.1.2** |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, release + `ci-lint` / `ci-supply-chain` images |
@@ -48,9 +48,9 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 
 | Component | Ref |
 |-----------|-----|
-| guardrails submodule | tag **1.8.0** → `aa5184ce…` |
-| github-scaffold submodule | tag **1.7.0** → `e76bb3fd…` |
-| methodologies (links only; not a submodule) | tag **1.6.0** |
+| guardrails submodule | tag **1.9.0** → `16a2c95c…` |
+| github-scaffold submodule | tag **1.8.0** → `ac9059fd…` |
+| methodologies (links only; not a submodule) | tag **1.8.0** |
 | containerdevops (image callers + security rescan) | tag `5.0.2` → `32384866e5669dbde8bdecde153a6ae6ead728ed` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 | `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `5.1.1` `sha256:35a82a43839e0969dc7c44d63c36b5c97cdefb20c6d3112255f52c09444042a1` (`latest` == alpine) |

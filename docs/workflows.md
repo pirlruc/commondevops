@@ -2,7 +2,9 @@
 
 All workflows support `workflow_call` and `workflow_dispatch`. Top-level
 `permissions: {}` (CI-025); jobs grant least privilege. Secret-using jobs skip
-when `github.actor == 'dependabot[bot]'` (CI-024). Nested script checkout uses
+when `github.event.pull_request.user.login == 'dependabot[bot]'` (CI-024). Do not
+use `github.actor`. `push` workflows stay on `main`, not `dependabot/**`.
+Nested script checkout uses
 `actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1` (v7.0.1) with
 `persist-credentials: false`.
 
@@ -25,7 +27,8 @@ or the reusable job fails at startup with no useful callee message.
 | `common-infra-lint.yml` | `contents: read` |
 | `common-doc-verify.yml` | `contents: read` |
 | `common-scaffold-verify.yml` | `contents: read` |
-| `common-secrets-sast.yml` | `contents: read`, `security-events: write` |
+| `common-secrets-sast.yml` | `contents: read` |
+| `common-ansible-verify.yml` | `contents: read` |
 | `common-supply-chain.yml` | `contents: read`, `security-events: write` |
 | `common-scorecard.yml` | `contents: read`, `security-events: write`, `id-token: write` |
 | `common-release.yml` | `contents: write`, `id-token: write` |
@@ -250,7 +253,7 @@ Digest-pin the image (CI-026); do not float on `:latest`.
 
 ```yaml
   published-rescan:
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     permissions:
       contents: read
       security-events: write
@@ -270,4 +273,34 @@ Digest-pin the image (CI-026); do not float on `:latest`.
 
 Model: [cppdevops-security.yml](https://github.com/pirlruc/cppdevops/blob/main/.github/workflows/cppdevops-security.yml)
 published-ci-cpp-rescan job. Probe skips the scan when GHCR is not pullable.
+
+## Public callers and jobs that are not language gates
+
+This repository is public today and is going private again. A public workflow
+cannot `uses:` a private reusable workflow. `checkout_token` is read only after
+the workflow file loads, so it does not fix that. While this host is private,
+public callers keep their own jobs. Tag 5.1.2 is
+[the tree](https://github.com/pirlruc/commondevops/tree/5.1.2), not a GitHub
+Release.
+
+These jobs do not replace a Kotlin or Android gate:
+
+- `common-secrets-sast` runs semgrep `--config` from `semgrep_config` (default
+  `auto`). That is not `p/kotlin` (KT-SEC-002). Pass `semgrep_config: p/kotlin`.
+- `common-supply-chain` Syft-on-directory does not see a Gradle graph, so it is
+  not the Android CycloneDX grype gate (KT-SEC-004).
+- `common-release` and `artifact-sweep` are for image publishers.
+
+`common-doc-verify` looks in `scripts/` and then `.github/scaffold/scripts/`
+for the YAML and link checkers, and fails closed when neither copy exists.
+`common-scaffold-verify` does the same for `issues-sync.py` and
+`setup-library-submodules.sh`.
+
+`common-infra-lint` passes `--severity` from `shellcheck_failure_threshold` and
+`--failure-threshold` from `hadolint_failure_threshold`. A missing key fails
+closed. `run_shfmt: true` runs `shfmt --diff` (off by default).
+`common-doc-verify` can run `markdownlint-cli2` and `lychee` when those inputs
+are true. `common-ansible-verify` runs yamllint, ansible-lint, the caller's
+guardrail script, and Molecule. `results_retention_days` on
+`common-supply-chain` defaults to 1.
 

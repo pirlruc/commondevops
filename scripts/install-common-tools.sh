@@ -37,6 +37,12 @@ GRYPE_SHA256="${GRYPE_SHA256:-0122df7b655981abe547ad3d2190d65551dac6a2bfc80b4dc2
 # https://github.com/anchore/grant/releases
 GRANT_VERSION="${GRANT_VERSION:-0.6.8}"
 GRANT_SHA256="${GRANT_SHA256:-6500f8bbf0f20fb993de8084686e199f0ba1eb494769ff75454286d5ef63f919}"
+# https://github.com/mvdan/sh/releases
+SHFMT_VERSION="${SHFMT_VERSION:-3.11.0}"
+SHFMT_SHA256="${SHFMT_SHA256:-1904ec6bac715c1d05cd7f6612eec8f67a625c3749cb327e5bfb4127d09035ff}"
+# https://github.com/lycheeverse/lychee/releases
+LYCHEE_VERSION="${LYCHEE_VERSION:-0.18.1}"
+LYCHEE_SHA256="${LYCHEE_SHA256:-0d48569e2dc11c1917fa98321dfd7aa675fba03b79f41e8e74afa3223e30d379}"
 
 verify_sha256() {
   local file="$1"
@@ -143,6 +149,22 @@ install_if_missing grant bash -c "
   verify_sha256 /tmp/grant.tgz '${GRANT_SHA256}'
   tar -xzf /tmp/grant.tgz -C '${DEST}' grant
   rm -f /tmp/grant.tgz
+"
+
+install_if_missing shfmt bash -c "
+  curl -sSfL -o '${DEST}/shfmt' \
+    'https://github.com/mvdan/sh/releases/download/v${SHFMT_VERSION}/shfmt_v${SHFMT_VERSION}_linux_amd64'
+  verify_sha256 '${DEST}/shfmt' '${SHFMT_SHA256}'
+  chmod +x '${DEST}/shfmt'
+"
+
+install_if_missing lychee bash -c "
+  curl -sSfL -o /tmp/lychee.tgz \
+    'https://github.com/lycheeverse/lychee/releases/download/lychee-v${LYCHEE_VERSION}/lychee-x86_64-unknown-linux-gnu.tar.gz'
+  verify_sha256 /tmp/lychee.tgz '${LYCHEE_SHA256}'
+  tar -xzf /tmp/lychee.tgz -C '${DEST}' lychee
+  chmod +x '${DEST}/lychee'
+  rm -f /tmp/lychee.tgz
 "
 
 echo "Tool install complete. PATH=${PATH}"

@@ -38,6 +38,16 @@ on:
         required: false
         type: boolean
         default: false
+      run_markdownlint:
+        description: Run markdownlint-cli2 (off by default; token-free npm ci)
+        required: false
+        type: boolean
+        default: false
+      run_lychee:
+        description: Run lychee on markdown links (off by default)
+        required: false
+        type: boolean
+        default: false
       scripts_ref:
         description: "Commit/tag/branch of commondevops to checkout for scripts (must match uses: pin)"
         required: false
@@ -68,6 +78,12 @@ on:
       run_link_lint:
         type: boolean
         default: false
+      run_markdownlint:
+        type: boolean
+        default: false
+      run_lychee:
+        type: boolean
+        default: false
       scripts_ref:
         type: string
         default: ""
@@ -81,7 +97,7 @@ env:
 jobs:
   verify:
     # CI-024: Dependabot PRs cannot use Actions secrets for private reusable workflows.
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
@@ -140,7 +156,7 @@ jobs:
         if: inputs.ruff_paths != ''
         run: |
           python3 -m venv .ci-venv
-          .ci-venv/bin/pip install -q 'ruff==0.14.10'
+          .ci-venv/bin/pip install -q --require-hashes -r _commondevops/scripts/requirements.txt
 
       - name: ruff
         id: ruff
@@ -161,14 +177,18 @@ jobs:
           YAML_FILES: ${{ inputs.yaml_files }}
           YAML_GLOBS: ${{ inputs.yaml_globs }}
         run: |
-          if [ ! -f scripts/validate-yaml.py ]; then
-            echo "error: scripts/validate-yaml.py not in caller (CI-035)" >&2
+          yaml_py=scripts/validate-yaml.py
+          if [ ! -f "${yaml_py}" ]; then
+            yaml_py=.github/scaffold/scripts/validate-yaml.py
+          fi
+          if [ ! -f "${yaml_py}" ]; then
+            echo "error: validate-yaml.py not in scripts/ or .github/scaffold/scripts/ (CI-035)" >&2
             exit 1
           fi
           if [ ! -x .ci-venv/bin/python ]; then
             python3 -m venv .ci-venv
           fi
-          .ci-venv/bin/pip install -q pyyaml
+          .ci-venv/bin/pip install -q --require-hashes -r _commondevops/scripts/requirements.txt
           # Preserve glob metacharacters for validate-yaml.py --glob (Python expands them).
           set -f
           set --
@@ -179,18 +199,46 @@ jobs:
             set -- "$@" "$f"
           done
           set +f
-          .ci-venv/bin/python scripts/validate-yaml.py "$@"
+          .ci-venv/bin/python "${yaml_py}" "$@"
 
       - name: Lint relative markdown links
         id: links
         if: inputs.run_link_lint
         continue-on-error: true
         run: |
-          if [ ! -f scripts/lint-doc-links.py ]; then
-            echo "error: scripts/lint-doc-links.py not in caller (CI-035)" >&2
+          links_py=scripts/lint-doc-links.py
+          if [ ! -f "${links_py}" ]; then
+            links_py=.github/scaffold/scripts/lint-doc-links.py
+          fi
+          if [ ! -f "${links_py}" ]; then
+            echo "error: lint-doc-links.py not in scripts/ or .github/scaffold/scripts/ (CI-035)" >&2
             exit 1
           fi
-          python3 scripts/lint-doc-links.py
+          python3 "${links_py}"
+
+      - name: markdownlint
+        id: markdownlint
+        if: inputs.run_markdownlint
+        continue-on-error: true
+        run: |
+          if [ ! -f _commondevops/scripts/markdownlint/package-lock.json ]; then
+            echo "error: markdownlint lockfile missing from scripts checkout (CI-039)" >&2
+            exit 1
+          fi
+          npm ci --ignore-scripts --prefix _commondevops/scripts/markdownlint
+          _commondevops/scripts/markdownlint/node_modules/.bin/markdownlint-cli2 \
+            "**/*.md" "#**/node_modules" "#**/.github/scaffold" "#**/_commondevops"
+
+      - name: lychee
+        id: lychee
+        if: inputs.run_lychee
+        continue-on-error: true
+        working-directory: ${{ github.workspace }}
+        env:
+          INSTALL_ONLY: lychee
+        run: |
+          bash _commondevops/scripts/install-common-tools.sh
+          lychee --no-progress '**/*.md'
 
       - name: Gate — docs
         if: always()
@@ -201,10 +249,14 @@ jobs:
           RUFF: ${{ steps.ruff.outcome }}
           YAML: ${{ steps.yaml.outcome }}
           LINKS: ${{ steps.links.outcome }}
+          MDLINT: ${{ steps.markdownlint.outcome }}
+          LYCHEE: ${{ steps.lychee.outcome }}
         run: |
           set --
           if [ "${SHELLCHECK}" != "skipped" ] && [ -n "${SHELLCHECK}" ]; then set -- "$@" "shellcheck=${SHELLCHECK}"; fi
           if [ "${RUFF}" != "skipped" ] && [ -n "${RUFF}" ]; then set -- "$@" "ruff=${RUFF}"; fi
           if [ "${YAML}" != "skipped" ] && [ -n "${YAML}" ]; then set -- "$@" "yaml=${YAML}"; fi
           if [ "${LINKS}" != "skipped" ] && [ -n "${LINKS}" ]; then set -- "$@" "links=${LINKS}"; fi
+          if [ "${MDLINT}" != "skipped" ] && [ -n "${MDLINT}" ]; then set -- "$@" "markdownlint=${MDLINT}"; fi
+          if [ "${LYCHEE}" != "skipped" ] && [ -n "${LYCHEE}" ]; then set -- "$@" "lychee=${LYCHEE}"; fi
           bash _commondevops/scripts/gate-aggregate.sh "$@"

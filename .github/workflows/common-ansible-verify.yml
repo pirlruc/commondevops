@@ -1,0 +1,184 @@
+name: Common Ansible Verify (reusable)
+
+# ansible-lint, yamllint, the caller's guardrail script, and Molecule.
+# Token-free: it does not check out this private repo. Callers pin the
+# workflow SHA (CI-034) and keep scripts_ref equal to that pin.
+
+on:
+  workflow_call:
+    inputs:
+      scenarios:
+        description: Newline-separated Molecule scenario names
+        required: true
+        type: string
+      requirements_txt:
+        description: pip requirements file
+        required: false
+        type: string
+        default: requirements.txt
+      requirements_yml:
+        description: ansible-galaxy requirements file
+        required: false
+        type: string
+        default: requirements.yml
+      check_script:
+        description: Caller guardrail script (skipped when absent)
+        required: false
+        type: string
+        default: scripts/check-ansible-guardrails.py
+      blocking:
+        required: false
+        type: boolean
+        default: false
+      scripts_ref:
+        description: Must equal the caller's uses pin (CI-034). Not checked out.
+        required: false
+        type: string
+        default: ""
+  workflow_dispatch:
+    inputs:
+      scenarios:
+        type: string
+        required: true
+      requirements_txt:
+        type: string
+        default: requirements.txt
+      requirements_yml:
+        type: string
+        default: requirements.yml
+      check_script:
+        type: string
+        default: scripts/check-ansible-guardrails.py
+      blocking:
+        type: boolean
+        default: false
+      scripts_ref:
+        type: string
+        default: ""
+
+permissions: {}
+
+env:
+  ADVISORY: ${{ inputs.blocking == false }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Require scripts_ref for cross-repo callers (CI-034)
+        env:
+          SCRIPTS_REF: ${{ inputs.scripts_ref }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if [[ "${REPO}" != "pirlruc/commondevops" && -z "${SCRIPTS_REF}" ]]; then
+            echo "CI-034: cross-repo callers must pass scripts_ref matching the uses: pin" >&2
+            exit 1
+          fi
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Install Ansible toolchain
+        env:
+          REQUIREMENTS_TXT: ${{ inputs.requirements_txt }}
+        run: |
+          set -euo pipefail
+          if [[ ! -f "${REQUIREMENTS_TXT}" ]]; then
+            echo "error: ${REQUIREMENTS_TXT} not found" >&2
+            exit 1
+          fi
+          python3 -m pip install -r "${REQUIREMENTS_TXT}"
+
+      - name: Install collections
+        env:
+          REQUIREMENTS_YML: ${{ inputs.requirements_yml }}
+        run: |
+          set -euo pipefail
+          if [[ ! -f "${REQUIREMENTS_YML}" ]]; then
+            echo "error: ${REQUIREMENTS_YML} not found" >&2
+            exit 1
+          fi
+          ansible-galaxy collection install -r "${REQUIREMENTS_YML}"
+
+      - name: Caller guardrail script
+        id: check
+        continue-on-error: true
+        env:
+          CHECK_SCRIPT: ${{ inputs.check_script }}
+        run: |
+          set -euo pipefail
+          if [[ ! -f "${CHECK_SCRIPT}" ]]; then
+            echo "note: ${CHECK_SCRIPT} absent; skipping caller guardrail script"
+            exit 0
+          fi
+          python3 "${CHECK_SCRIPT}"
+
+      - name: yamllint
+        id: yamllint
+        continue-on-error: true
+        run: yamllint .
+
+      - name: ansible-lint
+        id: ansible_lint
+        continue-on-error: true
+        run: ansible-lint
+
+      - name: molecule
+        id: molecule
+        continue-on-error: true
+        env:
+          SCENARIOS: ${{ inputs.scenarios }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${SCENARIOS}" ]]; then
+            echo "error: scenarios input is empty" >&2
+            exit 1
+          fi
+          while IFS= read -r scenario; do
+            scenario="${scenario#"${scenario%%[![:space:]]*}"}"
+            [[ -z "${scenario}" || "${scenario}" == \#* ]] && continue
+            echo "molecule test -s ${scenario}"
+            molecule test -s "${scenario}"
+          done <<< "${SCENARIOS}"
+
+      - name: Gate — ansible
+        if: always()
+        env:
+          ADVISORY: ${{ env.ADVISORY }}
+          CHECK: ${{ steps.check.outcome }}
+          YAMLLINT: ${{ steps.yamllint.outcome }}
+          ANSIBLE: ${{ steps.ansible_lint.outcome }}
+          MOLECULE: ${{ steps.molecule.outcome }}
+        run: |
+          set -euo pipefail
+          failed=()
+          for pair in "check=${CHECK}" "yamllint=${YAMLLINT}" "ansible_lint=${ANSIBLE}" "molecule=${MOLECULE}"; do
+            name="${pair%%=*}"
+            outcome="${pair#*=}"
+            if [[ "${outcome}" == "skipped" || -z "${outcome}" ]]; then
+              continue
+            fi
+            if [[ "${outcome}" != "success" ]]; then
+              failed+=("${name}(${outcome})")
+            fi
+          done
+          if [[ ${#failed[@]} -eq 0 ]]; then
+            echo "All collected gates passed."
+            exit 0
+          fi
+          echo "Collected gate failures: ${failed[*]}"
+          if [[ "${ADVISORY}" == "true" ]]; then
+            echo "advisory — not failing the job (pass blocking=true to enforce findings)."
+            exit 0
+          fi
+          echo "::error::Quality gates failed: ${failed[*]}"
+          exit 1

@@ -1,0 +1,4 @@
+ruff==0.14.10
+pyyaml==6.0.2
+zizmor==1.29.0
+semgrep==1.172.0

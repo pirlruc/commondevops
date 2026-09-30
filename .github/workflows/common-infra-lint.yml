@@ -28,6 +28,11 @@ on:
         required: false
         type: string
         default: ""
+      run_shfmt:
+        description: Run shfmt --diff on shell scripts (SHELL-LANG-003 formatter; off by default)
+        required: false
+        type: boolean
+        default: false
     secrets:
       # Required when the caller is a different private repo: GITHUB_TOKEN cannot
       # read pirlruc/commondevops. Pass a PAT/fine-grained token with contents:read.
@@ -60,7 +65,7 @@ env:
 jobs:
   lint:
     # CI-024: Dependabot PRs cannot use Actions secrets for private reusable workflows.
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
@@ -103,14 +108,35 @@ jobs:
       - name: Install tooling
         working-directory: ${{ github.workspace }}
         env:
-          INSTALL_ONLY: actionlint,hadolint,shellcheck
+          INSTALL_ONLY: ${{ inputs.run_shfmt && 'actionlint,hadolint,shellcheck,shfmt' || 'actionlint,hadolint,shellcheck' }}
         run: bash _commondevops/scripts/install-common-tools.sh
 
       - name: Install zizmor
         working-directory: ${{ github.workspace }}
         run: |
-          pipx install 'zizmor==1.29.0' || pip install --user 'zizmor==1.29.0'
+          set -euo pipefail
+          python3 -m pip install --user --require-hashes -r _commondevops/scripts/requirements.txt
           echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
+
+      - name: Resolve lint thresholds
+        id: thr
+        working-directory: ${{ github.workspace }}
+        run: |
+          set -euo pipefail
+          shell_file="docs/guardrails/shell/profile.thresholds.yml"
+          if [[ ! -f "${shell_file}" ]]; then
+            shell_file="_commondevops/scripts/shell.profile.thresholds.yml"
+          fi
+          docker_file="docs/guardrails/docker/profile.thresholds.yml"
+          if [[ ! -f "${docker_file}" ]]; then
+            docker_file="_commondevops/scripts/docker.profile.thresholds.yml"
+          fi
+          shell_sev="$(bash _commondevops/scripts/read-thresholds.sh shellcheck_failure_threshold "${shell_file}")"
+          hadolint_sev="$(bash _commondevops/scripts/read-thresholds.sh hadolint_failure_threshold "${docker_file}")"
+          {
+            echo "shellcheck=${shell_sev}"
+            echo "hadolint=${hadolint_sev}"
+          } >> "$GITHUB_OUTPUT"
 
       - name: actionlint
         id: actionlint
@@ -134,18 +160,23 @@ jobs:
         continue-on-error: true
         env:
           SHELL_SCRIPTS: ${{ inputs.shell_scripts }}
+          SEVERITY: ${{ steps.thr.outputs.shellcheck }}
         run: |
           set -euo pipefail
+          if [[ -z "${SEVERITY}" ]]; then
+            echo "empty shellcheck_failure_threshold" >&2
+            exit 1
+          fi
           if [[ -n "${SHELL_SCRIPTS}" ]]; then
             # shellcheck disable=SC2086
-            shellcheck ${SHELL_SCRIPTS}
+            shellcheck --severity="${SEVERITY}" ${SHELL_SCRIPTS}
           else
             mapfile -t SHS < <(find scripts -name '*.sh' 2>/dev/null || true)
             if [[ ${#SHS[@]} -eq 0 ]]; then
               echo "No shell scripts"
               exit 0
             fi
-            shellcheck "${SHS[@]}"
+            shellcheck --severity="${SEVERITY}" "${SHS[@]}"
           fi
 
       - name: hadolint
@@ -153,18 +184,43 @@ jobs:
         continue-on-error: true
         env:
           DOCKERFILES: ${{ inputs.dockerfiles }}
+          THRESHOLD: ${{ steps.thr.outputs.hadolint }}
         run: |
           set -euo pipefail
+          if [[ -z "${THRESHOLD}" ]]; then
+            echo "empty hadolint_failure_threshold" >&2
+            exit 1
+          fi
           if [[ -n "${DOCKERFILES}" ]]; then
             # shellcheck disable=SC2086
-            hadolint ${DOCKERFILES}
+            hadolint --failure-threshold "${THRESHOLD}" ${DOCKERFILES}
           else
             mapfile -t DFS < <(find docker -name 'Dockerfile*' 2>/dev/null || true)
             if [[ ${#DFS[@]} -eq 0 ]]; then
               echo "No Dockerfiles"
               exit 0
             fi
-            hadolint "${DFS[@]}"
+            hadolint --failure-threshold "${THRESHOLD}" "${DFS[@]}"
+          fi
+
+      - name: shfmt
+        id: shfmt
+        if: inputs.run_shfmt
+        continue-on-error: true
+        env:
+          SHELL_SCRIPTS: ${{ inputs.shell_scripts }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${SHELL_SCRIPTS}" ]]; then
+            # shellcheck disable=SC2086
+            shfmt --diff ${SHELL_SCRIPTS}
+          else
+            mapfile -t SHS < <(find scripts -name '*.sh' 2>/dev/null || true)
+            if [[ ${#SHS[@]} -eq 0 ]]; then
+              echo "No shell scripts"
+              exit 0
+            fi
+            shfmt --diff "${SHS[@]}"
           fi
 
       - name: zizmor
@@ -191,10 +247,12 @@ jobs:
           SHELLCHECK: ${{ steps.shellcheck.outcome }}
           HADOLINT: ${{ steps.hadolint.outcome }}
           ZIZMOR: ${{ steps.zizmor.outcome }}
+          SHFMT: ${{ steps.shfmt.outcome }}
         run: |
           set -euo pipefail
           bash _commondevops/scripts/gate-aggregate.sh \
             actionlint="${ACTIONLINT}" \
             shellcheck="${SHELLCHECK}" \
             hadolint="${HADOLINT}" \
-            zizmor="${ZIZMOR}"
+            zizmor="${ZIZMOR}" \
+            shfmt="${SHFMT}"

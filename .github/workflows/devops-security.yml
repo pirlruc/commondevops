@@ -15,7 +15,7 @@ permissions: {}
 
 jobs:
   secrets-sast:
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     permissions:
       contents: read
       security-events: write
@@ -26,7 +26,7 @@ jobs:
       scripts_ref: ${{ github.sha }}
 
   supply-chain:
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     permissions:
       contents: read
       security-events: write
@@ -39,7 +39,7 @@ jobs:
 
   scorecard:
     if: >-
-      github.actor != 'dependabot[bot]' &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
       github.event.repository.fork == false
     permissions:
       contents: read
@@ -54,7 +54,7 @@ jobs:
       repo_token: ${{ secrets.SCORECARD_TOKEN }}
 
   published-ci-lint-rescan:
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     permissions:
       contents: read
       security-events: write
@@ -72,7 +72,7 @@ jobs:
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   published-ci-supply-chain-rescan:
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     permissions:
       contents: read
       security-events: write
