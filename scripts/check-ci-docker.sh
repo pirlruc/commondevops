@@ -18,7 +18,7 @@ SCRIPT_DIR="$(dirname "$0")"
 SCRIPT_DIR="$(cd "${SCRIPT_DIR}" && pwd)"
 ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 # CI-026 / DOCKER-SEC-006 — digest pin; tag is documentation only.
-IMAGE="${COMMONDEVOPS_CI_IMAGE:-ghcr.io/pirlruc/ci-lint:5.1.1@sha256:35a82a43839e0969dc7c44d63c36b5c97cdefb20c6d3112255f52c09444042a1}"
+IMAGE="${COMMONDEVOPS_CI_IMAGE:-ghcr.io/pirlruc/ci-lint:5.2.0@sha256:33dbcc7be28ffef2a6cf3cf4b611cf862a8f246c6d6932c4055772d73d697674}"
 BUILD_LOCAL="${COMMONDEVOPS_BUILD_LOCAL:-1}"
 ADVISORY="${COMMONDEVOPS_ADVISORY:-0}"
 

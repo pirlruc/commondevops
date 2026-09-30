@@ -213,9 +213,9 @@ reusables against this repository (`scripts_ref: ${{ github.sha }}`).
 ## `devops-security.yml` (scheduled)
 
 Weekly secrets/SAST, supply-chain, Scorecard, and registry rescans of
-digest-pinned `ghcr.io/pirlruc/ci-lint:5.1.1@sha256:35a82a43839e0969dc7c44d63c36b5c97cdefb20c6d3112255f52c09444042a1`
+digest-pinned `ghcr.io/pirlruc/ci-lint:5.2.0@sha256:33dbcc7be28ffef2a6cf3cf4b611cf862a8f246c6d6932c4055772d73d697674`
 and
-`ghcr.io/pirlruc/ci-supply-chain:5.1.1@sha256:10c82137edb980db080e682def182d236f40d042afd403bf025848838e9515ce`
+`ghcr.io/pirlruc/ci-supply-chain:5.2.0@sha256:f880c137677d703ec84ab0f386ceb0363d9e69aaf77bc3da40c0644dd7d9c784`
 via containerdevops
 `container-published-rescan.yml@5.0.2` (`32384866…`). Image CI still calls
 `container-scan.yml` at the same SHA.
@@ -229,7 +229,7 @@ Consumers should not copy `check-ci-docker.sh`. Pin this repo, sparse-checkout
 
 ```sh
 # After checking out pirlruc/commondevops@<sha> into _commondevops/scripts
-COMMONDEVOPS_CI_IMAGE="${MY_CI_IMAGE:-ghcr.io/pirlruc/ci-lint:5.1.1@sha256:35a82a43839e0969dc7c44d63c36b5c97cdefb20c6d3112255f52c09444042a1}"
+COMMONDEVOPS_CI_IMAGE="${MY_CI_IMAGE:-ghcr.io/pirlruc/ci-lint:5.2.0@sha256:33dbcc7be28ffef2a6cf3cf4b611cf862a8f246c6d6932c4055772d73d697674}"
 COMMONDEVOPS_DOCKER_STEPS="actionlint shellcheck hadolint zizmor yamllint"
 export COMMONDEVOPS_CI_IMAGE COMMONDEVOPS_DOCKER_STEPS
 sh _commondevops/scripts/check-ci-docker.sh
