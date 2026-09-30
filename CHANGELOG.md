@@ -30,6 +30,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
   1 day. The sweeper also deletes `*.dockerbuild`.
 - Debian image lint sets `run_secrets_scan: true`. Scans skip the
   `_commondevops` script checkout.
+- containerdevops callers pin **6.0.0** (`8e806128…`).
 
 ## [5.1.2] - 2026-09-15
 
