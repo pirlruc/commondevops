@@ -15,7 +15,7 @@
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
 # dhi.io/python:3.13-debian13-dev — digest pinned (DOCKER-BUILD-003 / CI-026)
-FROM dhi.io/python:3.13-debian13-dev@sha256:9b34b12a9952ea48d56c6ae0b6d77430c560b6d2939c07380cdfffa74767d589
+FROM dhi.io/python:3.13-debian13-dev@sha256:cb32401c177600c7bacdb96a49ef51dd10d9967a868614288c428acc41e65604
 
 LABEL org.opencontainers.image.title="ci-supply-chain" \
       org.opencontainers.image.description="Short-lived CI toolchain image for SBOM generation and vulnerability/license gates: syft, grype, trivy, grant. Non-root 1000:1000, linux/amd64." \
