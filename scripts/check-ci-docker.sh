@@ -3,7 +3,7 @@
 # POSIX sh — Alpine ci-lint has no bash (CI-036 / CMN-WF-003-T1).
 #
 # Env:
-#   COMMONDEVOPS_CI_IMAGE     — ci-lint image (default digest-pinned 5.1.1 Alpine)
+#   COMMONDEVOPS_CI_IMAGE     — ci-lint image (default digest-pinned 5.2.4 Alpine)
 #   COMMONDEVOPS_DOCKER_STEPS — space-separated step names (required)
 #   COMMONDEVOPS_BUILD_LOCAL  — if 1, build docker/ci-lint when pull fails (tag refs only)
 #   COMMONDEVOPS_ADVISORY     — if 1, yamllint findings are non-blocking
@@ -18,7 +18,7 @@ SCRIPT_DIR="$(dirname "$0")"
 SCRIPT_DIR="$(cd "${SCRIPT_DIR}" && pwd)"
 ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 # CI-026 / DOCKER-SEC-006 — digest pin; tag is documentation only.
-IMAGE="${COMMONDEVOPS_CI_IMAGE:-ghcr.io/pirlruc/ci-lint:5.2.2@sha256:fd24e836c677e044163aab19e1e7d49d92ce34576deb7970b1ae16ea52b36d1b}"
+IMAGE="${COMMONDEVOPS_CI_IMAGE:-ghcr.io/pirlruc/ci-lint:5.2.4@sha256:e0a51c64b004c6f4e4ca1672f3bb865aaf03d91bd8a2e228e0fa39be1174dfb4}"
 BUILD_LOCAL="${COMMONDEVOPS_BUILD_LOCAL:-1}"
 ADVISORY="${COMMONDEVOPS_ADVISORY:-0}"
 
