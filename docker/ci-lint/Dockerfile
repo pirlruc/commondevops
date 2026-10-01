@@ -4,7 +4,7 @@
 #
 # Binary path discoveries (2026-08-10):
 #   dhi.io/shellcheck:0-debian13 → /usr/local/bin/shellcheck
-#   dhi.io/gitleaks:8-debian13   → /usr/local/bin/gitleaks
+#   dhi.io/gitleaks:8-debian13   → /usr/bin/gitleaks
 #   hadolint/hadolint:2.12.0-alpine → /bin/hadolint
 #   rhysd/actionlint:1.7.12      → /usr/local/bin/actionlint
 #   ghcr.io/astral-sh/uv:0.12.0  → /uv (build stage only)
@@ -12,7 +12,7 @@
 # No HEALTHCHECK: short-lived CI toolchain (CLI job container), not a supervised
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
-ARG BASE=dhi.io/python:3.13-debian13-dev@sha256:9b34b12a9952ea48d56c6ae0b6d77430c560b6d2939c07380cdfffa74767d589
+ARG BASE=dhi.io/python:3.13-debian13-dev@sha256:cb32401c177600c7bacdb96a49ef51dd10d9967a868614288c428acc41e65604
 
 # ---------------------------------------------------------------------------
 # pybuild — install Python CLIs; uv stays out of the final image (~53 MB).
@@ -52,8 +52,8 @@ LABEL org.opencontainers.image.title="ci-lint" \
 
 COPY --from=dhi.io/shellcheck:0-debian13@sha256:eb696ecbc0a6dbe57588d88c700c3da7cce3824f8c865795348f9b51c7524331 \
   /usr/local/bin/shellcheck /usr/local/bin/shellcheck
-COPY --from=dhi.io/gitleaks:8-debian13@sha256:08b93b96ee818647ab1fb8e148bf8af4e1190b344e48b0e9bfa57eae98db8117 \
-  /usr/local/bin/gitleaks /usr/local/bin/gitleaks
+COPY --from=dhi.io/gitleaks:8-debian13@sha256:7f7f90449d80971451a7fc20eedd1875b7271ef68be571b1b9550f19109c32c3 \
+  /usr/bin/gitleaks /usr/local/bin/gitleaks
 COPY --from=hadolint/hadolint:2.12.0-alpine@sha256:3c206a451cec6d486367e758645269fd7d696c5ccb6ff59d8b03b0e45268a199 \
   /bin/hadolint /usr/local/bin/hadolint
 COPY --from=rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 \

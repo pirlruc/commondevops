@@ -15,7 +15,7 @@
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
 # dhi.io/python:3.13-debian13-dev — digest pinned (DOCKER-BUILD-003 / CI-026)
-FROM dhi.io/python:3.13-debian13-dev@sha256:9b34b12a9952ea48d56c6ae0b6d77430c560b6d2939c07380cdfffa74767d589
+FROM dhi.io/python:3.13-debian13-dev@sha256:cb32401c177600c7bacdb96a49ef51dd10d9967a868614288c428acc41e65604
 
 LABEL org.opencontainers.image.title="ci-supply-chain" \
       org.opencontainers.image.description="Short-lived CI toolchain image for SBOM generation and vulnerability/license gates: syft, grype, trivy, grant. Non-root 1000:1000, linux/amd64." \
@@ -25,11 +25,11 @@ LABEL org.opencontainers.image.title="ci-supply-chain" \
       org.opencontainers.image.vendor="pirlruc" \
       org.opencontainers.image.licenses="MIT"
 
-COPY --from=dhi.io/syft:1-debian13@sha256:3484ac184dd20f130a2f7b7ceb57b2e4f21a264338bb384295ea72bb825b2e3c \
+COPY --from=dhi.io/syft:1-debian13@sha256:592be9e9fb223f5bd3f175bba8f9191847b065cc97e03998cd3944c315b29128 \
   /usr/bin/syft /usr/local/bin/syft
-COPY --from=dhi.io/grype:0-debian13@sha256:b5af85761b7c2cd5afbfc8e75ca3b23d6a706c14c3831966f2e25218ff2da23f \
+COPY --from=dhi.io/grype:0-debian13@sha256:aa59b66b65c0cc54f094cd35614b203288477bc5d4d256be003b00a96a473925 \
   /usr/bin/grype /usr/local/bin/grype
-COPY --from=dhi.io/trivy:0-debian13@sha256:f957a8173ddfc1e82cd4454fd760011e65cb03f42ffe67a91fe105a140ffade5 \
+COPY --from=dhi.io/trivy:0-debian13@sha256:db666d33cb95930e3932439e7a4c3678f480ea033b6bf1ffb6b7228d9e879d3d \
   /usr/bin/trivy /usr/local/bin/trivy
 COPY --from=anchore/grant:v0.6.8@sha256:172463611795f43b77302cdfbd7b3f81295492a7330e0820cfe41c3674920237 \
   /grant /usr/local/bin/grant
