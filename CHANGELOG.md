@@ -5,6 +5,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.2.4] - 2026-10-01
+
+### Changed
+
+- Refresh DHI syft 1.52.0, grype 0.119.0, trivy 0.74.0, and gitleaks donors.
+  Those binaries are built with Go 1.26.8 and drop their fixable HIGH findings.
+  grant 0.6.8 and actionlint 1.7.12 are still the latest releases. Debian
+  openssl stays on deb13u2 because DHI has not shipped deb13u3.
+
 ## [5.2.3] - 2026-09-30
 
 ### Changed

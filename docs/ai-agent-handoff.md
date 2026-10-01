@@ -57,7 +57,7 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | `ghcr.io/pirlruc/ci-lint` (debian) | `5.2.2-debian` `sha256:2cb20ba2d39f55ccc4195acc162013162682cb3bcccc31c300261965ca9b30c1` |
 | `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.2.2` `sha256:2ea8da1b95fd393e8b2897fb0d11eba97d9036d9df011519bed058df172a9257` |
 | Release (reusables) | **5.1.2** (SHA after merge; no GitHub Release) |
-| Release (images) | **5.2.0** |
+| Release (images) | **5.2.2** published; **5.2.4** refreshes syft, grype, trivy, and gitleaks donors |
 
 ## Local image sizes / posture (2026-08-12, `du -sxm /`)
 
@@ -148,6 +148,11 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
+- 2026-10-01: **5.2.4** — DHI syft 1.52.0, grype 0.119.0, trivy 0.74.0, and
+  gitleaks (still 8.30.1, rebuilt, binary now at `/usr/bin/gitleaks`) drop
+  fixable HIGH findings. grant 0.6.8 and actionlint 1.7.12 stay. Debian
+  openssl HIGH remains until DHI ships deb13u3. Image digests are written
+  back after the GitHub Release publishes.
 - 2026-09-30: guardrails **1.8.0** / scaffold **1.7.0**. Methodology decision
   links cite **1.6.0** (no methodologies submodule). Synced scaffold templates.
 - 2026-09-15: **5.1.2** (tag-only) — write 5.1.1 alpine/debian Hub digests
@@ -209,4 +214,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-09-30 (5.2.1 digest writeback)*
+*Last updated: 2026-10-01 (5.2.4 donor refresh)*

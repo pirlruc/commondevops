@@ -1,121 +1,78 @@
 # Vendor-static toolchain binaries in ci-supply-chain — refresh digests when upstream ships fixes.
 # Review: 2026-11-11
+# syft 1.52.0, grype 0.119.0, and trivy 0.74.0 (Go 1.26.8) cleared their fixable
+# HIGH findings. grant 0.6.8 is still the latest release. grype still embeds an
+# unfixed moby client.
 vulnerabilities:
-  - id: CVE-2026-71556
-    paths:
-      - "**/syft"
-      - "**/grype"
-      - "**/trivy"
-      - "**/grant"
-    statement: Embedded go-git in DHI/Anchore donor binaries; no newer floating tag yet.
-  - id: CVE-2026-34040
-    paths:
-      - "**/grype"
-    statement: Embedded moby client in grype donor binary.
   - id: CVE-2026-41567
     paths:
       - "**/grype"
-    statement: Embedded moby client in grype donor binary.
+    statement: Embedded moby client in grype 0.119.0; no fixed version.
   - id: CVE-2026-42306
     paths:
       - "**/grype"
-    statement: Embedded moby client in grype donor binary.
+    statement: Embedded moby client in grype 0.119.0; no fixed version.
+  - id: CVE-2026-71556
+    paths:
+      - "**/grant"
+    statement: Embedded go-git in anchore/grant 0.6.8; no newer release.
   - id: CVE-2026-56852
     paths:
       - "**/grant"
-    statement: Embedded golang.org/x/text in grant donor binary.
+    statement: Embedded golang.org/x/text in grant 0.6.8; no newer release.
   - id: GHSA-hrxh-6v49-42gf
     paths:
       - "**/grant"
-    statement: Embedded gRPC-Go in grant donor binary.
+    statement: Embedded gRPC-Go in grant 0.6.8; no newer release.
   - id: CVE-2026-39821
     paths:
-      - "**/syft"
-      - "**/grype"
-      - "**/trivy"
       - "**/grant"
-    statement: Go stdlib embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+    statement: Go stdlib embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-46600
     paths:
-      - "**/syft"
-      - "**/grype"
-      - "**/trivy"
       - "**/grant"
-    statement: Go stdlib embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+    statement: Go stdlib embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-33818
     paths:
-      - "**/syft"
-      - "**/grype"
-      - "**/trivy"
       - "**/grant"
-    statement: Go stdlib embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+    statement: Go stdlib embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-56853
     paths:
-      - "**/syft"
-      - "**/grype"
-      - "**/trivy"
       - "**/grant"
-    statement: Go stdlib embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+    statement: Go stdlib embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-56854
     paths:
-      - "**/syft"
-      - "**/grype"
-      - "**/trivy"
       - "**/grant"
-    statement: golang.org/x/crypto embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+    statement: golang.org/x/crypto embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-56858
     paths:
-      - "**/syft"
-      - "**/grype"
-      - "**/trivy"
       - "**/grant"
-    statement: Go stdlib embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+    statement: Go stdlib embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-56859
     paths:
-      - "**/syft"
-      - "**/grype"
-      - "**/trivy"
       - "**/grant"
-    statement: Go stdlib embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+    statement: Go stdlib embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-56860
     paths:
-      - "**/syft"
-      - "**/grype"
-      - "**/trivy"
       - "**/grant"
-    statement: Go stdlib embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+    statement: Go stdlib embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-56862
     paths:
-      - "**/syft"
-      - "**/grype"
-      - "**/trivy"
       - "**/grant"
-    statement: Go stdlib embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+    statement: Go stdlib embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-56864
     paths:
-      - "**/syft"
-      - "**/grype"
-      - "**/trivy"
       - "**/grant"
-    statement: golang.org/x/mod embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+    statement: golang.org/x/mod embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-56865
     paths:
-      - "**/syft"
-      - "**/grype"
-      - "**/trivy"
       - "**/grant"
-    statement: golang.org/x/mod embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+    statement: golang.org/x/mod embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-84304
     paths:
-      - "**/syft"
-      - "**/grype"
-      - "**/trivy"
       - "**/grant"
-    statement: gRPC-Go embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+    statement: gRPC-Go embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-84445
     paths:
-      - "**/syft"
-      - "**/grype"
-      - "**/trivy"
       - "**/grant"
-    statement: gRPC-Go embedded in DHI/Anchore/Aqua donor binaries; bump when floating tag ships fix.
+    statement: gRPC-Go embedded in grant 0.6.8; no newer release.
