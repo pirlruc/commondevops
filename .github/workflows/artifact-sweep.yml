@@ -1,7 +1,9 @@
-name: Artifact sweep (container-image* and build records)
+name: Artifact sweep (container-image*, build records, stale caches)
 
-# Safety net for leftover image-tar artifacts and docker build records.
-# Does not delete GHCR packages, container-scan-*, or common-supply-chain-results.
+# Safety net for leftover image-tar artifacts, docker build records, and
+# Actions caches written on pull-request or tag refs. Does not delete GHCR
+# packages, container-scan-*, common-supply-chain-results, or caches on the
+# default branch.
 
 on:
   schedule:
@@ -13,7 +15,7 @@ permissions: {}
 jobs:
   sweep:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 20
     permissions:
       actions: write
     steps:
@@ -35,3 +37,23 @@ jobs:
             deleted=$((deleted + 1))
           done
           echo "deleted ${deleted} container-image* artifacts"
+
+      - name: Delete pull and tag Actions caches
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          mapfile -t rows < <(gh api --paginate "/repos/${REPO}/actions/caches?per_page=100" \
+            --jq '.actions_caches[] | select(.ref | startswith("refs/pull/") or startswith("refs/tags/") or contains("/refs/tags/")) | [.id, .ref, .key] | @tsv')
+          deleted=0
+          for row in "${rows[@]}"; do
+            [[ -z "${row}" ]] && continue
+            id="${row%%$'\t'*}"
+            rest="${row#*$'\t'}"
+            ref="${rest%%$'\t'*}"
+            echo "deleting cache ${id} (${ref})"
+            gh api -X DELETE "/repos/${REPO}/actions/caches/${id}" >/dev/null
+            deleted=$((deleted + 1))
+          done
+          echo "deleted ${deleted} pull or tag caches"

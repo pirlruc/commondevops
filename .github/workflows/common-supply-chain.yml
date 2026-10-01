@@ -130,8 +130,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p scan-results
-          # scripts/requirements.txt is the CI tool lock. semgrep==1.172.0
-          # requires mcp==1.23.3; the published image overrides mcp to 1.29.0.
+          # scripts/requirements.txt is the CI tool lock (semgrep 1.178.0,
+          # mcp 1.29.0). The published image still overrides PyJWT to 2.14.0.
           syft dir:. --exclude './_commondevops/**' \
             --exclude './scripts/requirements.txt' \
             --exclude './scripts/ci-requirements.in' \
