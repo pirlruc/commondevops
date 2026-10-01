@@ -5,6 +5,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.2.6] - 2026-10-01
+
+### Changed
+
+- Image callers pin containerdevops **6.1.0**
+  (`edef9c8413363c46dcb276f5188a033d9fc6fd4e`). That release writes the
+  BuildKit cache only on the default branch.
+- `scripts/requirements.txt` is recompiled from semgrep 1.178.0, which pins
+  mcp 1.29.0, plus urllib3 2.8.0. PyJWT stays 2.13.0 because semgrep declares
+  `pyjwt~=2.13.0`; 2.14.0 does not install beside it. The image still overrides
+  PyJWT at build time. CMN-CVE-001 tracks the lock bump.
+- The artifact sweep deletes Actions caches on pull-request and tag refs.
+  Tag only. No GitHub Release, so the images are not republished.
+
 ## [5.2.5] - 2026-10-01
 
 ### Changed

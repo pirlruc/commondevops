@@ -1393,3 +1393,69 @@ milestones:
               - grep -q p/kotlin docs/workflows.md
             guardrail_refs:
               - KT-SEC-002
+
+      - id: CMN-CVE-001
+        status: open
+        title: Refresh actionlint and grant past known Go HIGH findings
+        overview:
+          problem: >-
+            A 2026-10-01 Trivy scan of the published images (os and library,
+            no ignorefile) found HIGH findings in donor Go binaries. ci-lint
+            actionlint 1.7.12 vendors Go stdlib v1.26.1 (20 findings, fixed in
+            1.26.4). ci-supply-chain grant vendors stdlib, go-git, x/crypto,
+            x/mod, x/text, and grpc. grype vendors docker/docker
+            CVE-2026-41567 with no fix.
+          goal: >-
+            Republish ci-lint and ci-supply-chain once upstream actionlint and
+            grant ship binaries built on the fixed Go modules.
+        decision: >-
+          In the context of published CI images, facing HIGH findings inside
+          donor binaries we do not compile, we decided to wait for upstream
+          rebuilds rather than fork the tools, to achieve a clean library
+          scan, accepting that the findings stay until those releases exist.
+        architecture:
+          target: ci-lint and ci-supply-chain donor pins
+          modules:
+            - docker/ci-lint/Dockerfile
+            - docker/ci-lint/Dockerfile.alpine
+            - docker/ci-supply-chain/Dockerfile
+            - docker/ci-supply-chain/Dockerfile.alpine
+        acceptance_criteria:
+          - actionlint is built with Go stdlib 1.26.4 or newer
+          - grant no longer reports the fixed go-git, x/crypto, x/mod, x/text, and grpc findings
+        guardrail_refs:
+          - DOCKER-SEC-001
+        tasks:
+          - id: CMN-CVE-001-T1
+            status: open
+            title: Bump the actionlint donor once a rebuilt image exists
+            instructions:
+              files:
+                - docker/ci-lint/Dockerfile
+                - docker/ci-lint/Dockerfile.alpine
+            verification:
+              - trivy image --severity HIGH,CRITICAL pirlruc/ci-lint:latest finds no stdlib findings in actionlint
+            guardrail_refs:
+              - DOCKER-SEC-001
+          - id: CMN-CVE-001-T3
+            status: open
+            title: Pin PyJWT 2.14 or newer in the tool lock when semgrep allows it
+            instructions:
+              files:
+                - scripts/ci-requirements.in
+                - scripts/requirements.txt
+            verification:
+              - grep -E -q 'pyjwt==2\\.(1[4-9]|[2-9][0-9])' scripts/requirements.txt
+            guardrail_refs:
+              - DOCKER-SEC-001
+          - id: CMN-CVE-001-T2
+            status: open
+            title: Bump the grant donor once a rebuilt image exists
+            instructions:
+              files:
+                - docker/ci-supply-chain/Dockerfile
+                - docker/ci-supply-chain/Dockerfile.alpine
+            verification:
+              - trivy image --severity HIGH,CRITICAL pirlruc/ci-supply-chain:latest finds no fixed-module findings in grant
+            guardrail_refs:
+              - DOCKER-SEC-001

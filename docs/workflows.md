@@ -104,7 +104,7 @@ Pin the commit that introduced this file (after PR #62 merges).
 | Step | Tool |
 |------|------|
 | Secrets | gitleaks (`--config .gitleaks.toml` when present) |
-| SAST | semgrep `1.172.0` (`--config auto`, plus `.semgrep.yml` when present) |
+| SAST | semgrep `1.178.0` (`--config auto`, plus `.semgrep.yml` when present) |
 
 Needs `contents: read` + `security-events: write`. Full history checkout for
 gitleaks ranges. Prefer `ghcr.io/pirlruc/ci-lint` for the same toolset.
@@ -247,8 +247,8 @@ The same SHA is the sparse-checkout ref for this runner.
 
 ## Published-image rescan caller (CMN-RESCAN-001)
 
-Copy-ready job. Pin containerdevops **6.0.1**
-(`c01b12a999ab2f17bc7352e2611d36a68e55a08e`) for both `uses:` and `scripts_ref`.
+Copy-ready job. Pin containerdevops **6.1.0**
+(`edef9c8413363c46dcb276f5188a033d9fc6fd4e`) for both `uses:` and `scripts_ref`.
 Digest-pin the image (CI-026); do not float on `:latest`.
 
 ```yaml
@@ -258,10 +258,10 @@ Digest-pin the image (CI-026); do not float on `:latest`.
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@c01b12a999ab2f17bc7352e2611d36a68e55a08e
+    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@edef9c8413363c46dcb276f5188a033d9fc6fd4e
     with:
       image: ghcr.io/pirlruc/<image>@sha256:<digest>
-      scripts_ref: c01b12a999ab2f17bc7352e2611d36a68e55a08e
+      scripts_ref: edef9c8413363c46dcb276f5188a033d9fc6fd4e
       pkg_types: library
       ignorefile: docker/<image>/.trivyignore.yaml
       results_artifact: published-<image>-scan

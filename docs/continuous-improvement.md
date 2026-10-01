@@ -156,6 +156,7 @@ Do not recommend removing these without **requires user decision**:
 5. Guardrails stay canonical in `pirlruc/guardrails` — cite IDs; record deviations here only
 6. DHI digests stay pinned; do not float `latest` on production FROM lines
 7. Caller jobs must grant every permission the reusable job declares (no escalation)
+8. The artifact sweep may delete pull and tag Actions caches; it must not delete published GHCR or Docker Hub tags
 
 ## Automation configuration
 

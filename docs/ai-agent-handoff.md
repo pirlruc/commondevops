@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
-| **Branch** | `feature-digest-5.1.2` → tag **5.1.2** |
+| **Branch** | `main` → tag **5.2.6** (re-pin; images stay **5.2.4**) |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, release + `ci-lint` / `ci-supply-chain` images |
 | **Type** | CI infrastructure |
 
@@ -18,8 +18,8 @@ Owns `.github/workflows/common-*.yml`, `devops-ci.yml`, `devops-security.yml`,
 matching `scripts_ref` + `checkout_token`. `common-doc-verify.yml` /
 `common-scaffold-verify.yml` ship in 4.1.0; older pins do not have them.
 
-Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `5.0.2`
-→ `c01b12a999ab2f17bc7352e2611d36a68e55a08e` (compose GHCR refs from
+Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `6.1.0`
+→ `edef9c8413363c46dcb276f5188a033d9fc6fd4e` (compose GHCR refs from
 `handoff_package` + `digest`; `flavor: latest=false`). Do not pin 5.0.0
 (`f5a3a632…`) — job outputs from the handoff `always()` step were empty.
 `common-doc-verify.yml` / `common-scaffold-verify.yml` shipped in **4.1.0**
@@ -51,13 +51,13 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | guardrails submodule | tag **1.9.0** → `16a2c95c…` |
 | github-scaffold submodule | tag **1.8.0** → `ac9059fd…` |
 | methodologies (links only; not a submodule) | tag **1.8.0** |
-| containerdevops (image callers + security rescan) | tag `6.0.1` → `c01b12a999ab2f17bc7352e2611d36a68e55a08e` |
+| containerdevops (image callers + security rescan) | tag `6.1.0` → `edef9c8413363c46dcb276f5188a033d9fc6fd4e` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 | `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `5.2.4` `sha256:e0a51c64b004c6f4e4ca1672f3bb865aaf03d91bd8a2e228e0fa39be1174dfb4` (`latest` == alpine) |
 | `ghcr.io/pirlruc/ci-lint` (debian) | `5.2.4-debian` `sha256:618b469a95b60097eb709830cbe3ee079a78f614ad0bf74b5643d4c8c0895cec` |
 | `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.2.4` `sha256:f7abb77fd31aeb68bf31ff391ed0e54825f706314607dc1570088e19d3d6c55c` |
 | `ghcr.io/pirlruc/ci-supply-chain` (debian) | `5.2.4-debian` `sha256:99aa0689b82930919e525e2f6afdbfde5819bb1ab587e2fd2be20022a0f204fc` |
-| Release (reusables) | **5.1.2** (SHA after merge; no GitHub Release) |
+| Release (reusables) | **5.2.6** (tag only; images stay 5.2.4) |
 | Release (images) | **5.2.4** |
 
 ## Local image sizes / posture (2026-08-12, `du -sxm /`)
@@ -143,12 +143,16 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. cppdevops / pydevops / containerdevops re-pin `uses:` + `scripts_ref` to
-   the **5.1.2** SHA.
-2. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
+1. cppdevops and pydevops re-pin `uses:` + `scripts_ref` to the **5.2.6** SHA.
+2. Rebuild actionlint and grant past the Go HIGH findings in CMN-CVE-001.
+3. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
 
 ## Recent history
 
+- 2026-10-01: **5.2.6** (tag-only) — containerdevops **6.1.0**
+  (`edef9c84…`). The tool lock is semgrep 1.178.0, mcp 1.29.0, urllib3 2.8.0.
+  PyJWT stays 2.13.0 until semgrep allows 2.14. The sweep deletes pull and tag
+  Actions caches. Images are not republished.
 - 2026-10-01: **5.2.5** (tag-only) — write 5.2.4 alpine/debian digests.
   Debian OpenSSL is `deb13u3` in that publish. No GitHub Release.
 - 2026-10-01: **5.2.4** — DHI syft 1.52.0, grype 0.119.0, trivy 0.74.0, and
@@ -217,4 +221,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-01 (5.2.4 image digests)*
+*Last updated: 2026-10-01 (5.2.6 re-pin containerdevops 6.1.0)*
