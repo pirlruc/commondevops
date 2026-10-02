@@ -7,9 +7,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Changed
 
-- Registry examples and the continuous-improvement prompt match the published
-  5.3.0 images. Debian owns unsuffixed `ci-lint`; Alpine owns unsuffixed
-  `ci-supply-chain`.
+- Close CMN-CVE-001. actionlint and grant were rebuilt on Go 1.26.8 in 5.3.0.
+  Module CVEs stay ignored until upstream ships.
 
 ## [5.3.2] - 2026-10-02
 

@@ -1395,7 +1395,7 @@ milestones:
               - KT-SEC-002
 
       - id: CMN-CVE-001
-        status: open
+        status: done
         title: Refresh actionlint and grant past known Go HIGH findings
         overview:
           problem: >-
@@ -1429,7 +1429,7 @@ milestones:
           - DOCKER-SEC-001
         tasks:
           - id: CMN-CVE-001-T1
-            status: open
+            status: done
             title: Bump the actionlint donor once a rebuilt image exists
             instructions:
               files:
@@ -1451,7 +1451,7 @@ milestones:
             guardrail_refs:
               - DOCKER-SEC-001
           - id: CMN-CVE-001-T2
-            status: open
+            status: done
             title: Bump the grant donor once a rebuilt image exists
             instructions:
               files:
