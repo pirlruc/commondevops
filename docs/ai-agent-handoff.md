@@ -106,8 +106,10 @@ python3 .github/scaffold/scripts/issues-sync.py \
   fallback silently filters findings. Root `.trivyignore.yaml` was removed.
 - **Variant jobs:** parallel debian/alpine builds need unique `artifact_name`,
   `results_artifact`, and `sarif_category` (containerdevops ≥ 2.3.0).
-- **Alpine owns unsuffixed tags** for `ci-supply-chain` and (as of `4.0.0`)
-  `ci-lint` — consumers on glibc must pin `:*-debian`.
+- **Debian owns unsuffixed `ci-lint` tags.** Alpine ci-lint has no semgrep
+  (no musllinux wheel). Parallel calls of `common-secrets-sast` or
+  `common-infra-lint` in one run must pass a distinct `concurrency_suffix`
+  or GitHub cancels the extras.
 - **CMD is `sh`:** Alpine DHI has no bash. All toolchain images use `CMD ["sh"]`
   and `/bin/sh` in passwd. Do not restore `bash`.
 - **shellcheck/gitleaks on Alpine:** no DHI alpine tag; copy static Debian donors.
@@ -227,4 +229,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-02 (setuid bits cleared; Debian image CST was red on unix_chkpwd)*
+*Last updated: 2026-10-02 (concurrency_suffix for parallel secrets and infra calls)*

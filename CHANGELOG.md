@@ -27,7 +27,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - `common-token-audit.yml` checks PAT expiry (90 days, warn at 7). Scaffold
   verify installs PyYAML from a hashed lock. Ansible verify requires
   `--hash` lines. Reusable workflows set concurrency that cancels only on
-  `workflow_dispatch`.
+  `workflow_dispatch`. `common-secrets-sast` and `common-infra-lint` take
+  `concurrency_suffix` so several calls in one run do not share a group.
 
 ## [5.2.6] - 2026-10-01
 
