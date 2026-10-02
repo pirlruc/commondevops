@@ -7,11 +7,10 @@ and exit 0. Does not treat a missing network call as a pass of the comparison.
 
 from __future__ import annotations
 
-import http.client
 import json
 import os
+import subprocess
 import sys
-from urllib.parse import urlparse
 
 import yaml
 
@@ -36,41 +35,38 @@ def done_ids(path: str) -> list[str]:
 
 
 def open_titles(repo: str, token: str) -> list[str]:
+    """List open issue titles via the gh CLI, which the CI runner already has."""
     titles: list[str] = []
-    path = f"/repos/{repo}/issues?state=open&per_page=100"
-    while path:
-        connection = http.client.HTTPSConnection("api.github.com", timeout=30)
-        connection.request(
-            "GET",
-            path,
-            headers={
-                "Authorization": f"Bearer {token}",
-                "Accept": "application/vnd.github+json",
-                "User-Agent": "commondevops-check-done-open",
-            },
+    page = 1
+    env = os.environ.copy()
+    env["GH_TOKEN"] = token
+    while True:
+        completed = subprocess.run(
+            [
+                "gh",
+                "api",
+                f"repos/{repo}/issues?state=open&per_page=100&page={page}",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=30,
         )
-        response = connection.getresponse()
-        body = response.read()
-        link = response.getheader("Link", "")
-        connection.close()
-        if response.status >= 400:
-            raise SystemExit(f"GitHub issues API returned {response.status}")
-        payload = json.loads(body)
+        if completed.returncode != 0:
+            raise SystemExit(completed.stderr.strip() or "gh api failed")
+        payload = json.loads(completed.stdout)
         if not isinstance(payload, list):
             raise SystemExit("GitHub issues payload was not a list")
+        if not payload:
+            break
         for item in payload:
             if "pull_request" in item:
                 continue
-            title = item.get("title") or ""
-            titles.append(title)
-        path = ""
-        for part in link.split(","):
-            if 'rel="next"' in part:
-                next_url = part.split(";")[0].strip().strip("<>")
-                parsed = urlparse(next_url)
-                if parsed.netloc != "api.github.com":
-                    raise SystemExit("GitHub pagination left api.github.com")
-                path = parsed.path + (f"?{parsed.query}" if parsed.query else "")
+            titles.append(item.get("title") or "")
+        if len(payload) < 100:
+            break
+        page += 1
     return titles
 
 
@@ -90,7 +86,7 @@ def main() -> int:
     ids = done_ids(manifest)
     try:
         titles = open_titles(repo, token)
-    except OSError as exc:
+    except (OSError, json.JSONDecodeError, subprocess.TimeoutExpired) as exc:
         print(f"error: GitHub issue lookup failed: {exc}", file=sys.stderr)
         return 1
     stale = [item for item in ids if any(f"[{item}]" in title for title in titles)]
