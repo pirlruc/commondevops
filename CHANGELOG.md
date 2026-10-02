@@ -20,7 +20,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
   with `expired_at: 2026-11-01` (amended CMN-CVE-001). hadolint is 2.15.1.
   ci-lint Python tools install from a hashed lock (zizmor 1.30.1, yamllint
   1.38.0).
-- Image callers pin containerdevops `7f2457c3aa9e8051a036265d658914635ea2c1d5`
+- Image callers pin containerdevops `2ad052e69d2587cdaf8ccac59b9dae5c60f5560b`
   (provenance `mode=max` and sbom on without `sign`). SC-PROV-001 is retired.
 - Strip setuid and setgid bits in the final image. Debian ci-lint ships
   `/usr/sbin/unix_chkpwd` setuid, which failed the structure test.
