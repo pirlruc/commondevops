@@ -11,6 +11,7 @@ on:
       guardrails_token:
         required: false
       checkout_token:
+        description: Token that can read pirlruc/commondevops when the caller is another repo
         required: false
   workflow_dispatch:
 
@@ -33,6 +34,7 @@ jobs:
         with:
           repository: pirlruc/commondevops
           ref: ${{ github.workflow_sha }}
+          token: ${{ secrets.checkout_token || github.token }}
           persist-credentials: false
           sparse-checkout: |
             scripts/check-token-expiry.sh
