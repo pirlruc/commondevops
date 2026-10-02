@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
-| **Branch** | `main` → tag **5.3.0** (images published; digest notes are 5.3.1) |
+| **Branch** | `main` → tag **5.3.2** (guardrails pin; images stay **5.3.0**) |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, release + `ci-lint` / `ci-supply-chain` images |
 | **Type** | CI infrastructure |
 
@@ -229,4 +229,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-02 (guardrails 1.10.0; SC-DEP-003 retired)*
+*Last updated: 2026-10-02 (registry docs match 5.3.0; tip tag 5.3.2)*

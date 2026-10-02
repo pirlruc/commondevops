@@ -197,11 +197,13 @@ Pass `image_title`, `image_description`, `image_documentation`, `image_url`,
 containerdevops `container-publish` so OCI labels describe the image (not the
 repository) and Hub Overview stays in sync.
 
-`ci-supply-chain` builds Debian (`Dockerfile`) and Alpine 3.24
-(`Dockerfile.alpine`) variants. Publish uses `tag_suffix: -debian` /
-`-alpine`; Alpine sets `tag_alias_unsuffixed: true` so it owns `<version>` and
-`latest`. Distinct `artifact_name` / `results_artifact` / `sarif_category`
-values keep parallel jobs from colliding (containerdevops ≥ `2.3.0`).
+Both images publish Debian and Alpine variants with `tag_suffix` `-debian` and
+`-alpine`. One variant also sets `tag_alias_unsuffixed: true` and owns
+`<version>` and `latest`. From 5.3.0, Debian owns unsuffixed `ci-lint` because
+semgrep 1.179.0 has no musllinux wheel. Alpine still owns unsuffixed
+`ci-supply-chain`. Distinct `artifact_name` / `results_artifact` /
+`sarif_category` values keep parallel jobs from colliding (containerdevops ≥
+`2.3.0`).
 
 ---
 
@@ -213,9 +215,9 @@ reusables against this repository (`scripts_ref: ${{ github.sha }}`).
 ## `devops-security.yml` (scheduled)
 
 Weekly secrets/SAST, supply-chain, Scorecard, and registry rescans of
-digest-pinned `ghcr.io/pirlruc/ci-lint:5.2.4@sha256:e0a51c64b004c6f4e4ca1672f3bb865aaf03d91bd8a2e228e0fa39be1174dfb4`
+digest-pinned `ghcr.io/pirlruc/ci-lint:5.3.0@sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82a19826db7432ae35c45`
 and
-`ghcr.io/pirlruc/ci-supply-chain:5.2.4@sha256:f7abb77fd31aeb68bf31ff391ed0e54825f706314607dc1570088e19d3d6c55c`
+`ghcr.io/pirlruc/ci-supply-chain:5.3.0@sha256:71ad1ca2f404147d00351b492d051c1213dacffeb961fcd96f2053e7715ab17e`
 via containerdevops
 `container-published-rescan.yml@5.0.2` (`32384866…`). Image CI still calls
 `container-scan.yml` at the same SHA.
@@ -229,7 +231,7 @@ Consumers should not copy `check-ci-docker.sh`. Pin this repo, sparse-checkout
 
 ```sh
 # After checking out pirlruc/commondevops@<sha> into _commondevops/scripts
-COMMONDEVOPS_CI_IMAGE="${MY_CI_IMAGE:-ghcr.io/pirlruc/ci-lint:5.2.4@sha256:e0a51c64b004c6f4e4ca1672f3bb865aaf03d91bd8a2e228e0fa39be1174dfb4}"
+COMMONDEVOPS_CI_IMAGE="${MY_CI_IMAGE:-ghcr.io/pirlruc/ci-lint:5.3.0@sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82a19826db7432ae35c45}"
 COMMONDEVOPS_DOCKER_STEPS="actionlint shellcheck hadolint zizmor yamllint"
 export COMMONDEVOPS_CI_IMAGE COMMONDEVOPS_DOCKER_STEPS
 sh _commondevops/scripts/check-ci-docker.sh

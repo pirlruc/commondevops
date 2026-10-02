@@ -45,7 +45,7 @@ docker pull pirlruc/ci-lint@sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-lint:5.2.4 \
+  pirlruc/ci-lint:5.3.0 \
   actionlint .github/workflows/*.yml
 ```
 
@@ -58,7 +58,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-lint:5.2.4 \
+  pirlruc/ci-lint:5.3.0 \
   semgrep scan --config auto --error .
 ```
 
@@ -80,12 +80,12 @@ and `ci-container`).
 ## Verify a publish
 
 ```bash
-docker pull pirlruc/ci-lint@sha256:e0a51c64b004c6f4e4ca1672f3bb865aaf03d91bd8a2e228e0fa39be1174dfb4
+docker pull pirlruc/ci-lint@sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82a19826db7432ae35c45
 
 cosign verify \
   --certificate-identity-regexp 'https://github.com/pirlruc/commondevops/.github/workflows/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  pirlruc/ci-lint@sha256:e0a51c64b004c6f4e4ca1672f3bb865aaf03d91bd8a2e228e0fa39be1174dfb4
+  pirlruc/ci-lint@sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82a19826db7432ae35c45
 ```
 
 Signing runs only when the source repository is public.
