@@ -48,7 +48,7 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 
 | Component | Ref |
 |-----------|-----|
-| guardrails submodule | tag **1.9.0** → `16a2c95c…` |
+| guardrails submodule | tag **1.10.0** → `e2db476f…` |
 | github-scaffold submodule | tag **1.8.0** → `ac9059fd…` |
 | methodologies (links only; not a submodule) | tag **1.8.0** |
 | containerdevops (image callers + security rescan) | `2ad052e69d2587cdaf8ccac59b9dae5c60f5560b` (feature-ops-hardening; not tagged) |
@@ -229,4 +229,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-02 (5.3.0 image digests recorded; Debian owns unsuffixed ci-lint)*
+*Last updated: 2026-10-02 (guardrails 1.10.0; SC-DEP-003 retired)*

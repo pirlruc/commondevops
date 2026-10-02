@@ -39,12 +39,3 @@ deviations:
     owner: pirlruc
     approved_by: Engineering Lead
     review: 2026-12-31
-  - id: SC-DEP-003
-    why: >-
-      Dependabot ignores dhi.io python images >= 3.14. PY-RUN-003 keeps
-      Python 3.13 until the 2027-04 re-evaluation. Patch updates on 3.13
-      still apply.
-    epic: CMN-PIN-019
-    owner: pirlruc
-    approved_by: Engineering Lead
-    review: 2027-04-30
