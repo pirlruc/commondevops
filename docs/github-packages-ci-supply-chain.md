@@ -39,16 +39,16 @@ move `latest` off the SemVer tag — pin the digest, not `latest`.
 If the package is public, anonymous pulls work:
 
 ```bash
-docker pull ghcr.io/pirlruc/ci-supply-chain:5.2.4
+docker pull ghcr.io/pirlruc/ci-supply-chain:5.3.0
 ```
 
 If the package is private, authenticate with a PAT that has `read:packages`:
 
 ```bash
 echo "$CR_PAT" | docker login ghcr.io -u USERNAME --password-stdin
-docker pull ghcr.io/pirlruc/ci-supply-chain:5.2.4
+docker pull ghcr.io/pirlruc/ci-supply-chain:5.3.0
 # or
-docker pull ghcr.io/pirlruc/ci-supply-chain@sha256:f7abb77fd31aeb68bf31ff391ed0e54825f706314607dc1570088e19d3d6c55c
+docker pull ghcr.io/pirlruc/ci-supply-chain@sha256:71ad1ca2f404147d00351b492d051c1213dacffeb961fcd96f2053e7715ab17e
 ```
 
 ## Use as a GitHub Actions job container
@@ -58,7 +58,7 @@ jobs:
   supply-chain:
     runs-on: ubuntu-24.04
     container:
-      image: ghcr.io/pirlruc/ci-supply-chain:5.2.4
+      image: ghcr.io/pirlruc/ci-supply-chain:5.3.0
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -74,7 +74,7 @@ Grant the package **Actions** Read access for the calling repository when using
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  ghcr.io/pirlruc/ci-supply-chain:5.2.4 \
+  ghcr.io/pirlruc/ci-supply-chain:5.3.0 \
   syft . -o spdx-json
 ```
 
@@ -87,7 +87,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  ghcr.io/pirlruc/ci-supply-chain:5.2.4 \
+  ghcr.io/pirlruc/ci-supply-chain:5.3.0 \
   trivy fs --scanners vuln --severity HIGH,CRITICAL .
 ```
 
@@ -107,12 +107,12 @@ semgrep (see `ci-lint`), cosign (installed on the publish runner), dive (see
 ## Verify a publish
 
 ```bash
-docker pull ghcr.io/pirlruc/ci-supply-chain@sha256:f7abb77fd31aeb68bf31ff391ed0e54825f706314607dc1570088e19d3d6c55c
+docker pull ghcr.io/pirlruc/ci-supply-chain@sha256:71ad1ca2f404147d00351b492d051c1213dacffeb961fcd96f2053e7715ab17e
 
 cosign verify \
   --certificate-identity-regexp 'https://github.com/pirlruc/commondevops/.github/workflows/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  ghcr.io/pirlruc/ci-supply-chain@sha256:f7abb77fd31aeb68bf31ff391ed0e54825f706314607dc1570088e19d3d6c55c
+  ghcr.io/pirlruc/ci-supply-chain@sha256:71ad1ca2f404147d00351b492d051c1213dacffeb961fcd96f2053e7715ab17e
 ```
 
 Signing runs only when the source repository is public.

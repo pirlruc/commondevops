@@ -5,6 +5,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+
+- Registry examples and the continuous-improvement prompt match the published
+  5.3.0 images. Debian owns unsuffixed `ci-lint`; Alpine owns unsuffixed
+  `ci-supply-chain`.
+
 ## [5.3.2] - 2026-10-02
 
 ### Changed
