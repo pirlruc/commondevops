@@ -15,7 +15,7 @@
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
 # grant v0.6.8 rebuilt with Go 1.26.8. Stdlib fixes only; modules stay at go.sum.
-FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:653aaa8fcf7170279c09c70dd4a3fa8346be302644ce31e657815a9d50cd7054 AS grant-build
+FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:99aefd8f74fe54dc6fea76c474e65b5e5959391e06975b6a9db0b71a8624ad68 AS grant-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/anchore/grant.git \
@@ -25,7 +25,7 @@ RUN git init \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/grant ./cmd/grant
 
 # dhi.io/python:3.13-alpine3.24-dev — digest pinned (DOCKER-BUILD-003 / CI-026)
-FROM dhi.io/python:3.13-alpine3.24-dev@sha256:b638b0f214ccf84e1bf0814dfcb81774e470f7aaa206f7bf77edd8ba357ee79a
+FROM dhi.io/python:3.13-alpine3.24-dev@sha256:78bb600276589f46c7bf4fa959f8d27ee755d6358c380b6babe29d437d5a4914
 
 LABEL org.opencontainers.image.title="ci-supply-chain" \
       org.opencontainers.image.description="Short-lived CI toolchain image for SBOM generation and vulnerability/license gates: syft, grype, trivy, grant. Alpine 3.24 variant. Non-root 1000:1000, linux/amd64." \

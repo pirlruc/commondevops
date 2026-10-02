@@ -15,7 +15,7 @@
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
 # grant v0.6.8 rebuilt with Go 1.26.8. Stdlib fixes only; modules stay at go.sum.
-FROM dhi.io/golang:1.26-debian13-dev@sha256:06dc5566a36380eb27e0eef948ce336fe53790617fd8512a1d21b1d774c0545a AS grant-build
+FROM dhi.io/golang:1.27-debian13-dev@sha256:cd8e96d7dea8311275d4633816f1f283d3b044997a6ccfbd8c1f9e409702136f AS grant-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/anchore/grant.git \
