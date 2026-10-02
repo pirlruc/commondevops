@@ -5,6 +5,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.3.1] - 2026-10-02
+
+### Changed
+
+- Record the published 5.3.0 image digests. Debian owns unsuffixed
+  `ci-lint` tags. Alpine still owns unsuffixed `ci-supply-chain` tags.
+
 ## [5.3.0] - 2026-10-02
 
 ### Changed

@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
-| **Branch** | `main` → tag **5.2.6** (re-pin; images stay **5.2.4**) |
+| **Branch** | `main` → tag **5.3.0** (images published; digest notes are 5.3.1) |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, release + `ci-lint` / `ci-supply-chain` images |
 | **Type** | CI infrastructure |
 
@@ -53,12 +53,12 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | methodologies (links only; not a submodule) | tag **1.8.0** |
 | containerdevops (image callers + security rescan) | `2ad052e69d2587cdaf8ccac59b9dae5c60f5560b` (feature-ops-hardening; not tagged) |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
-| `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `5.2.4` `sha256:e0a51c64b004c6f4e4ca1672f3bb865aaf03d91bd8a2e228e0fa39be1174dfb4` (`latest` == alpine) |
-| `ghcr.io/pirlruc/ci-lint` (debian) | `5.2.4-debian` `sha256:618b469a95b60097eb709830cbe3ee079a78f614ad0bf74b5643d4c8c0895cec` |
-| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.2.4` `sha256:f7abb77fd31aeb68bf31ff391ed0e54825f706314607dc1570088e19d3d6c55c` |
-| `ghcr.io/pirlruc/ci-supply-chain` (debian) | `5.2.4-debian` `sha256:99aa0689b82930919e525e2f6afdbfde5819bb1ab587e2fd2be20022a0f204fc` |
-| Release (reusables) | **5.2.6** (tag only; images stay 5.2.4) |
-| Release (images) | **5.2.4** |
+| `ghcr.io/pirlruc/ci-lint` (debian, unsuffixed) | `5.3.0` `sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82a19826db7432ae35c45` (`latest` == debian) |
+| `ghcr.io/pirlruc/ci-lint` (alpine) | `5.3.0-alpine` `sha256:c55c8f74f2d99d7725cd5a2f785a3782b37d92939baa482a6774308cc5846bf9` |
+| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.3.0` `sha256:71ad1ca2f404147d00351b492d051c1213dacffeb961fcd96f2053e7715ab17e` |
+| `ghcr.io/pirlruc/ci-supply-chain` (debian) | `5.3.0-debian` `sha256:6706b44d46e252537af3ad77b797c6c880f98afa2059e954cbf0d597ff054900` |
+| Release (reusables) | **5.3.0** |
+| Release (images) | **5.3.0** |
 
 ## Local image sizes / posture (2026-08-12, `du -sxm /`)
 
@@ -229,4 +229,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-02 (image callers pin containerdevops 2ad052e6)*
+*Last updated: 2026-10-02 (5.3.0 image digests recorded; Debian owns unsuffixed ci-lint)*
