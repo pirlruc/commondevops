@@ -1,78 +1,55 @@
-# Vendor-static toolchain binaries in ci-supply-chain — refresh digests when upstream ships fixes.
-# Review: 2026-11-11
-# syft 1.52.0, grype 0.119.0, and trivy 0.74.0 (Go 1.26.8) cleared their fixable
-# HIGH findings. grant 0.6.8 is still the latest release. grype still embeds an
-# unfixed moby client.
+# Vendor-static toolchain binaries in ci-supply-chain.
+# grant v0.6.8 rebuilt on Go 1.26.8 cleared stdlib CVEs. Module CVEs stay until
+# upstream ships a release (CMN-CVE-001). grype 0.119.0 still embeds an unfixed
+# moby client. Every entry expires 2026-11-01.
 vulnerabilities:
   - id: CVE-2026-41567
     paths:
       - "**/grype"
+    expired_at: 2026-11-01
     statement: Embedded moby client in grype 0.119.0; no fixed version.
   - id: CVE-2026-42306
     paths:
       - "**/grype"
+    expired_at: 2026-11-01
     statement: Embedded moby client in grype 0.119.0; no fixed version.
   - id: CVE-2026-71556
     paths:
       - "**/grant"
-    statement: Embedded go-git in anchore/grant 0.6.8; no newer release.
+    expired_at: 2026-11-01
+    statement: Embedded go-git in grant 0.6.8 rebuilt on Go 1.26.8; no newer release.
   - id: CVE-2026-56852
     paths:
       - "**/grant"
+    expired_at: 2026-11-01
     statement: Embedded golang.org/x/text in grant 0.6.8; no newer release.
   - id: GHSA-hrxh-6v49-42gf
     paths:
       - "**/grant"
+    expired_at: 2026-11-01
     statement: Embedded gRPC-Go in grant 0.6.8; no newer release.
-  - id: CVE-2026-39821
-    paths:
-      - "**/grant"
-    statement: Go stdlib embedded in grant 0.6.8; no newer release.
-  - id: CVE-2026-46600
-    paths:
-      - "**/grant"
-    statement: Go stdlib embedded in grant 0.6.8; no newer release.
-  - id: CVE-2026-33818
-    paths:
-      - "**/grant"
-    statement: Go stdlib embedded in grant 0.6.8; no newer release.
-  - id: CVE-2026-56853
-    paths:
-      - "**/grant"
-    statement: Go stdlib embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-56854
     paths:
       - "**/grant"
+    expired_at: 2026-11-01
     statement: golang.org/x/crypto embedded in grant 0.6.8; no newer release.
-  - id: CVE-2026-56858
-    paths:
-      - "**/grant"
-    statement: Go stdlib embedded in grant 0.6.8; no newer release.
-  - id: CVE-2026-56859
-    paths:
-      - "**/grant"
-    statement: Go stdlib embedded in grant 0.6.8; no newer release.
-  - id: CVE-2026-56860
-    paths:
-      - "**/grant"
-    statement: Go stdlib embedded in grant 0.6.8; no newer release.
-  - id: CVE-2026-56862
-    paths:
-      - "**/grant"
-    statement: Go stdlib embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-56864
     paths:
       - "**/grant"
+    expired_at: 2026-11-01
     statement: golang.org/x/mod embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-56865
     paths:
       - "**/grant"
+    expired_at: 2026-11-01
     statement: golang.org/x/mod embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-84304
     paths:
       - "**/grant"
+    expired_at: 2026-11-01
     statement: gRPC-Go embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-84445
     paths:
       - "**/grant"
+    expired_at: 2026-11-01
     statement: gRPC-Go embedded in grant 0.6.8; no newer release.

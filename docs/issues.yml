@@ -1406,13 +1406,14 @@ milestones:
             x/mod, x/text, and grpc. grype vendors docker/docker
             CVE-2026-41567 with no fix.
           goal: >-
-            Republish ci-lint and ci-supply-chain once upstream actionlint and
-            grant ship binaries built on the fixed Go modules.
+            Rebuild the upstream actionlint and grant tags from source on DHI
+            Go 1.26 so the stdlib findings clear without bumping modules.
         decision: >-
           In the context of published CI images, facing HIGH findings inside
-          donor binaries we do not compile, we decided to wait for upstream
-          rebuilds rather than fork the tools, to achieve a clean library
-          scan, accepting that the findings stay until those releases exist.
+          donor Go binaries, we decided to rebuild the current upstream tags
+          from source on DHI Go 1.26 and not bump modules, to clear stdlib
+          CVEs, accepting that go-git, x/crypto, x/mod, x/text, and grpc
+          findings stay ignored until upstream ships a release.
         architecture:
           target: ci-lint and ci-supply-chain donor pins
           modules:
@@ -1421,8 +1422,9 @@ milestones:
             - docker/ci-supply-chain/Dockerfile
             - docker/ci-supply-chain/Dockerfile.alpine
         acceptance_criteria:
-          - actionlint is built with Go stdlib 1.26.4 or newer
-          - grant no longer reports the fixed go-git, x/crypto, x/mod, x/text, and grpc findings
+          - actionlint and grant are rebuilt on Go stdlib 1.26.4 or newer
+          - stdlib HIGH findings are gone from both binaries
+          - remaining grant module findings stay path-scoped with expired_at
         guardrail_refs:
           - DOCKER-SEC-001
         tasks:
@@ -1438,7 +1440,7 @@ milestones:
             guardrail_refs:
               - DOCKER-SEC-001
           - id: CMN-CVE-001-T3
-            status: open
+            status: done
             title: Pin PyJWT 2.14 or newer in the tool lock when semgrep allows it
             instructions:
               files:

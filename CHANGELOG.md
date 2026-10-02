@@ -5,6 +5,31 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.3.0] - 2026-10-02
+
+### Changed
+
+- Recompile `scripts/requirements.txt` from semgrep 1.179.0. That release
+  requires PyJWT >= 2.15, so the lock is now PyJWT 2.15.1 (CMN-CVE-001-T3).
+  mcp stays 1.29.0 and urllib3 stays 2.8.0. ci-lint no longer overrides
+  PyJWT or urllib3 at image build time.
+- Debian owns unsuffixed `ci-lint` tags. semgrep 1.179.0 has no musllinux
+  wheel, so the Alpine variant ships zizmor and yamllint but not semgrep.
+- Rebuild actionlint v1.7.12 and grant v0.6.8 from their release commits on
+  DHI Go 1.26.8. Stdlib HIGH findings clear. Grant module CVEs stay ignored
+  with `expired_at: 2026-11-01` (amended CMN-CVE-001). hadolint is 2.15.1.
+  ci-lint Python tools install from a hashed lock (zizmor 1.30.1, yamllint
+  1.38.0).
+- Image callers pin containerdevops `2ad052e69d2587cdaf8ccac59b9dae5c60f5560b`
+  (provenance `mode=max` and sbom on without `sign`). SC-PROV-001 is retired.
+- Strip setuid and setgid bits in the final image. Debian ci-lint ships
+  `/usr/sbin/unix_chkpwd` setuid, which failed the structure test.
+- `common-token-audit.yml` checks PAT expiry (90 days, warn at 7). Scaffold
+  verify installs PyYAML from a hashed lock. Ansible verify requires
+  `--hash` lines. Reusable workflows set concurrency that cancels only on
+  `workflow_dispatch`. `common-secrets-sast` and `common-infra-lint` take
+  `concurrency_suffix` so several calls in one run do not share a group.
+
 ## [5.2.6] - 2026-10-01
 
 ### Changed

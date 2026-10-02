@@ -5,8 +5,8 @@
 # Binary path discoveries (2026-08-12):
 #   dhi.io/shellcheck:0-debian13 → /usr/local/bin/shellcheck (static; no Alpine DHI tag)
 #   dhi.io/gitleaks:8-debian13   → /usr/bin/gitleaks   (static; no Alpine DHI tag)
-#   hadolint/hadolint:2.12.0-alpine → /bin/hadolint
-#   rhysd/actionlint:1.7.12      → /usr/local/bin/actionlint
+#   hadolint/hadolint:v2.15.1-alpine → /bin/hadolint
+#   actionlint v1.7.12 is rebuilt in-image on Go 1.26.8 (commit 914e7df2)
 #   ghcr.io/astral-sh/uv:0.12.0  → /uv (build stage only)
 #
 # shellcheck and gitleaks have no dhi.io alpine3.24 build. Both Debian donors are
@@ -15,38 +15,38 @@
 # No HEALTHCHECK: short-lived CI toolchain (CLI job container), not a supervised
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
-ARG BASE=dhi.io/python:3.13-alpine3.24-dev@sha256:b638b0f214ccf84e1bf0814dfcb81774e470f7aaa206f7bf77edd8ba357ee79a
+# actionlint v1.7.12 rebuilt with Go 1.26.8. Stdlib fixes only (CMN-CVE-001).
+FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:653aaa8fcf7170279c09c70dd4a3fa8346be302644ce31e657815a9d50cd7054 AS actionlint-build
+WORKDIR /src
+RUN git init \
+ && git remote add origin https://github.com/rhysd/actionlint.git \
+ && git fetch --depth 1 origin 914e7df21a07ef503a81201c76d2b11c789d3fca \
+ && git checkout --detach FETCH_HEAD \
+ && test "$(git rev-parse HEAD)" = "914e7df21a07ef503a81201c76d2b11c789d3fca" \
+ && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/actionlint ./cmd/actionlint
 
 # ---------------------------------------------------------------------------
 # pybuild — install Python CLIs; uv stays out of the final image (~53 MB).
 # ---------------------------------------------------------------------------
-# hadolint ignore=DL3006
-FROM ${BASE} AS pybuild
+FROM dhi.io/python:3.13-alpine3.24-dev@sha256:b638b0f214ccf84e1bf0814dfcb81774e470f7aaa206f7bf77edd8ba357ee79a AS pybuild
 COPY --from=ghcr.io/astral-sh/uv:0.12.0@sha256:606e70c71c852d03f611b1e56a195d08648507018a7057fab82c4974c4eae105 \
   /uv /usr/local/bin/uv
 ENV UV_SYSTEM_PYTHON=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
-# semgrep>=1.168 brings PyJWT~=2.13 and urllib3<2.8. Override the fixed floors.
-# mcp stays 1.29.0 — mcp 2.x drops FastMCP and breaks semgrep's MCP command.
-RUN printf 'mcp==1.29.0\nPyJWT==2.14.0\nurllib3==2.8.0\n' > /tmp/uv-overrides.txt \
- && uv pip install --system --no-cache --override /tmp/uv-overrides.txt \
-      'zizmor==1.29.0' \
-      'yamllint>=1.35' \
-      'semgrep==1.172.0' \
-      'mcp==1.29.0' \
-      'PyJWT==2.14.0' \
-      'urllib3==2.8.0' \
- && rm -f /tmp/uv-overrides.txt
+# semgrep 1.179.0 publishes manylinux wheels only, so Alpine does not ship it.
+# Debian owns the unsuffixed tags. This variant has zizmor and yamllint.
+COPY requirements-alpine.txt /tmp/requirements.txt
+RUN uv pip install --system --no-cache --require-hashes -r /tmp/requirements.txt \
+ && rm -f /tmp/requirements.txt
 
 # ---------------------------------------------------------------------------
 # Final image
 # ---------------------------------------------------------------------------
-# hadolint ignore=DL3006
-FROM ${BASE}
+FROM dhi.io/python:3.13-alpine3.24-dev@sha256:b638b0f214ccf84e1bf0814dfcb81774e470f7aaa206f7bf77edd8ba357ee79a
 
 LABEL org.opencontainers.image.title="ci-lint" \
-      org.opencontainers.image.description="Short-lived CI toolchain image for lint and secrets/SAST: actionlint, hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep. Alpine 3.24 variant. Non-root 1000:1000, linux/amd64." \
+      org.opencontainers.image.description="Short-lived CI toolchain image for lint and secrets/SAST: actionlint, hadolint, shellcheck, zizmor, yamllint, gitleaks. Alpine 3.24 variant. semgrep is Debian-only. Non-root 1000:1000, linux/amd64." \
       org.opencontainers.image.source="https://github.com/pirlruc/commondevops" \
       org.opencontainers.image.url="https://hub.docker.com/r/pirlruc/ci-lint" \
       org.opencontainers.image.documentation="https://hub.docker.com/r/pirlruc/ci-lint" \
@@ -58,14 +58,13 @@ COPY --from=dhi.io/shellcheck:0-debian13@sha256:eb696ecbc0a6dbe57588d88c700c3da7
   /usr/local/bin/shellcheck /usr/local/bin/shellcheck
 COPY --from=dhi.io/gitleaks:8-debian13@sha256:7f7f90449d80971451a7fc20eedd1875b7271ef68be571b1b9550f19109c32c3 \
   /usr/bin/gitleaks /usr/local/bin/gitleaks
-COPY --from=hadolint/hadolint:2.12.0-alpine@sha256:3c206a451cec6d486367e758645269fd7d696c5ccb6ff59d8b03b0e45268a199 \
+COPY --from=hadolint/hadolint:v2.15.1-alpine@sha256:a1d49ae1a4e83c1dbad26b8c1ad7588c8bd1e04f4866b34ad3cac50335198552 \
   /bin/hadolint /usr/local/bin/hadolint
-COPY --from=rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 \
-  /usr/local/bin/actionlint /usr/local/bin/actionlint
+COPY --from=actionlint-build /out/actionlint /usr/local/bin/actionlint
 
 # Python packages + console scripts from pybuild (no uv binary in final).
 COPY --from=pybuild /usr/lib/python3.13/site-packages /usr/lib/python3.13/site-packages
-COPY --from=pybuild /usr/bin/semgrep /usr/bin/pysemgrep /usr/bin/zizmor /usr/bin/yamllint /usr/bin/
+COPY --from=pybuild /usr/bin/zizmor /usr/bin/yamllint /usr/bin/
 
 ENV PATH="/usr/local/bin:${PATH}" \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -87,6 +86,7 @@ RUN printf 'ci:x:1000:1000::/home/ci:/bin/sh\n' >> /etc/passwd \
  && printf 'ci:x:1000:\n' >> /etc/group \
  && mkdir -p /home/ci \
  && chown -R 1000:1000 /home/ci /workspace
+RUN find / -xdev -type f \( -perm -4000 -o -perm -2000 \) -exec chmod a-s {} +
 USER 1000:1000
 
 ENTRYPOINT []

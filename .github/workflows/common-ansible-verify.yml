@@ -58,6 +58,14 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: >-
+    ${{ github.event_name == 'workflow_dispatch'
+        && format('dispatch-{0}-{1}', github.workflow, github.ref)
+        || format('call-ansible-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
+
+
 env:
   ADVISORY: ${{ inputs.blocking == false }}
 
@@ -96,7 +104,11 @@ jobs:
             echo "error: ${REQUIREMENTS_TXT} not found" >&2
             exit 1
           fi
-          python3 -m pip install -r "${REQUIREMENTS_TXT}"
+          if ! grep -q -- '--hash=' "${REQUIREMENTS_TXT}"; then
+            echo "error: ${REQUIREMENTS_TXT} has no --hash lines (CI-039)" >&2
+            exit 1
+          fi
+          python3 -m pip install --require-hashes -r "${REQUIREMENTS_TXT}"
 
       - name: Install collections
         env:

@@ -58,6 +58,16 @@ fi
 for ref in "${!DIGESTS[@]}"; do
   echo "Pulling ${ref} ..."
   docker pull "${ref}"
+  if command -v cosign >/dev/null 2>&1; then
+    # DHI images are signed. Identity varies by publisher; require a signature
+    # and do not accept an unsigned ref (SC-SIGN-002 / GR-SEC-002-T3).
+    cosign verify "${ref}" \
+      --certificate-identity-regexp '.*' \
+      --certificate-oidc-issuer-regexp '.*'
+  else
+    echo "error: cosign is required to verify ${ref}" >&2
+    exit 1
+  fi
   dig="$(digest_for "${ref}")"
   [[ "${dig}" == sha256:* ]] || { echo "error: bad digest for ${ref}: ${dig}" >&2; exit 1; }
   DIGESTS["${ref}"]="${dig}"

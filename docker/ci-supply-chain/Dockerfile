@@ -6,13 +6,23 @@
 #   dhi.io/syft:1-debian13  → /usr/bin/syft
 #   dhi.io/grype:0-debian13 → /usr/bin/grype
 #   dhi.io/trivy:0-debian13 → /usr/bin/trivy
-#   anchore/grant:v0.6.8    → /grant
+#   grant v0.6.8 is rebuilt in-image on Go 1.26.8 (commit 0fb3c502)
 #
 # cosign is intentionally omitted: container-publish installs it on the runner
 # via INSTALL_ONLY when sign=true (~109 MB saved).
 #
 # No HEALTHCHECK: short-lived CI toolchain (CLI job container), not a supervised
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
+
+# grant v0.6.8 rebuilt with Go 1.26.8. Stdlib fixes only; modules stay at go.sum.
+FROM dhi.io/golang:1.26-debian13-dev@sha256:06dc5566a36380eb27e0eef948ce336fe53790617fd8512a1d21b1d774c0545a AS grant-build
+WORKDIR /src
+RUN git init \
+ && git remote add origin https://github.com/anchore/grant.git \
+ && git fetch --depth 1 origin 0fb3c502202139efcf4a20aa72014cf6eafab930 \
+ && git checkout --detach FETCH_HEAD \
+ && test "$(git rev-parse HEAD)" = "0fb3c502202139efcf4a20aa72014cf6eafab930" \
+ && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/grant ./cmd/grant
 
 # dhi.io/python:3.13-debian13-dev — digest pinned (DOCKER-BUILD-003 / CI-026)
 FROM dhi.io/python:3.13-debian13-dev@sha256:cb32401c177600c7bacdb96a49ef51dd10d9967a868614288c428acc41e65604
@@ -31,8 +41,7 @@ COPY --from=dhi.io/grype:0-debian13@sha256:aa59b66b65c0cc54f094cd35614b203288477
   /usr/bin/grype /usr/local/bin/grype
 COPY --from=dhi.io/trivy:0-debian13@sha256:db666d33cb95930e3932439e7a4c3678f480ea033b6bf1ffb6b7228d9e879d3d \
   /usr/bin/trivy /usr/local/bin/trivy
-COPY --from=anchore/grant:v0.6.8@sha256:172463611795f43b77302cdfbd7b3f81295492a7330e0820cfe41c3674920237 \
-  /grant /usr/local/bin/grant
+COPY --from=grant-build /out/grant /usr/local/bin/grant
 
 ENV PATH="/usr/local/bin:${PATH}" \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -59,6 +68,7 @@ RUN printf 'ci:x:1000:1000::/home/ci:/bin/sh\n' >> /etc/passwd \
  && printf 'ci:x:1000:\n' >> /etc/group \
  && mkdir -p /home/ci \
  && chown -R 1000:1000 /home/ci /workspace
+RUN find / -xdev -type f \( -perm -4000 -o -perm -2000 \) -exec chmod a-s {} +
 USER 1000:1000
 
 ENTRYPOINT []

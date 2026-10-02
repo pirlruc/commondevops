@@ -9,9 +9,8 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
-import urllib.error
-import urllib.request
 
 import yaml
 
@@ -36,32 +35,38 @@ def done_ids(path: str) -> list[str]:
 
 
 def open_titles(repo: str, token: str) -> list[str]:
+    """List open issue titles via the gh CLI, which the CI runner already has."""
     titles: list[str] = []
-    url = f"https://api.github.com/repos/{repo}/issues?state=open&per_page=100"
-    while url:
-        request = urllib.request.Request(
-            url,
-            headers={
-                "Authorization": f"Bearer {token}",
-                "Accept": "application/vnd.github+json",
-                "User-Agent": "commondevops-check-done-open",
-            },
+    page = 1
+    env = os.environ.copy()
+    env["GH_TOKEN"] = token
+    while True:
+        completed = subprocess.run(
+            [
+                "gh",
+                "api",
+                f"repos/{repo}/issues?state=open&per_page=100&page={page}",
+            ],
+            check=False,
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=30,
         )
-        # URL is the GitHub API for GITHUB_REPOSITORY, not a caller-controlled path.
-        with urllib.request.urlopen(request, timeout=30) as response:  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
-            payload = json.load(response)
-            link = response.headers.get("Link", "")
+        if completed.returncode != 0:
+            raise SystemExit(completed.stderr.strip() or "gh api failed")
+        payload = json.loads(completed.stdout)
         if not isinstance(payload, list):
             raise SystemExit("GitHub issues payload was not a list")
+        if not payload:
+            break
         for item in payload:
             if "pull_request" in item:
                 continue
-            title = item.get("title") or ""
-            titles.append(title)
-        url = ""
-        for part in link.split(","):
-            if 'rel="next"' in part:
-                url = part.split(";")[0].strip().strip("<>")
+            titles.append(item.get("title") or "")
+        if len(payload) < 100:
+            break
+        page += 1
     return titles
 
 
@@ -81,8 +86,8 @@ def main() -> int:
     ids = done_ids(manifest)
     try:
         titles = open_titles(repo, token)
-    except urllib.error.HTTPError as exc:
-        print(f"error: GitHub issue lookup failed: HTTP {exc.code}", file=sys.stderr)
+    except (OSError, json.JSONDecodeError, subprocess.TimeoutExpired) as exc:
+        print(f"error: GitHub issue lookup failed: {exc}", file=sys.stderr)
         return 1
     stale = [item for item in ids if any(f"[{item}]" in title for title in titles)]
     if not stale:

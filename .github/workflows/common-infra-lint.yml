@@ -33,6 +33,11 @@ on:
         required: false
         type: boolean
         default: false
+      concurrency_suffix:
+        description: Distinguishes parallel calls of this workflow in one run
+        required: false
+        type: string
+        default: ""
     secrets:
       # Required when the caller is a different private repo: GITHUB_TOKEN cannot
       # read pirlruc/commondevops. Pass a PAT/fine-grained token with contents:read.
@@ -55,9 +60,20 @@ on:
       scripts_ref:
         type: string
         default: ""
+      concurrency_suffix:
+        type: string
+        default: ""
 
 # CI-025: default-deny; jobs grant the minimum they need.
 permissions: {}
+
+concurrency:
+  group: >-
+    ${{ github.event_name == 'workflow_dispatch'
+        && format('dispatch-{0}-{1}', github.workflow, github.ref)
+        || format('call-infra-lint-{0}-{1}', github.run_id, inputs.concurrency_suffix) }}
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
+
 
 env:
   ADVISORY: ${{ inputs.blocking == false }}
