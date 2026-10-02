@@ -16,21 +16,23 @@ and semgrep. Not a product runtime — no `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `5.2.4` / `5.2.4-alpine` | Immutable Alpine `sha256:e0a51c64b004c6f4e4ca1672f3bb865aaf03d91bd8a2e228e0fa39be1174dfb4` |
-| `5.2.4-debian` | Immutable Debian `sha256:618b469a95b60097eb709830cbe3ee079a78f614ad0bf74b5643d4c8c0895cec` |
+| `5.3.0` / `5.3.0-debian` | Immutable Debian `sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82a19826db7432ae35c45` |
+| `5.3.0-alpine` | Immutable Alpine `sha256:c55c8f74f2d99d7725cd5a2f785a3782b37d92939baa482a6774308cc5846bf9` |
+| `5.2.4` / `5.2.4-alpine` | Previous Alpine `sha256:e0a51c64b004c6f4e4ca1672f3bb865aaf03d91bd8a2e228e0fa39be1174dfb4` |
+| `5.2.4-debian` | Previous Debian `sha256:618b469a95b60097eb709830cbe3ee079a78f614ad0bf74b5643d4c8c0895cec` |
 | `5.2.2` / `5.2.2-alpine` | Previous Alpine `sha256:fd24e836c677e044163aab19e1e7d49d92ce34576deb7970b1ae16ea52b36d1b` |
 | `5.2.2-debian` | Previous Debian `sha256:2cb20ba2d39f55ccc4195acc162013162682cb3bcccc31c300261965ca9b30c1` |
 | `5.1.0` / `5.1.0-alpine` | Previous Alpine `sha256:fc7d91c3ad2ca946e50395227b86396ac92d90afa14e9ca8c301909a5424085c` |
 | `5.1.0-debian` | Previous Debian `sha256:c46d04b224d6a7e3227c02aa693c6cce277614be9432f6a6bcc88e8dbbbe1a7d` |
-| `latest` / `latest-alpine` | Latest non-prerelease Alpine publish |
-| `latest-debian` | Latest non-prerelease Debian publish |
+| `latest` / `latest-debian` | Latest non-prerelease Debian publish |
+| `latest-alpine` | Latest non-prerelease Alpine publish |
 | `sha-<git>` / `sha-<git>-alpine` / `sha-<git>-debian` | Exact git SHA of the published commit |
 
-Alpine owns the unsuffixed tags because it currently has the lower OS vulnerability
-posture on the DHI catalog. Prefer an explicit `-alpine` / `-debian` suffix when the
-libc matters; prefer a digest in production.
-`latest` equals `latest-alpine` (`flavor: latest=false`). A monthly rebuild may
-move `latest` off the SemVer tag — pin the digest, not `latest`.
+From 5.3.0, Debian owns unsuffixed tags and `latest`. semgrep 1.179.0 has
+no musllinux wheel, so the Alpine variant does not include semgrep. Prefer an
+explicit `-alpine` / `-debian` suffix when the libc matters; prefer a digest
+in production. A monthly rebuild may move `latest` off the SemVer tag — pin
+the digest, not `latest`.
 
 ## Authentication
 
