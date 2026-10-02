@@ -24,17 +24,15 @@ COPY --from=ghcr.io/astral-sh/uv:0.12.0@sha256:606e70c71c852d03f611b1e56a195d086
 ENV UV_SYSTEM_PYTHON=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
-# semgrep>=1.168 brings PyJWT~=2.13 and urllib3<2.8. Override the fixed floors.
-# mcp stays 1.29.0 — mcp 2.x drops FastMCP and breaks semgrep's MCP command.
-RUN printf 'mcp==1.29.0\nPyJWT==2.14.0\nurllib3==2.8.0\n' > /tmp/uv-overrides.txt \
- && uv pip install --system --no-cache --override /tmp/uv-overrides.txt \
+# semgrep 1.179.0 requires PyJWT>=2.15 and pins mcp==1.29.0.
+# mcp 2.x drops FastMCP and breaks semgrep's MCP command.
+RUN uv pip install --system --no-cache \
       'zizmor==1.29.0' \
       'yamllint>=1.35' \
-      'semgrep==1.172.0' \
+      'semgrep==1.179.0' \
       'mcp==1.29.0' \
-      'PyJWT==2.14.0' \
-      'urllib3==2.8.0' \
- && rm -f /tmp/uv-overrides.txt
+      'PyJWT==2.15.1' \
+      'urllib3==2.8.0'
 
 # ---------------------------------------------------------------------------
 # Final image

@@ -145,14 +145,17 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 1. cppdevops and pydevops re-pin `uses:` + `scripts_ref` to the **5.2.6** SHA.
 2. Rebuild actionlint and grant past the Go HIGH findings in CMN-CVE-001.
+   PyJWT 2.15.1 is in the tool lock (T3).
 3. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
 
 ## Recent history
 
+- 2026-10-02: tool lock is semgrep **1.179.0**, PyJWT **2.15.1**, mcp 1.29.0,
+  urllib3 2.8.0. ci-lint Dockerfiles install those pins directly; the PyJWT
+  override file is gone (CMN-CVE-001-T3). Images are not republished yet.
 - 2026-10-01: **5.2.6** (tag-only) — containerdevops **6.1.0**
-  (`edef9c84…`). The tool lock is semgrep 1.178.0, mcp 1.29.0, urllib3 2.8.0.
-  PyJWT stays 2.13.0 until semgrep allows 2.14. The sweep deletes pull and tag
-  Actions caches. Images are not republished.
+  (`edef9c84…`). The tool lock was semgrep 1.178.0, mcp 1.29.0, urllib3 2.8.0.
+  The sweep deletes pull and tag Actions caches. Images are not republished.
 - 2026-10-01: **5.2.5** (tag-only) — write 5.2.4 alpine/debian digests.
   Debian OpenSSL is `deb13u3` in that publish. No GitHub Release.
 - 2026-10-01: **5.2.4** — DHI syft 1.52.0, grype 0.119.0, trivy 0.74.0, and
@@ -221,4 +224,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-01 (5.2.6 re-pin containerdevops 6.1.0)*
+*Last updated: 2026-10-02 (semgrep 1.179.0, PyJWT 2.15.1)*

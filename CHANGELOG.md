@@ -5,6 +5,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+
+- Recompile `scripts/requirements.txt` from semgrep 1.179.0. That release
+  requires PyJWT >= 2.15, so the lock is now PyJWT 2.15.1 (CMN-CVE-001-T3).
+  mcp stays 1.29.0 and urllib3 stays 2.8.0. ci-lint no longer overrides
+  PyJWT or urllib3 at image build time.
+
 ## [5.2.6] - 2026-10-01
 
 ### Changed
