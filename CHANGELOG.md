@@ -5,6 +5,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.3.0] - 2026-10-02
+
 ### Changed
 
 - Recompile `scripts/requirements.txt` from semgrep 1.179.0. That release
