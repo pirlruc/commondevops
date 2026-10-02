@@ -55,7 +55,7 @@ updates:
     cooldown:
       default-days: 7
     ignore:
-      # PY-RUN-003 keeps Python 3.13 until 2027-04. Recorded as SC-DEP-003.
+      # PY-RUN-003 keeps Python 3.13 until 2027-04. SC-DEP-003 carve-out (guardrails 1.10.0).
       - dependency-name: "python"
         versions: [">= 3.14"]
 
@@ -69,7 +69,7 @@ updates:
     cooldown:
       default-days: 7
     ignore:
-      # PY-RUN-003 keeps Python 3.13 until 2027-04. Recorded as SC-DEP-003.
+      # PY-RUN-003 keeps Python 3.13 until 2027-04. SC-DEP-003 carve-out (guardrails 1.10.0).
       - dependency-name: "python"
         versions: [">= 3.14"]
 

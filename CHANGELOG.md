@@ -5,6 +5,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.3.2] - 2026-10-02
+
+### Changed
+
+- Pin guardrails **1.10.0**. Retire SC-DEP-003: the 1.10.0 carve-out covers
+  a Dependabot ignore that holds Python at the PY-RUN-003 pin until 2027-04.
+
 ## [5.3.1] - 2026-10-02
 
 ### Changed
