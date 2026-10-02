@@ -31,10 +31,6 @@ commandTests:
     command: "yamllint"
     args: ["--version"]
     exitCode: 0
-  - name: semgrep
-    command: "semgrep"
-    args: ["--version"]
-    exitCode: 0
   - name: "no setuid or setgid files"
     command: "sh"
     args:

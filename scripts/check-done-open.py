@@ -7,11 +7,11 @@ and exit 0. Does not treat a missing network call as a pass of the comparison.
 
 from __future__ import annotations
 
+import http.client
 import json
 import os
 import sys
-import urllib.error
-import urllib.request
+from urllib.parse import urlparse
 
 import yaml
 
@@ -37,20 +37,25 @@ def done_ids(path: str) -> list[str]:
 
 def open_titles(repo: str, token: str) -> list[str]:
     titles: list[str] = []
-    url = f"https://api.github.com/repos/{repo}/issues?state=open&per_page=100"
-    while url:
-        request = urllib.request.Request(
-            url,
+    path = f"/repos/{repo}/issues?state=open&per_page=100"
+    while path:
+        connection = http.client.HTTPSConnection("api.github.com", timeout=30)
+        connection.request(
+            "GET",
+            path,
             headers={
                 "Authorization": f"Bearer {token}",
                 "Accept": "application/vnd.github+json",
                 "User-Agent": "commondevops-check-done-open",
             },
         )
-        # URL is the GitHub API for GITHUB_REPOSITORY, not a caller-controlled path.
-        with urllib.request.urlopen(request, timeout=30) as response:  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
-            payload = json.load(response)
-            link = response.headers.get("Link", "")
+        response = connection.getresponse()
+        body = response.read()
+        link = response.getheader("Link", "")
+        connection.close()
+        if response.status >= 400:
+            raise SystemExit(f"GitHub issues API returned {response.status}")
+        payload = json.loads(body)
         if not isinstance(payload, list):
             raise SystemExit("GitHub issues payload was not a list")
         for item in payload:
@@ -58,10 +63,14 @@ def open_titles(repo: str, token: str) -> list[str]:
                 continue
             title = item.get("title") or ""
             titles.append(title)
-        url = ""
+        path = ""
         for part in link.split(","):
             if 'rel="next"' in part:
-                url = part.split(";")[0].strip().strip("<>")
+                next_url = part.split(";")[0].strip().strip("<>")
+                parsed = urlparse(next_url)
+                if parsed.netloc != "api.github.com":
+                    raise SystemExit("GitHub pagination left api.github.com")
+                path = parsed.path + (f"?{parsed.query}" if parsed.query else "")
     return titles
 
 
@@ -81,8 +90,8 @@ def main() -> int:
     ids = done_ids(manifest)
     try:
         titles = open_titles(repo, token)
-    except urllib.error.HTTPError as exc:
-        print(f"error: GitHub issue lookup failed: HTTP {exc.code}", file=sys.stderr)
+    except OSError as exc:
+        print(f"error: GitHub issue lookup failed: {exc}", file=sys.stderr)
         return 1
     stale = [item for item in ids if any(f"[{item}]" in title for title in titles)]
     if not stale:

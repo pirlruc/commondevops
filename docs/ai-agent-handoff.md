@@ -18,8 +18,8 @@ Owns `.github/workflows/common-*.yml`, `devops-ci.yml`, `devops-security.yml`,
 matching `scripts_ref` + `checkout_token`. `common-doc-verify.yml` /
 `common-scaffold-verify.yml` ship in 4.1.0; older pins do not have them.
 
-Companion: [containerdevops](https://github.com/pirlruc/containerdevops) tag `6.1.0`
-→ `edef9c8413363c46dcb276f5188a033d9fc6fd4e` (compose GHCR refs from
+Companion: [containerdevops](https://github.com/pirlruc/containerdevops)
+`7f2457c3aa9e8051a036265d658914635ea2c1d5` (compose GHCR refs from
 `handoff_package` + `digest`; `flavor: latest=false`). Do not pin 5.0.0
 (`f5a3a632…`) — job outputs from the handoff `always()` step were empty.
 `common-doc-verify.yml` / `common-scaffold-verify.yml` shipped in **4.1.0**
@@ -51,7 +51,7 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | guardrails submodule | tag **1.9.0** → `16a2c95c…` |
 | github-scaffold submodule | tag **1.8.0** → `ac9059fd…` |
 | methodologies (links only; not a submodule) | tag **1.8.0** |
-| containerdevops (image callers + security rescan) | tag `6.1.0` → `edef9c8413363c46dcb276f5188a033d9fc6fd4e` |
+| containerdevops (image callers + security rescan) | `7f2457c3aa9e8051a036265d658914635ea2c1d5` (feature-ops-hardening; not tagged) |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 | `ghcr.io/pirlruc/ci-lint` (alpine, unsuffixed) | `5.2.4` `sha256:e0a51c64b004c6f4e4ca1672f3bb865aaf03d91bd8a2e228e0fa39be1174dfb4` (`latest` == alpine) |
 | `ghcr.io/pirlruc/ci-lint` (debian) | `5.2.4-debian` `sha256:618b469a95b60097eb709830cbe3ee079a78f614ad0bf74b5643d4c8c0895cec` |
@@ -150,6 +150,9 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
+- 2026-10-02: Rebuild actionlint and grant on DHI Go 1.26.8; hashed ci-lint
+  lock; retire SC-PROV-001; `common-token-audit.yml`. Images not republished
+  until the next GitHub Release.
 - 2026-10-02: tool lock is semgrep **1.179.0**, PyJWT **2.15.1**, mcp 1.29.0,
   urllib3 2.8.0. ci-lint Dockerfiles install those pins directly; the PyJWT
   override file is gone (CMN-CVE-001-T3). Images are not republished yet.
@@ -224,4 +227,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-02 (semgrep 1.179.0, PyJWT 2.15.1)*
+*Last updated: 2026-10-02 (actionlint/grant rebuilt on Go 1.26.8; SC-PROV-001 retired)*

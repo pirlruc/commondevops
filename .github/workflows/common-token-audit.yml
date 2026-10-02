@@ -1,0 +1,47 @@
+name: Common Token Audit (reusable)
+
+# CI-038: long-lived PATs must expire within ci_token_max_lifetime_days (90).
+# Callers pass only the PATs they actually use. GITHUB_TOKEN is not audited.
+
+on:
+  workflow_call:
+    secrets:
+      scorecard_token:
+        required: false
+      guardrails_token:
+        required: false
+      checkout_token:
+        required: false
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: >-
+    ${{ github.event_name == 'workflow_dispatch'
+        && format('dispatch-token-audit-{0}', github.ref)
+        || format('call-token-audit-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pirlruc/commondevops
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: |
+            scripts/check-token-expiry.sh
+          sparse-checkout-cone-mode: false
+      - name: Check PAT expiry
+        env:
+          SCORECARD_TOKEN: ${{ secrets.scorecard_token }}
+          GUARDRAILS_TOKEN: ${{ secrets.guardrails_token }}
+          CHECKOUT_TOKEN: ${{ secrets.checkout_token }}
+          MAX_DAYS: "90"
+          WARN_DAYS: "7"
+        run: sh scripts/check-token-expiry.sh

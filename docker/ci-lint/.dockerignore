@@ -2,4 +2,6 @@
 !Dockerfile
 !Dockerfile.alpine
 !container-structure-test.yml
+!requirements.txt
+!requirements-alpine.txt
 !README.md

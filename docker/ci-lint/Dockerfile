@@ -5,40 +5,42 @@
 # Binary path discoveries (2026-08-10):
 #   dhi.io/shellcheck:0-debian13 → /usr/local/bin/shellcheck
 #   dhi.io/gitleaks:8-debian13   → /usr/bin/gitleaks
-#   hadolint/hadolint:2.12.0-alpine → /bin/hadolint
-#   rhysd/actionlint:1.7.12      → /usr/local/bin/actionlint
+#   hadolint/hadolint:v2.15.1-alpine → /bin/hadolint
+#   actionlint v1.7.12 is rebuilt in-image on Go 1.26.8 (commit 914e7df2)
 #   ghcr.io/astral-sh/uv:0.12.0  → /uv (build stage only)
 #
 # No HEALTHCHECK: short-lived CI toolchain (CLI job container), not a supervised
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
-ARG BASE=dhi.io/python:3.13-debian13-dev@sha256:cb32401c177600c7bacdb96a49ef51dd10d9967a868614288c428acc41e65604
+# actionlint v1.7.12 rebuilt with Go 1.26.8. Stdlib fixes only; modules stay
+# at the upstream go.sum (CMN-CVE-001).
+FROM dhi.io/golang:1.26-debian13-dev@sha256:06dc5566a36380eb27e0eef948ce336fe53790617fd8512a1d21b1d774c0545a AS actionlint-build
+WORKDIR /src
+RUN git init \
+ && git remote add origin https://github.com/rhysd/actionlint.git \
+ && git fetch --depth 1 origin 914e7df21a07ef503a81201c76d2b11c789d3fca \
+ && git checkout --detach FETCH_HEAD \
+ && test "$(git rev-parse HEAD)" = "914e7df21a07ef503a81201c76d2b11c789d3fca" \
+ && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/actionlint ./cmd/actionlint
 
 # ---------------------------------------------------------------------------
 # pybuild — install Python CLIs; uv stays out of the final image (~53 MB).
 # ---------------------------------------------------------------------------
-# hadolint ignore=DL3006
-FROM ${BASE} AS pybuild
+FROM dhi.io/python:3.13-debian13-dev@sha256:cb32401c177600c7bacdb96a49ef51dd10d9967a868614288c428acc41e65604 AS pybuild
 COPY --from=ghcr.io/astral-sh/uv:0.12.0@sha256:606e70c71c852d03f611b1e56a195d08648507018a7057fab82c4974c4eae105 \
   /uv /usr/local/bin/uv
 ENV UV_SYSTEM_PYTHON=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 # semgrep 1.179.0 requires PyJWT>=2.15 and pins mcp==1.29.0.
-# mcp 2.x drops FastMCP and breaks semgrep's MCP command.
-RUN uv pip install --system --no-cache \
-      'zizmor==1.29.0' \
-      'yamllint>=1.35' \
-      'semgrep==1.179.0' \
-      'mcp==1.29.0' \
-      'PyJWT==2.15.1' \
-      'urllib3==2.8.0'
+COPY requirements.txt /tmp/requirements.txt
+RUN uv pip install --system --no-cache --require-hashes -r /tmp/requirements.txt \
+ && rm -f /tmp/requirements.txt
 
 # ---------------------------------------------------------------------------
 # Final image
 # ---------------------------------------------------------------------------
-# hadolint ignore=DL3006
-FROM ${BASE}
+FROM dhi.io/python:3.13-debian13-dev@sha256:cb32401c177600c7bacdb96a49ef51dd10d9967a868614288c428acc41e65604
 
 LABEL org.opencontainers.image.title="ci-lint" \
       org.opencontainers.image.description="Short-lived CI toolchain image for lint and secrets/SAST: actionlint, hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep. Non-root 1000:1000, linux/amd64." \
@@ -52,10 +54,9 @@ COPY --from=dhi.io/shellcheck:0-debian13@sha256:eb696ecbc0a6dbe57588d88c700c3da7
   /usr/local/bin/shellcheck /usr/local/bin/shellcheck
 COPY --from=dhi.io/gitleaks:8-debian13@sha256:7f7f90449d80971451a7fc20eedd1875b7271ef68be571b1b9550f19109c32c3 \
   /usr/bin/gitleaks /usr/local/bin/gitleaks
-COPY --from=hadolint/hadolint:2.12.0-alpine@sha256:3c206a451cec6d486367e758645269fd7d696c5ccb6ff59d8b03b0e45268a199 \
+COPY --from=hadolint/hadolint:v2.15.1-alpine@sha256:a1d49ae1a4e83c1dbad26b8c1ad7588c8bd1e04f4866b34ad3cac50335198552 \
   /bin/hadolint /usr/local/bin/hadolint
-COPY --from=rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 \
-  /usr/local/bin/actionlint /usr/local/bin/actionlint
+COPY --from=actionlint-build /out/actionlint /usr/local/bin/actionlint
 
 # Python packages + console scripts from pybuild (no uv binary in final).
 COPY --from=pybuild /usr/lib/python3.13/site-packages /usr/lib/python3.13/site-packages

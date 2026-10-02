@@ -26,11 +26,12 @@ and semgrep. Not a product runtime — no `HEALTHCHECK`.
 | `latest-debian` | Latest non-prerelease Debian publish |
 | `sha-<git>` / `sha-<git>-alpine` / `sha-<git>-debian` | Exact git SHA of the published commit |
 
-Alpine owns the unsuffixed tags because it currently has the lower OS vulnerability
-posture on the DHI catalog (0 CRITICAL OS findings vs Debian). Prefer an explicit
-`-alpine` / `-debian` suffix when the libc matters; prefer a digest in production.
-`latest` equals `latest-alpine` (`flavor: latest=false`). A monthly rebuild may
-move `latest` off the SemVer tag — pin the digest, not `latest`.
+Tags through 5.2.4: Alpine owns the unsuffixed tags. The next publish flips
+that. semgrep 1.179.0 has no musllinux wheel, so Debian owns unsuffixed tags
+and `latest`, and the Alpine variant does not include semgrep. Prefer an
+explicit `-alpine` / `-debian` suffix when the libc matters; prefer a digest
+in production. A monthly rebuild may move `latest` off the SemVer tag — pin
+the digest, not `latest`.
 
 ```bash
 docker pull pirlruc/ci-lint:5.2.4
