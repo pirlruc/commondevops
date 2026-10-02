@@ -227,4 +227,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-02 (actionlint/grant rebuilt on Go 1.26.8; SC-PROV-001 retired)*
+*Last updated: 2026-10-02 (setuid bits cleared; Debian image CST was red on unix_chkpwd)*

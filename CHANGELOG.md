@@ -20,6 +20,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
   1.38.0).
 - Image callers pin containerdevops `7f2457c3aa9e8051a036265d658914635ea2c1d5`
   (provenance `mode=max` and sbom on without `sign`). SC-PROV-001 is retired.
+- Strip setuid and setgid bits in the final image. Debian ci-lint ships
+  `/usr/sbin/unix_chkpwd` setuid, which failed the structure test.
 - `common-token-audit.yml` checks PAT expiry (90 days, warn at 7). Scaffold
   verify installs PyYAML from a hashed lock. Ansible verify requires
   `--hash` lines. Reusable workflows set concurrency that cancels only on

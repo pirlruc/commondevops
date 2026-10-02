@@ -87,6 +87,7 @@ RUN printf 'ci:x:1000:1000::/home/ci:/bin/sh\n' >> /etc/passwd \
  && printf 'ci:x:1000:\n' >> /etc/group \
  && mkdir -p /home/ci \
  && chown -R 1000:1000 /home/ci /workspace
+RUN find / -xdev -type f \( -perm -4000 -o -perm -2000 \) -exec chmod a-s {} +
 USER 1000:1000
 
 ENTRYPOINT []
