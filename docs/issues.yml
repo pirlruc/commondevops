@@ -1461,3 +1461,129 @@ milestones:
               - trivy image --severity HIGH,CRITICAL pirlruc/ci-supply-chain:latest finds no fixed-module findings in grant
             guardrail_refs:
               - DOCKER-SEC-001
+
+      - id: CMN-TOFU-001
+        status: open
+        title: Add a reusable OpenTofu verify workflow
+        overview:
+          problem: >-
+            common-infra-lint covers workflows, shell, and Dockerfiles. An
+            OpenTofu repo has no reusable fmt, validate, or tflint job, and
+            ci-lint does not contain tofu or tflint.
+          goal: >-
+            common-tofu-verify runs tofu fmt -check, tofu validate, and tflint
+            from the ci-lint image. The caller passes scripts_ref equal to the
+            uses pin.
+        decision: >-
+          In the context of OpenTofu repos calling commondevops, facing no tofu
+          or tflint job, we decided common-tofu-verify plus those tools in
+          ci-lint, to achieve one reusable gate, accepting an image rebuild.
+        out_of_scope:
+          - terraform plan against a live hypervisor
+          - checkov, until a guardrail pack names it
+        architecture:
+          target: .github/workflows/common-tofu-verify.yml
+          modules:
+            - .github/workflows/common-tofu-verify.yml
+            - docker/ci-lint/Dockerfile
+        acceptance_criteria:
+          - common-tofu-verify.yml is workflow_call
+          - ci-lint contains tofu and tflint
+          - docs/workflows.md lists the workflow
+        guardrail_refs:
+          - CI-018
+          - CI-034
+          - CI-035
+        tasks:
+          - id: CMN-TOFU-001-T1
+            status: open
+            title: Add tofu and tflint to ci-lint and ship common-tofu-verify
+            instructions:
+              files:
+                - .github/workflows/common-tofu-verify.yml
+                - docker/ci-lint/Dockerfile
+                - docs/workflows.md
+            verification:
+              - test -f .github/workflows/common-tofu-verify.yml
+            guardrail_refs:
+              - CI-034
+
+      - id: CMN-SOPS-001
+        status: open
+        title: Add a reusable SOPS encryption check
+        overview:
+          problem: >-
+            A repository can commit a SOPS file that was never encrypted. No
+            workflow checks that, and ci-lint does not contain sops or age.
+            CI must not receive an Age private key.
+          goal: >-
+            common-sops-verify fails when a *.sops.* file is not encrypted.
+            The job has no private key.
+        decision: >-
+          In the context of SOPS repos, facing CI that cannot prove a file is
+          encrypted, we decided common-sops-verify plus sops and age in ci-lint,
+          to achieve a token-free encryption check, accepting that CI never
+          receives an Age private key.
+        out_of_scope:
+          - Decrypting secrets in CI
+          - Holding an Age private key as an Actions secret
+        architecture:
+          target: .github/workflows/common-sops-verify.yml
+          modules:
+            - .github/workflows/common-sops-verify.yml
+            - docker/ci-lint/Dockerfile
+        acceptance_criteria:
+          - The workflow fails on a plaintext sops file
+          - The workflow requests no Age key
+          - docs/workflows.md lists it
+        guardrail_refs:
+          - CI-035
+          - ANSIBLE-SEC-001
+        tasks:
+          - id: CMN-SOPS-001-T1
+            status: open
+            title: Add sops and age to ci-lint and ship common-sops-verify
+            instructions:
+              files:
+                - .github/workflows/common-sops-verify.yml
+                - docker/ci-lint/Dockerfile
+                - docs/workflows.md
+            verification:
+              - test -f .github/workflows/common-sops-verify.yml
+            guardrail_refs:
+              - CI-035
+
+      - id: CMN-DOC-003
+        status: open
+        title: List ansible-verify and token-audit in the workflow table
+        overview:
+          problem: >-
+            README.md workflow table omits common-ansible-verify and
+            common-token-audit. Both files exist and are callable. A consumer
+            reading the table will not find them.
+          goal: >-
+            The table names both workflows, their inputs, and that
+            common-ansible-verify runs yamllint, ansible-lint, and Molecule.
+        decision: >-
+          In the context of the workflow table, facing two callable workflows
+          omitted from README, we decided to add both rows, to achieve a table
+          that matches the workflow files, accepting a docs-only change.
+        out_of_scope:
+          - Changing either workflow
+        architecture:
+          target: README.md
+          modules:
+            - README.md
+            - docs/workflows.md
+        acceptance_criteria:
+          - README names common-ansible-verify and common-token-audit
+        tasks:
+          - id: CMN-DOC-003-T1
+            status: open
+            title: Add the two missing workflow rows
+            instructions:
+              files:
+                - README.md
+                - docs/workflows.md
+            verification:
+              - rg -n 'common-ansible-verify|common-token-audit' README.md
