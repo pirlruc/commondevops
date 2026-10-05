@@ -145,9 +145,10 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. CMN-CVE-001 is done. actionlint and grant were rebuilt on Go 1.26.8 in
+1. Homelab gap epics are filed and not implemented: CMN-TOFU-001 (tofu/tflint workflow and ci-lint tools), CMN-SOPS-001 (encryption check, no Age key in CI), CMN-DOC-003 (README rows for common-ansible-verify and common-token-audit).
+2. CMN-CVE-001 is done. actionlint and grant were rebuilt on Go 1.26.8 in
    5.3.0. Module CVEs stay ignored until upstream ships.
-2. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
+3. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
    The 2026-10-02 group was closed because it jumped Go 1.26 to 1.27.
 
 ## Recent history
@@ -229,4 +230,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-02 (CMN-CVE-001 done; images stay 5.3.0)*
+*Last updated: 2026-10-05 (homelab gap epics filed, not implemented)*
