@@ -5,6 +5,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.3.3] - 2026-10-06
+
+### Fixed
+
+- `common-secrets-sast` and `common-supply-chain` grant, at workflow level,
+  the permissions their jobs request. An empty set made every caller that
+  nests them fail at startup with zero jobs.
+
 ### Changed
 
 - Close CMN-CVE-001. actionlint and grant were rebuilt on Go 1.26.8 in 5.3.0.
