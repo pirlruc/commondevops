@@ -54,7 +54,10 @@ on:
         type: string
         default: ""
 
-permissions: {}
+# CI-025: workflow permissions are the union of the job permissions.
+permissions:
+  contents: read
+  security-events: write
 
 concurrency:
   group: >-
