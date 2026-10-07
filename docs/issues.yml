@@ -1587,3 +1587,31 @@ milestones:
                 - docs/workflows.md
             verification:
               - rg -n 'common-ansible-verify|common-token-audit' README.md
+
+      - id: CMN-PRIV-001
+        status: open
+        title: Pull private GHCR job containers with the job token
+        overview:
+          problem: >-
+            ci-lint and ci-supply-chain are private. A job container without
+            packages read and container.credentials fails with manifest unknown.
+            pydevops already uses that pull.
+          goal: >-
+            Every commondevops job that pulls ghcr.io/pirlruc sets packages read
+            and container.credentials.
+        decision: >-
+          In the context of private CI images, facing a container pull with no
+          credentials, we decided to use the pydevops pull, to achieve a pull
+          after the package grant, accepting that each caller repo needs Actions
+          read on the package.
+        acceptance_criteria:
+        - Job containers that pull ghcr.io/pirlruc set credentials and packages read
+        tasks:
+        - id: CMN-PRIV-001-T1
+          status: open
+          title: Add credentials to the private image pulls
+          instructions:
+            files:
+            - .github/workflows/
+          verification:
+          - rg -n 'container.credentials|packages: read' .github/workflows

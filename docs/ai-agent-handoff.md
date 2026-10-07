@@ -230,4 +230,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-05 (homelab gap epics filed, not implemented)*
+*Last updated: 2026-10-07 (phase-3 review issues appended to docs/issues.yml)*
