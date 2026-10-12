@@ -26,7 +26,7 @@ or the reusable job fails at startup with no useful callee message.
 |----------|---------------------------|
 | `common-infra-lint.yml` | `contents: read` |
 | `common-doc-verify.yml` | `contents: read` |
-| `common-scaffold-verify.yml` | `contents: read` |
+| `common-scaffold-verify.yml` | `contents: read`, `issues: read` |
 | `common-secrets-sast.yml` | `contents: read` |
 | `common-ansible-verify.yml` | `contents: read` |
 | `common-supply-chain.yml` | `contents: read`, `security-events: write` |

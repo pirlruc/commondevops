@@ -5,6 +5,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.3.4] - 2026-10-12
+
+### Fixed
+
+- `common-scaffold-verify` requests `issues: read` so the done-versus-open
+  check can list issues. Callers that only granted `contents: read` got
+  HTTP 403 from that step.
+
 ## [5.3.3] - 2026-10-06
 
 ### Fixed
