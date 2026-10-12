@@ -37,6 +37,7 @@ jobs:
   scaffold:
     permissions:
       contents: read
+      issues: read
     uses: ./.github/workflows/common-scaffold-verify.yml
     with:
       blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
