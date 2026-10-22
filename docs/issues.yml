@@ -322,7 +322,7 @@ milestones:
                 - .github/workflows/ci-base-image.yml
                 - docs/issues.yml
             verification:
-              - grep -q 'image_max_size_mb: \"700\"' .github/workflows/ci-lint-image.yml
+              - "grep -q 'image_max_size_mb: \\\"700\\\"' .github/workflows/ci-lint-image.yml"
               - grep -q 'DOCKER-PERF-001' docs/guardrail-deviations.yml
             guardrail_refs:
               - DOCKER-PERF-001
@@ -460,7 +460,7 @@ milestones:
             - docs/workflows.md
         acceptance_criteria:
           - Blocking scan jobs pass per-image ignorefile paths
-          - Both scan-posture jobs set ignorefile: none
+          - "Both scan-posture jobs set ignorefile: none"
           - Root .trivyignore.yaml removed
           - workflows.md documents the ignorefile contract
         guardrail_refs:
@@ -476,8 +476,8 @@ milestones:
                 - .github/workflows/ci-supply-chain-image.yml
             verification:
               - test ! -f .trivyignore.yaml
-              - rg -n "ignorefile: docker/ci-lint" .github/workflows/ci-lint-image.yml
-              - rg -n "ignorefile: docker/ci-supply-chain" .github/workflows/ci-supply-chain-image.yml
+              - "rg -n \"ignorefile: docker/ci-lint\" .github/workflows/ci-lint-image.yml"
+              - "rg -n \"ignorefile: docker/ci-supply-chain\" .github/workflows/ci-supply-chain-image.yml"
             guardrail_refs:
               - DOCKER-SEC-001
           - id: CMN-WF-001-T2
@@ -488,8 +488,8 @@ milestones:
                 - .github/workflows/ci-lint-image.yml
                 - .github/workflows/ci-supply-chain-image.yml
             verification:
-              - rg -n "ignorefile: none" .github/workflows/ci-lint-image.yml
-              - rg -n "ignorefile: none" .github/workflows/ci-supply-chain-image.yml
+              - "rg -n \"ignorefile: none\" .github/workflows/ci-lint-image.yml"
+              - "rg -n \"ignorefile: none\" .github/workflows/ci-supply-chain-image.yml"
           - id: CMN-WF-001-T3
             status: done
             title: Document ignorefile contract in workflows.md
@@ -497,7 +497,7 @@ milestones:
               files:
                 - docs/workflows.md
             verification:
-              - grep -q "ignorefile: none" docs/workflows.md
+              - "grep -q \"ignorefile: none\" docs/workflows.md"
 
       - id: CMN-WF-002
         status: done
@@ -669,8 +669,8 @@ milestones:
                 - .github/workflows/ci-supply-chain-image.yml
                 - .github/workflows/devops-ci.yml
             verification:
-              - grep -q 'tag_suffix: -alpine' .github/workflows/ci-supply-chain-image.yml
-              - grep -q 'tag_alias_unsuffixed: true' .github/workflows/ci-supply-chain-image.yml
+              - "grep -q 'tag_suffix: -alpine' .github/workflows/ci-supply-chain-image.yml"
+              - "grep -q 'tag_alias_unsuffixed: true' .github/workflows/ci-supply-chain-image.yml"
               - grep -q Dockerfile.alpine .github/workflows/devops-ci.yml
               - actionlint .github/workflows/ci-supply-chain-image.yml
             guardrail_refs:
@@ -685,7 +685,7 @@ milestones:
                 - docs/github-packages-ci-supply-chain.md
                 - docs/workflows.md
             verification:
-              - grep -q 'repo_value: 800' docs/guardrail-deviations.yml
+              - "grep -q 'repo_value: 800' docs/guardrail-deviations.yml"
               - grep -q '3.0.0-alpine' docs/docker-hub-ci-supply-chain.md
             guardrail_refs:
               - DOCKER-PERF-001
@@ -796,8 +796,8 @@ milestones:
                 - .github/workflows/devops-security.yml
                 - .github/workflows/common-infra-lint.yml
             verification:
-              - grep -q 'tag_suffix: -alpine' .github/workflows/ci-lint-image.yml
-              - grep -q 'tag_alias_unsuffixed: true' .github/workflows/ci-lint-image.yml
+              - "grep -q 'tag_suffix: -alpine' .github/workflows/ci-lint-image.yml"
+              - "grep -q 'tag_alias_unsuffixed: true' .github/workflows/ci-lint-image.yml"
               - grep -q 'Dockerfile\\*' .github/workflows/common-infra-lint.yml
             guardrail_refs:
               - CI-026
@@ -812,7 +812,7 @@ milestones:
                 - scripts/check-ci-local.sh
                 - docs/ai-agent-handoff.md
             verification:
-              - grep -q 'repo_value: 850' docs/guardrail-deviations.yml
+              - "grep -q 'repo_value: 850' docs/guardrail-deviations.yml"
               - grep -q '4.0.0-alpine' docs/docker-hub-ci-lint.md
               - grep -q yamllint scripts/check-ci-local.sh
             guardrail_refs:
@@ -929,7 +929,7 @@ milestones:
                 - README.md
             verification:
               - grep -q 'ghcr-package-visibility' README.md
-              - grep -q 'packages: read' docs/workflows.md
+              - "grep -q 'packages: read' docs/workflows.md"
             guardrail_refs:
               - CI-025
 
