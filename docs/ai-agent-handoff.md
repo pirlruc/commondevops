@@ -230,4 +230,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-06 (Hub and GHCR ci-lint and ci-supply-chain 5.3.3 digests)*
+*Last updated: 2026-10-22 (5.3.3 digests, token-audit scripts_ref, guardrails 1.12.0, private GHCR issue)*
