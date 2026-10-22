@@ -29,7 +29,7 @@ or the reusable job fails at startup with no useful callee message.
 | `common-scaffold-verify.yml` | `contents: read`, `issues: read` |
 | `common-secrets-sast.yml` | `contents: read` |
 | `common-ansible-verify.yml` | `contents: read` |
-| `common-supply-chain.yml` | `contents: read`, `security-events: write` |
+| `common-supply-chain.yml` | `contents: read`, `actions: read`, `security-events: write` |
 | `common-scorecard.yml` | `contents: read`, `security-events: write`, `id-token: write` |
 | `common-release.yml` | `contents: write`, `id-token: write` |
 | `ci-lint-image.yml` / `ci-supply-chain-image.yml` | `contents: read`; `packages: write` on build; `packages: read` on scan; `packages: write` on publish |
@@ -291,7 +291,7 @@ These jobs do not replace a Kotlin or Android gate:
   `auto`). That is not `p/kotlin` (KT-SEC-002). Pass `semgrep_config: p/kotlin`.
 - `common-supply-chain` Syft-on-directory does not see a Gradle graph, so it is
   not the Android CycloneDX grype gate (KT-SEC-004).
-- `common-release` and `artifact-sweep` are for image publishers.
+- `common-release` and `artifact-sweep` are for image publishers. `artifact-sweep.yml` is also `workflow_call`, so another repository can run the same sweep.
 
 `common-doc-verify` looks in `scripts/` and then `.github/scaffold/scripts/`
 for the YAML and link checkers, and fails closed when neither copy exists.

@@ -84,6 +84,7 @@ jobs:
     if: github.event.pull_request.user.login != 'dependabot[bot]'
     permissions:
       contents: read
+      actions: read
       security-events: write
     uses: ./.github/workflows/common-supply-chain.yml
     with:
@@ -98,6 +99,7 @@ jobs:
       github.event.repository.fork == false
     permissions:
       contents: read
+      actions: read
       security-events: write
       id-token: write
     uses: ./.github/workflows/common-scorecard.yml
