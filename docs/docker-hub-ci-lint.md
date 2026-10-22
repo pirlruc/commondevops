@@ -16,8 +16,10 @@ and semgrep. Not a product runtime — no `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `5.3.0` / `5.3.0-debian` | Immutable Debian `sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82a19826db7432ae35c45` |
-| `5.3.0-alpine` | Immutable Alpine `sha256:c55c8f74f2d99d7725cd5a2f785a3782b37d92939baa482a6774308cc5846bf9` |
+| `5.3.3` / `5.3.3-debian` / `latest` / `latest-debian` | Debian `sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b` |
+| `5.3.3-alpine` / `latest-alpine` | Alpine `sha256:bdd9c2ea12ad700da6ebd8426845d883510156a188b741f32ffd9ceb3f43f830` |
+| `5.3.0` / `5.3.0-debian` | Previous Debian `sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82a19826db7432ae35c45` |
+| `5.3.0-alpine` | Previous Alpine `sha256:c55c8f74f2d99d7725cd5a2f785a3782b37d92939baa482a6774308cc5846bf9` |
 | `5.2.4` / `5.2.4-alpine` | Previous Alpine `sha256:e0a51c64b004c6f4e4ca1672f3bb865aaf03d91bd8a2e228e0fa39be1174dfb4` |
 | `5.2.4-debian` | Previous Debian `sha256:618b469a95b60097eb709830cbe3ee079a78f614ad0bf74b5643d4c8c0895cec` |
 | `5.2.2` / `5.2.2-alpine` | Previous Alpine `sha256:fd24e836c677e044163aab19e1e7d49d92ce34576deb7970b1ae16ea52b36d1b` |

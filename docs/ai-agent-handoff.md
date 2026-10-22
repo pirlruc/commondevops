@@ -53,12 +53,12 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | methodologies (links only; not a submodule) | tag **1.8.0** |
 | containerdevops (image callers + security rescan) | `2ad052e69d2587cdaf8ccac59b9dae5c60f5560b` (feature-ops-hardening; not tagged) |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
-| `ghcr.io/pirlruc/ci-lint` (debian, unsuffixed) | `5.3.0` `sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82a19826db7432ae35c45` (`latest` == debian) |
-| `ghcr.io/pirlruc/ci-lint` (alpine) | `5.3.0-alpine` `sha256:c55c8f74f2d99d7725cd5a2f785a3782b37d92939baa482a6774308cc5846bf9` |
-| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.3.0` `sha256:71ad1ca2f404147d00351b492d051c1213dacffeb961fcd96f2053e7715ab17e` |
-| `ghcr.io/pirlruc/ci-supply-chain` (debian) | `5.3.0-debian` `sha256:6706b44d46e252537af3ad77b797c6c880f98afa2059e954cbf0d597ff054900` |
-| Release (reusables) | **5.3.0** |
-| Release (images) | **5.3.0** |
+| `ghcr.io/pirlruc/ci-lint` (debian, unsuffixed) | `5.3.3` `sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b` (`latest` == debian) |
+| `ghcr.io/pirlruc/ci-lint` (alpine) | `5.3.3-alpine` `sha256:bdd9c2ea12ad700da6ebd8426845d883510156a188b741f32ffd9ceb3f43f830` |
+| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.3.3` `sha256:eaa177b7c527ebe54449bb77b39dfd3eb9e7f403c799044a1b6647677a0aba74` |
+| `ghcr.io/pirlruc/ci-supply-chain` (debian) | `5.3.3-debian` `sha256:c4319ff77a65c1223f214ca27c545a1bc81da023ea0ee33a697fc817c54c2099` |
+| Release (reusables) | **5.3.3** |
+| Release (images) | **5.3.3** |
 
 ## Local image sizes / posture (2026-08-12, `du -sxm /`)
 
@@ -230,4 +230,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-05 (homelab gap epics filed, not implemented)*
+*Last updated: 2026-10-06 (Hub and GHCR ci-lint and ci-supply-chain 5.3.3 digests)*
