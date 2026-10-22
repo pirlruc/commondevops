@@ -4,17 +4,17 @@
 #
 # Binary path discoveries (2026-08-10):
 #   dhi.io/shellcheck:0-debian13 → /usr/local/bin/shellcheck
-#   dhi.io/gitleaks:8-debian13   → /usr/bin/gitleaks
+#   gitleaks v8.30.1 is rebuilt in-image on Go 1.26.10 (commit 83d9cd68)
 #   hadolint/hadolint:v2.15.1-alpine → /bin/hadolint
-#   actionlint v1.7.12 is rebuilt in-image on Go 1.26.8 (commit 914e7df2)
+#   actionlint v1.7.12 is rebuilt in-image on Go 1.26.10 (commit 914e7df2)
 #   ghcr.io/astral-sh/uv:0.12.0  → /uv (build stage only)
 #
 # No HEALTHCHECK: short-lived CI toolchain (CLI job container), not a supervised
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
-# actionlint v1.7.12 rebuilt with Go 1.26.8. Stdlib fixes only; modules stay
+# actionlint v1.7.12 rebuilt with Go 1.26.10. Stdlib fixes only; modules stay
 # at the upstream go.sum (CMN-CVE-001).
-FROM dhi.io/golang:1.26-debian13-dev@sha256:06dc5566a36380eb27e0eef948ce336fe53790617fd8512a1d21b1d774c0545a AS actionlint-build
+FROM dhi.io/golang:1.26-debian13-dev@sha256:5bff7bbb70c4f0791e039b58deb70eb0609dcc2d503c5524af3565b86d8b7544 AS actionlint-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/rhysd/actionlint.git \
@@ -22,6 +22,17 @@ RUN git init \
  && git checkout --detach FETCH_HEAD \
  && test "$(git rev-parse HEAD)" = "914e7df21a07ef503a81201c76d2b11c789d3fca" \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/actionlint ./cmd/actionlint
+
+# gitleaks v8.30.1 rebuilt with Go 1.26.10. The DHI donor is still Go 1.26.9.
+FROM dhi.io/golang:1.26-debian13-dev@sha256:5bff7bbb70c4f0791e039b58deb70eb0609dcc2d503c5524af3565b86d8b7544 AS gitleaks-build
+WORKDIR /src
+RUN git init \
+ && git remote add origin https://github.com/gitleaks/gitleaks.git \
+ && git fetch --depth 1 origin 83d9cd684c87d95d656c1458ef04895a7f1cbd8e \
+ && git checkout --detach FETCH_HEAD \
+ && test "$(git rev-parse HEAD)" = "83d9cd684c87d95d656c1458ef04895a7f1cbd8e" \
+ && go get golang.org/x/crypto@v0.55.0 golang.org/x/text@v0.41.0 github.com/klauspost/compress@v1.18.7 \
+ && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/gitleaks .
 
 # ---------------------------------------------------------------------------
 # pybuild — install Python CLIs; uv stays out of the final image (~53 MB).
@@ -52,8 +63,7 @@ LABEL org.opencontainers.image.title="ci-lint" \
 
 COPY --from=dhi.io/shellcheck:0-debian13@sha256:eb696ecbc0a6dbe57588d88c700c3da7cce3824f8c865795348f9b51c7524331 \
   /usr/local/bin/shellcheck /usr/local/bin/shellcheck
-COPY --from=dhi.io/gitleaks:8-debian13@sha256:7f7f90449d80971451a7fc20eedd1875b7271ef68be571b1b9550f19109c32c3 \
-  /usr/bin/gitleaks /usr/local/bin/gitleaks
+COPY --from=gitleaks-build /out/gitleaks /usr/local/bin/gitleaks
 COPY --from=hadolint/hadolint:v2.15.1-alpine@sha256:a1d49ae1a4e83c1dbad26b8c1ad7588c8bd1e04f4866b34ad3cac50335198552 \
   /bin/hadolint /usr/local/bin/hadolint
 COPY --from=actionlint-build /out/actionlint /usr/local/bin/actionlint

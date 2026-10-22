@@ -6,7 +6,7 @@
 #   dhi.io/syft:1-alpine3.24  → /usr/bin/syft
 #   dhi.io/grype:0-alpine3.24 → /usr/bin/grype
 #   dhi.io/trivy:0-alpine3.24 → /usr/bin/trivy
-#   grant v0.6.8 is rebuilt in-image on Go 1.26.8 (commit 0fb3c502)
+#   grant v0.6.8 is rebuilt in-image on Go 1.26.10 (commit 0fb3c502)
 #
 # cosign is intentionally omitted: container-publish installs it on the runner
 # via INSTALL_ONLY when sign=true (~109 MB saved).
@@ -14,8 +14,8 @@
 # No HEALTHCHECK: short-lived CI toolchain (CLI job container), not a supervised
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
-# grant v0.6.8 rebuilt with Go 1.26.8. Stdlib fixes only; modules stay at go.sum.
-FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:653aaa8fcf7170279c09c70dd4a3fa8346be302644ce31e657815a9d50cd7054 AS grant-build
+# grant v0.6.8 rebuilt with Go 1.26.10. Stdlib fixes only; modules stay at go.sum.
+FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:c48766f47ce584f72b290949310376b0c6dfdc7565aed51f219507d42807501e AS grant-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/anchore/grant.git \

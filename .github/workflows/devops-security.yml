@@ -57,8 +57,11 @@ jobs:
     if: github.event.pull_request.user.login != 'dependabot[bot]'
     permissions: {}
     uses: ./.github/workflows/common-token-audit.yml
+    with:
+      scripts_ref: ${{ github.sha }}
     secrets:
-      scorecard_token: ${{ secrets.SCORECARD_TOKEN }}
+      guardrails_token: ${{ secrets.GUARDRAILS_READ_TOKEN }}
+      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   published-ci-lint-rescan:
     if: github.event.pull_request.user.login != 'dependabot[bot]'
