@@ -115,6 +115,11 @@ python3 .github/scaffold/scripts/issues-sync.py \
   or GitHub cancels the extras.
 - **CMD is `sh`:** Alpine DHI has no bash. All toolchain images use `CMD ["sh"]`
   and `/bin/sh` in passwd. Do not restore `bash`.
+- **Job-container git:** ci-lint and ci-supply-chain do not ship git. The job
+  mounts the runner's `/usr/bin/git`, `/usr/lib/git-core`, and the
+  libcurl-gnutls closure. `git-remote-https` from git 2.55 fails without
+  `libcurl-gnutls.so.4`. Do not overlay the image's libc or libssl. Do not
+  apt-get install git, and do not publish a new image to add it.
 - **shellcheck/gitleaks on Alpine:** no DHI alpine tag; copy static Debian donors.
 - **OCI labels:** pass `image_title` / `image_description` into containerdevops
   publish or the package page shows the repository description. Hub Overview needs

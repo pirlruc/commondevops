@@ -16,7 +16,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
   private `ghcr.io/pirlruc` job containers with `packages: read` and
   `container.credentials` (CMN-PRIV-001). A caller of those workflows grants
   `packages: read`. The published images have no git, so the job mounts the
-  runner's git for `actions/checkout`. OpenTofu and SOPS stay on the runner
+  runner's git and the libcurl-gnutls libraries `git-remote-https` needs.
+  OpenTofu and SOPS stay on the runner
   and log in with `docker`, because those jobs need the Docker daemon.
 - Hub Overviews update on a push to `main` when `docs/docker-hub*.md`
   changes. That path does not publish an image.
