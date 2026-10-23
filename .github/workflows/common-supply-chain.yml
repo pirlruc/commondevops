@@ -150,12 +150,13 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           set -euo pipefail
-          THR="${{ github.workspace }}/_commondevops/scripts/supply-chain.profile.thresholds.yml"
+          THR="${PWD}/_commondevops/scripts/supply-chain.profile.thresholds.yml"
           if [[ ! -f "${THR}" ]]; then
             echo "::error::Missing vendored thresholds at ${THR}; failing closed (SC-LIC-001)."
             exit 1
           fi
           echo "THRESHOLDS_PATH=${THR}" >> "${GITHUB_ENV}"
+          echo "COMMONDEVOPS_SCRIPTS=${PWD}/_commondevops/scripts" >> "${GITHUB_ENV}"
           SEV="$(bash _commondevops/scripts/read-thresholds.sh vuln_fail_on_severity "${THR}")"
           SEV_UP="$(printf '%s' "${SEV}" | tr '[:lower:]' '[:upper:]')"
           SEV_LO="$(printf '%s' "${SEV}" | tr '[:upper:]' '[:lower:]')"
@@ -238,7 +239,7 @@ jobs:
           GRANT_CONFIG_PATH: .grant.yaml
         run: |
           set -euo pipefail
-          python3 "${{ github.workspace }}/_commondevops/scripts/generate_grant_config.py"
+          python3 "${COMMONDEVOPS_SCRIPTS}/generate_grant_config.py"
           DRY=()
           if [[ "${ADVISORY}" == "true" ]]; then
             DRY=(--dry-run)
@@ -253,7 +254,7 @@ jobs:
           SPDX_SBOM_PATH: scan-results/sbom-spdx.json
           LICENSE_DENY_LIST: ${{ inputs.license_deny_list }}
           THRESHOLDS_PATH: ${{ env.THRESHOLDS_PATH }}
-        run: python3 "${{ github.workspace }}/_commondevops/scripts/license_gate.py"
+        run: python3 "${COMMONDEVOPS_SCRIPTS}/license_gate.py"
 
       - name: Gate — supply-chain
         if: always()

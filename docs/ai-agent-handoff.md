@@ -121,8 +121,10 @@ python3 .github/scaffold/scripts/issues-sync.py \
   `libcurl-gnutls.so.4` and `libunistring.so.5`. Do not overlay the image's
   libc or libssl. Sparse checkout of a second repository fails inside that
   container (`ENOENT` on `.git/info/sparse-checkout`); those jobs check out
-  the scripts tree in full. Do not apt-get install git, and do not publish a
-  new image to add it.
+  the scripts tree in full. Inside the container, `${{ github.workspace }}`
+  in a `run` script is the host path; use `$PWD` after the step's working
+  directory is the workspace. Do not apt-get install git, and do not publish
+  a new image to add it.
 - **shellcheck/gitleaks on Alpine:** no DHI alpine tag; copy static Debian donors.
 - **OCI labels:** pass `image_title` / `image_description` into containerdevops
   publish or the package page shows the repository description. Hub Overview needs
