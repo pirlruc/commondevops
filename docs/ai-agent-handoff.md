@@ -148,7 +148,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. Wire token-audit callers in containerdevops, cppdevops, and pydevops to the PATs those repos already have. Do not add `SCORECARD_TOKEN`. Confirm PAT expiries before the first scheduled run.
+1. Wire token-audit callers in containerdevops, cppdevops, and pydevops to the PATs those repos already have (`GUARDRAILS_READ_TOKEN`, `CONTAINERDEVOPS_READ_TOKEN` via `containerdevops_token`, `COMMONDEVOPS_READ_TOKEN` as `checkout_token`). Do not add `SCORECARD_TOKEN`. Confirm PAT expiries before the first scheduled run.
 2. CMN-PRIV-001 is still open (private GHCR job credentials).
 
 ## Recent history

@@ -11,6 +11,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 - Image callers pin containerdevops **6.3.0**.
 - Record the published `ci-iac` 5.4.0 digest in the Hub and Packages docs.
+- `common-token-audit` accepts `containerdevops_token` so a caller can audit
+  `CONTAINERDEVOPS_READ_TOKEN` without a Scorecard PAT.
 
 ## [5.4.0] - 2026-10-23
 
