@@ -83,7 +83,8 @@ jobs:
       image: ghcr.io/pirlruc/ci-supply-chain@sha256:a062d78ef4f44114af77147e89786375ea213d5a3433919e610cc05590e400a1
       credentials:
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        # A caller's GITHUB_TOKEN cannot pull another repo's private package.
+        password: ${{ secrets.checkout_token || github.token }}
       # The published image has no git. Mount the runner git and the
       # libcurl-gnutls closure git-remote-https needs. Leave libc and libssl
       # on the image copies.

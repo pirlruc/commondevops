@@ -7,6 +7,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- Job containers for infra lint, secrets, and supply-chain authenticate
+  with `checkout_token` when a caller passes one. The caller's
+  `GITHUB_TOKEN` cannot pull this repo's private images.
 - `common-infra-lint` and `common-secrets-sast` pin the 5.4.4
   ci-lint linux/amd64 digest. `common-supply-chain` pins the 5.4.4
   Debian linux/amd64 digest, because the Alpine image has no bash.
