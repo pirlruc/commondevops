@@ -16,7 +16,7 @@
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
 # actionlint v1.7.12 rebuilt with Go 1.26.10. Stdlib fixes only (CMN-CVE-001).
-FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:6a223ab4d5afe13feec0d7b9c5929baa3c0eb3ab998be0bd2bfb7395946f47ca AS actionlint-build
+FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:2ceb813d69b9c82501323484e0c0ae612efde281f5dffce2a3d83a79a9c87304 AS actionlint-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/rhysd/actionlint.git \
@@ -26,7 +26,7 @@ RUN git init \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/actionlint ./cmd/actionlint
 
 # gitleaks v8.30.1 rebuilt with Go 1.26.10. Static binary, so it runs on musl.
-FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:6a223ab4d5afe13feec0d7b9c5929baa3c0eb3ab998be0bd2bfb7395946f47ca AS gitleaks-build
+FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:2ceb813d69b9c82501323484e0c0ae612efde281f5dffce2a3d83a79a9c87304 AS gitleaks-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/gitleaks/gitleaks.git \
