@@ -149,7 +149,7 @@ milestones:
             - .github/workflows/devops-security.yml
         acceptance_criteria:
           - Push/PR set blocking true; workflow_dispatch uses inputs.blocking
-          - Weekly cron Mon 06:17 UTC; concurrency groups present
+          - "Weekly cron Mon 06:17 UTC; concurrency groups present"
         guardrail_refs:
           - CI-002
           - CI-024
@@ -362,7 +362,7 @@ milestones:
                 - .github/workflows/ci-base-image.yml
                 - docs/issues.yml
             verification:
-              - docker build -t ci-base:ci -f docker/ci-base/Dockerfile docker/ci-base
+              - "docker build -t ci-base:ci -f docker/ci-base/Dockerfile docker/ci-base"
               - >
                 docker run --rm -v /var/run/docker.sock:/var/run/docker.sock
                 -v $PWD/.trivyignore.yaml:/tmp/.trivyignore.yaml:ro
@@ -521,7 +521,7 @@ milestones:
         acceptance_criteria:
           - common-release.yml has optional release_token secret and warns when falling back
           - workflows.md documents the PAT requirement for release-event workflows
-          - devops-security.yml rescans ghcr.io/pirlruc/ci-lint:latest and ci-supply-chain:latest
+          - "devops-security.yml rescans ghcr.io/pirlruc/ci-lint:latest and ci-supply-chain:latest"
           - actionlint passes on both workflows
         guardrail_refs:
           - CI-024
@@ -576,7 +576,7 @@ milestones:
             - docs/ai-agent-handoff.md
         acceptance_criteria:
           - actionlint installs via versioned tarball with SHA256 verification
-          - All containerdevops uses:/scripts_ref pairs pin 2.2.0 SHA
+          - "All containerdevops uses:/scripts_ref pairs pin 2.2.0 SHA"
           - CONTAINERDEVOPS_PIN env removed
           - continuous-improvement.md requires reading referenced files before claiming
         guardrail_refs:
@@ -637,7 +637,7 @@ milestones:
             - docs/docker-hub-ci-supply-chain.md
             - docs/github-packages-ci-supply-chain.md
         acceptance_criteria:
-          - Dockerfile.alpine builds on dhi.io/python:3.13-alpine3.24-dev with Alpine donors
+          - "Dockerfile.alpine builds on dhi.io/python:3.13-alpine3.24-dev with Alpine donors"
           - Publish emits -alpine and -debian tags; Alpine owns unsuffixed version/latest
           - Parallel jobs use unique artifact_name / results_artifact / sarif_category
           - Alpine size gate matches measured rootfs (~722 MB → 800 MB deviation)
@@ -758,12 +758,12 @@ milestones:
             - scripts/check-ci-local.sh
             - docs/guardrail-deviations.yml
         acceptance_criteria:
-          - Dockerfile.alpine builds on dhi.io/python:3.13-alpine3.24-dev
+          - "Dockerfile.alpine builds on dhi.io/python:3.13-alpine3.24-dev"
           - shellcheck/gitleaks copied from Debian DHI donors (static)
           - Alpine owns unsuffixed tags; Debian publishes -debian only
           - All toolchain images use CMD [sh] and /bin/sh login shell
           - Alpine size gate matches measured rootfs (~752 MB → 850 MB deviation)
-          - containerdevops uses:/scripts_ref pin 2.4.0 in lockstep
+          - "containerdevops uses:/scripts_ref pin 2.4.0 in lockstep"
         guardrail_refs:
           - DOCKER-BUILD-003
           - DOCKER-PERF-001
@@ -848,7 +848,7 @@ milestones:
             - scripts/check-ci-local.sh
         acceptance_criteria:
           - Container command runs under `sh` (no bash-only syntax) on the Alpine ci-lint image
-          - COMMONDEVOPS_CI_IMAGE=ghcr.io/pirlruc/ci-lint:latest check-ci-docker.sh succeeds
+          - "COMMONDEVOPS_CI_IMAGE=ghcr.io/pirlruc/ci-lint:latest check-ci-docker.sh succeeds"
           - Step definitions are not duplicated across the two scripts
           - shellcheck passes on both scripts; check-ci-local.sh completes on a clean host
         guardrail_refs:
@@ -1436,7 +1436,7 @@ milestones:
                 - docker/ci-lint/Dockerfile
                 - docker/ci-lint/Dockerfile.alpine
             verification:
-              - trivy image --severity HIGH,CRITICAL pirlruc/ci-lint:latest finds no stdlib findings in actionlint
+              - "trivy image --severity HIGH,CRITICAL pirlruc/ci-lint:latest finds no stdlib findings in actionlint"
             guardrail_refs:
               - DOCKER-SEC-001
           - id: CMN-CVE-001-T3
@@ -1458,80 +1458,86 @@ milestones:
                 - docker/ci-supply-chain/Dockerfile
                 - docker/ci-supply-chain/Dockerfile.alpine
             verification:
-              - trivy image --severity HIGH,CRITICAL pirlruc/ci-supply-chain:latest finds no fixed-module findings in grant
+              - "trivy image --severity HIGH,CRITICAL pirlruc/ci-supply-chain:latest finds no fixed-module findings in grant"
             guardrail_refs:
               - DOCKER-SEC-001
 
       - id: CMN-TOFU-001
-        status: open
+        status: done
         title: Add a reusable OpenTofu verify workflow
         overview:
           problem: >-
             common-infra-lint covers workflows, shell, and Dockerfiles. An
-            OpenTofu repo has no reusable fmt, validate, or tflint job, and
-            ci-lint does not contain tofu or tflint.
+            OpenTofu repo has no reusable fmt, validate, or tflint job.
+            ci-lint stays scoped to workflow lint and secrets/SAST.
           goal: >-
             common-tofu-verify runs tofu fmt -check, tofu validate, and tflint
-            from the ci-lint image. The caller passes scripts_ref equal to the
-            uses pin.
+            from the ci-iac image. The caller passes scripts_ref equal to the
+            uses pin and passes the image digest.
         decision: >-
           In the context of OpenTofu repos calling commondevops, facing no tofu
-          or tflint job, we decided common-tofu-verify plus those tools in
-          ci-lint, to achieve one reusable gate, accepting an image rebuild.
+          or tflint job, we decided common-tofu-verify plus a separate ci-iac
+          image, to achieve one reusable gate, accepting that ci-lint does not
+          grow those tools.
         out_of_scope:
           - terraform plan against a live hypervisor
           - checkov, until a guardrail pack names it
+          - installing tofu or tflint into ci-lint
         architecture:
           target: .github/workflows/common-tofu-verify.yml
           modules:
             - .github/workflows/common-tofu-verify.yml
-            - docker/ci-lint/Dockerfile
+            - docker/ci-iac/Dockerfile
         acceptance_criteria:
           - common-tofu-verify.yml is workflow_call
-          - ci-lint contains tofu and tflint
+          - "ci-iac contains tofu and tflint"
           - docs/workflows.md lists the workflow
+          - "ci-lint Dockerfiles do not install tofu or tflint"
         guardrail_refs:
           - CI-018
           - CI-034
           - CI-035
         tasks:
           - id: CMN-TOFU-001-T1
-            status: open
-            title: Add tofu and tflint to ci-lint and ship common-tofu-verify
+            status: done
+            title: Ship ci-iac and common-tofu-verify
             instructions:
               files:
                 - .github/workflows/common-tofu-verify.yml
-                - docker/ci-lint/Dockerfile
+                - docker/ci-iac/Dockerfile
                 - docs/workflows.md
             verification:
               - test -f .github/workflows/common-tofu-verify.yml
+              - test -f docker/ci-iac/Dockerfile
+              - "rg -n 'common-tofu-verify' docs/workflows.md"
             guardrail_refs:
               - CI-034
 
       - id: CMN-SOPS-001
-        status: open
+        status: done
         title: Add a reusable SOPS encryption check
         overview:
           problem: >-
             A repository can commit a SOPS file that was never encrypted. No
-            workflow checks that, and ci-lint does not contain sops or age.
-            CI must not receive an Age private key.
+            workflow checks that. CI must not receive an Age private key, and
+            ci-lint does not contain sops or age.
           goal: >-
             common-sops-verify fails when a *.sops.* file is not encrypted.
-            The job has no private key.
+            The job uses ci-iac and has no private key.
         decision: >-
           In the context of SOPS repos, facing CI that cannot prove a file is
-          encrypted, we decided common-sops-verify plus sops and age in ci-lint,
+          encrypted, we decided common-sops-verify plus sops and age in ci-iac,
           to achieve a token-free encryption check, accepting that CI never
           receives an Age private key.
         out_of_scope:
           - Decrypting secrets in CI
           - Holding an Age private key as an Actions secret
+          - installing sops or age into ci-lint
         architecture:
           target: .github/workflows/common-sops-verify.yml
           modules:
             - .github/workflows/common-sops-verify.yml
-            - docker/ci-lint/Dockerfile
+            - docker/ci-iac/Dockerfile
         acceptance_criteria:
           - The workflow fails on a plaintext sops file
           - The workflow requests no Age key
@@ -1541,20 +1547,21 @@ milestones:
           - ANSIBLE-SEC-001
         tasks:
           - id: CMN-SOPS-001-T1
-            status: open
-            title: Add sops and age to ci-lint and ship common-sops-verify
+            status: done
+            title: Ship sops and age on ci-iac and common-sops-verify
             instructions:
               files:
                 - .github/workflows/common-sops-verify.yml
-                - docker/ci-lint/Dockerfile
+                - docker/ci-iac/Dockerfile
                 - docs/workflows.md
             verification:
               - test -f .github/workflows/common-sops-verify.yml
+              - "rg -n 'common-sops-verify' docs/workflows.md"
             guardrail_refs:
               - CI-035
 
       - id: CMN-DOC-003
-        status: open
+        status: done
         title: List ansible-verify and token-audit in the workflow table
         overview:
           problem: >-
@@ -1579,7 +1586,7 @@ milestones:
           - README names common-ansible-verify and common-token-audit
         tasks:
           - id: CMN-DOC-003-T1
-            status: open
+            status: done
             title: Add the two missing workflow rows
             instructions:
               files:

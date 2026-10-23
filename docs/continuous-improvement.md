@@ -133,9 +133,9 @@ Provenance after human merge+sync uses these prefixes and the PR description; do
 
 | Area | Intent |
 |------|--------|
-| `.github/workflows/` | Reusable `common-*` workflows + self CI + ci-lint / ci-supply-chain callers |
+| `.github/workflows/` | Reusable `common-*` workflows + self CI + ci-lint / ci-supply-chain / ci-iac callers |
+| `docker/ci-lint/` / `docker/ci-supply-chain/` / `docker/ci-iac/` | CI images. ci-iac is OpenTofu, tflint, sops, age, and ansible-lint, and is not part of ci-lint. Which variant owns unsuffixed tags is in the image workflow and registry docs; derive it from the checkout |
 | `scripts/` | Install, local/docker parity, license gate, DHI pin refresh |
-| `docker/ci-lint/` / `docker/ci-supply-chain/` | Debian and Alpine CI images. Which variant owns unsuffixed tags is in the image workflow and registry docs; derive it from the checkout |
 | `docs/` | Handoff, workflows reference, Docker Hub and GitHub Packages pages, this prompt, `issues.yml`, deviations |
 | `docker/*/.trivyignore.yaml` | Per-image path-scoped donor CVE ignores |
 | `.github/dependabot.yml` | Multi-ecosystem dependency updates |

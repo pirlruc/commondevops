@@ -1,0 +1,182 @@
+---
+# Publishes ghcr.io/pirlruc/ci-iac (+ Docker Hub when secrets are set).
+# Debian only. OpenTofu, tflint, sops, age, and ansible-lint are not on ci-lint.
+# containerdevops pin: 2ad052e (handoff_package + digest).
+name: CI IaC Image
+
+on:
+  release:
+    types: [published]
+  schedule:
+    - cron: "17 5 15 * *"
+  pull_request:
+    branches: [main]
+    paths:
+      - "docker/ci-iac/**"
+      - ".github/workflows/ci-iac-image.yml"
+  workflow_dispatch:
+    inputs:
+      blocking:
+        description: Fail the job on gate errors
+        type: boolean
+        default: false
+      publish:
+        description: Publish to GHCR/Hub (break-glass; also runs on release / schedule)
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    if: >-
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    permissions:
+      contents: read
+      security-events: write
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@2ad052e69d2587cdaf8ccac59b9dae5c60f5560b
+    with:
+      dockerfile: docker/ci-iac/Dockerfile
+      working_directory: .
+      scripts_ref: 2ad052e69d2587cdaf8ccac59b9dae5c60f5560b
+      runner_image: ""
+      run_infra_lint: false
+      run_secrets_scan: true
+      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
+    secrets:
+      checkout_token: ${{ github.token }}
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  build:
+    needs: lint
+    if: >-
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    permissions:
+      contents: read
+      packages: write
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@2ad052e69d2587cdaf8ccac59b9dae5c60f5560b
+    with:
+      context: docker/ci-iac
+      dockerfile: docker/ci-iac/Dockerfile
+      image_name: ci-iac:ci
+      artifact_name: container-image-ci-iac
+      handoff_package: ci-iac
+      structure_test_config: docker/ci-iac/container-structure-test.yml
+      scripts_ref: 2ad052e69d2587cdaf8ccac59b9dae5c60f5560b
+      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
+      size_class: ci_toolchain
+      image_title: ci-iac
+      image_description: >-
+        Short-lived CI image for OpenTofu, tflint, sops, age, and ansible-lint.
+        Debian 13. Non-root 1000:1000, linux/amd64.
+      dhi_login: true
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  scan:
+    needs: build
+    if: >-
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    permissions:
+      contents: read
+      security-events: write
+      packages: read
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@2ad052e69d2587cdaf8ccac59b9dae5c60f5560b
+    with:
+      image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build.outputs.handoff_package, needs.build.outputs.digest) }}
+      results_artifact: container-scan-results-ci-iac
+      sarif_category: trivy-ci-iac
+      scripts_ref: 2ad052e69d2587cdaf8ccac59b9dae5c60f5560b
+      pkg_types: library
+      ignorefile: docker/ci-iac/.trivyignore.yaml
+      blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
+    secrets:
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  scan-posture:
+    needs: build
+    if: >-
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    permissions:
+      contents: read
+      security-events: write
+      packages: read
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@2ad052e69d2587cdaf8ccac59b9dae5c60f5560b
+    with:
+      image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build.outputs.handoff_package, needs.build.outputs.digest) }}
+      results_artifact: container-scan-posture-ci-iac
+      sarif_category: trivy-posture-ci-iac
+      scripts_ref: 2ad052e69d2587cdaf8ccac59b9dae5c60f5560b
+      pkg_types: os,library
+      ignorefile: none
+      blocking: false
+    secrets:
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  publish:
+    needs: [build, scan]
+    if: >-
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      (github.event_name == 'release' ||
+       github.event_name == 'schedule' ||
+       (github.event_name == 'workflow_dispatch' && inputs.publish))
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@2ad052e69d2587cdaf8ccac59b9dae5c60f5560b
+    with:
+      context: docker/ci-iac
+      dockerfile: docker/ci-iac/Dockerfile
+      image_name: ci-iac
+      dockerhub_image: pirlruc/ci-iac
+      scripts_ref: 2ad052e69d2587cdaf8ccac59b9dae5c60f5560b
+      platforms: linux/amd64
+      tag_suffix: ""
+      tag_alias_unsuffixed: false
+      image_title: ci-iac
+      image_description: >-
+        Short-lived CI image for OpenTofu, tflint, sops, age, and ansible-lint.
+        Debian 13. Non-root 1000:1000, linux/amd64.
+      image_documentation: https://hub.docker.com/r/pirlruc/ci-iac
+      image_url: https://hub.docker.com/r/pirlruc/ci-iac
+      image_vendor: pirlruc
+      dockerhub_readme: docs/docker-hub-ci-iac.md
+      dockerhub_short_description: >-
+        CI image for OpenTofu, tflint, sops, age, and ansible-lint
+      sign: ${{ github.event.repository.visibility == 'public' }}
+      blocking: true
+      dhi_login: true
+      tag_latest: ${{ github.event_name != 'release' || github.event.release.prerelease == false }}
+      verify_command: /bin/true
+      source_image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build.outputs.handoff_package, needs.build.outputs.digest) }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  cleanup:
+    needs: [build, scan]
+    if: always() && github.event_name == 'pull_request' && needs.build.outputs.handoff_tag != ''
+    permissions:
+      packages: write
+    uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@2ad052e69d2587cdaf8ccac59b9dae5c60f5560b
+    with:
+      package: ${{ needs.build.outputs.handoff_package }}
+      tag: ${{ needs.build.outputs.handoff_tag }}

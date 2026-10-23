@@ -23,16 +23,21 @@ permissions: {}
 jobs:
   pins:
     # Token-free (CI-024): Dependabot PRs still get a submodule pin signal.
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
     permissions:
       contents: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - name: SC-DEP-004 submodule pin assert
-        run: sh scripts/check-submodule-pins.sh
+    uses: ./.github/workflows/common-pins-verify.yml
+    with:
+      scripts_ref: ${{ github.sha }}
+
+  threshold-drift:
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/common-threshold-drift.yml
+    with:
+      scripts_ref: ${{ github.sha }}
+    secrets:
+      checkout_token: ${{ secrets.GUARDRAILS_READ_TOKEN }}
 
   scaffold:
     permissions:
@@ -67,7 +72,7 @@ jobs:
       blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
       working_directory: .
       shell_scripts: scripts/*.sh
-      dockerfiles: docker/ci-lint/Dockerfile docker/ci-lint/Dockerfile.alpine docker/ci-supply-chain/Dockerfile docker/ci-supply-chain/Dockerfile.alpine
+      dockerfiles: docker/ci-lint/Dockerfile docker/ci-lint/Dockerfile.alpine docker/ci-supply-chain/Dockerfile docker/ci-supply-chain/Dockerfile.alpine docker/ci-iac/Dockerfile
       scripts_ref: ${{ github.sha }}
 
   secrets-sast:

@@ -6,15 +6,15 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
-| **Branch** | `main` → tag **5.3.2** (guardrails pin; images stay **5.3.0**) |
-| **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, release + `ci-lint` / `ci-supply-chain` images |
+| **Branch** | `main` → release **5.4.0** (images include `ci-iac`) |
+| **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
 ## Scope
 
 Owns `.github/workflows/common-*.yml`, `devops-ci.yml`, `devops-security.yml`,
-`ci-lint-image.yml`, `ci-supply-chain-image.yml`, `scripts/`, `docker/ci-lint/`,
-`docker/ci-supply-chain/`. Consumers pin `pirlruc/commondevops@<sha|tag>` and pass
+`ci-lint-image.yml`, `ci-supply-chain-image.yml`, `ci-iac-image.yml`, `scripts/`,
+`docker/ci-lint/`, `docker/ci-supply-chain/`, `docker/ci-iac/`. Consumers pin `pirlruc/commondevops@<sha|tag>` and pass
 matching `scripts_ref` + `checkout_token`. `common-doc-verify.yml` /
 `common-scaffold-verify.yml` ship in 4.1.0; older pins do not have them.
 
@@ -42,23 +42,25 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | CMN-DOC-001 — Caller-contract docs | Done (`4.1.0`); T1 was already 2.4.4 |
 | CMN-PIN-001 — guardrails 1.6.0 pin | Done (this wave) |
 | CMN-WF-004 — single POSIX runner via scripts_ref | Done (this wave) |
-| CMN-RESCAN-001 — rescan caller recipe | Done (this wave) |
+| CMN-TOFU-001 — ci-iac + common-tofu-verify | Done on `feature-image-docs` (release 5.4.0) |
+| CMN-SOPS-001 — common-sops-verify, no Age key | Done on `feature-image-docs` (release 5.4.0) |
+| CMN-DOC-003 — README rows | Done on `feature-image-docs` |
 
 ## Pins
 
 | Component | Ref |
 |-----------|-----|
-| guardrails submodule | tag **1.10.0** → `e2db476f…` |
-| github-scaffold submodule | tag **1.8.0** → `ac9059fd…` |
-| methodologies (links only; not a submodule) | tag **1.8.0** |
+| guardrails submodule | tag **1.12.0** → `f4baf6198006c6b898eee9cec451b66b87129bd3` |
+| github-scaffold submodule | tag **1.10.0** → `1d9901f7e7e5785abb7cac6f5d46e0e8e2023ff8` |
+| methodologies (links only; not a submodule) | tag **1.9.1** |
 | containerdevops (image callers + security rescan) | `2ad052e69d2587cdaf8ccac59b9dae5c60f5560b` (feature-ops-hardening; not tagged) |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 | `ghcr.io/pirlruc/ci-lint` (debian, unsuffixed) | `5.3.3` `sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b` (`latest` == debian) |
 | `ghcr.io/pirlruc/ci-lint` (alpine) | `5.3.3-alpine` `sha256:bdd9c2ea12ad700da6ebd8426845d883510156a188b741f32ffd9ceb3f43f830` |
 | `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.3.3` `sha256:eaa177b7c527ebe54449bb77b39dfd3eb9e7f403c799044a1b6647677a0aba74` |
 | `ghcr.io/pirlruc/ci-supply-chain` (debian) | `5.3.3-debian` `sha256:c4319ff77a65c1223f214ca27c545a1bc81da023ea0ee33a697fc817c54c2099` |
-| Release (reusables) | **5.3.3** |
-| Release (images) | **5.3.3** |
+| Release (reusables) | **5.4.0** (this branch; tag after merge) |
+| Release (images) | **5.4.0** publishes `ci-iac`. `ci-lint` and `ci-supply-chain` republish on that release |
 
 ## Local image sizes / posture (2026-08-12, `du -sxm /`)
 
@@ -145,14 +147,14 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. Homelab gap epics are filed and not implemented: CMN-TOFU-001 (tofu/tflint workflow and ci-lint tools), CMN-SOPS-001 (encryption check, no Age key in CI), CMN-DOC-003 (README rows for common-ansible-verify and common-token-audit).
-2. CMN-CVE-001 is done. actionlint and grant were rebuilt on Go 1.26.8 in
-   5.3.0. Module CVEs stay ignored until upstream ships.
-3. Confirm the next monthly Dependabot `all-dependencies` PR (Insights).
-   The 2026-10-02 group was closed because it jumped Go 1.26 to 1.27.
+1. After 5.4.0 publishes, record the `ci-iac` digest in the Hub and Packages docs.
+2. commondevops 5.4.1 pins containerdevops 6.3.0 and rewires token-audit callers.
+3. Confirm PAT expiry dates before the first scheduled token audit.
+4. CMN-PRIV-001 is still open (private GHCR job credentials).
 
 ## Recent history
 
+- 2026-10-23: `ci-iac` (OpenTofu, tflint, sops, age, ansible-lint), `common-tofu-verify`, `common-sops-verify`, `common-pins-verify`, `common-threshold-drift`. Vendored `license_deny_list` matches guardrails 1.12.0. Release target **5.4.0**.
 - 2026-10-02: Rebuild actionlint and grant on DHI Go 1.26.8; hashed ci-lint
   lock; retire SC-PROV-001; `common-token-audit.yml`. Images not republished
   until the next GitHub Release.
@@ -230,4 +232,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-22 (5.3.3 digests, token-audit scripts_ref, guardrails 1.12.0, private GHCR issue)*
+*Last updated: 2026-10-23 (ci-iac, tofu/sops/pins/threshold workflows, guardrails 1.12.0 deny list)*

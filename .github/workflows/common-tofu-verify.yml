@@ -1,0 +1,125 @@
+name: Common OpenTofu Verify (reusable)
+
+# tofu fmt, tofu validate, and tflint from the ci-iac image.
+# ci-lint does not carry these tools. The job does not plan or apply.
+# Callers pin the workflow SHA (CI-034) and pass the same value as scripts_ref.
+# Pass image as a digest (CI-018).
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: ghcr.io/pirlruc/ci-iac digest reference
+        required: true
+        type: string
+      blocking:
+        description: When false, failures are advisory only
+        required: false
+        type: boolean
+        default: true
+      working_directory:
+        description: Repo subdirectory to check
+        required: false
+        type: string
+        default: .
+      scripts_ref:
+        description: Must equal the caller's uses pin (CI-034)
+        required: false
+        type: string
+        default: ""
+    secrets:
+      checkout_token:
+        required: false
+  workflow_dispatch:
+    inputs:
+      image:
+        description: ghcr.io/pirlruc/ci-iac digest reference
+        required: true
+        type: string
+      blocking:
+        type: boolean
+        default: true
+      working_directory:
+        type: string
+        default: .
+      scripts_ref:
+        type: string
+        default: ""
+
+permissions: {}
+
+concurrency:
+  group: >-
+    ${{ github.event_name == 'workflow_dispatch'
+        && format('dispatch-{0}-{1}', github.workflow, github.ref)
+        || format('call-tofu-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
+
+jobs:
+  verify:
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Checkout commondevops scripts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pirlruc/commondevops
+          ref: ${{ inputs.scripts_ref || github.sha }}
+          token: ${{ secrets.checkout_token || github.token }}
+          persist-credentials: false
+          path: _commondevops
+          sparse-checkout: |
+            scripts
+          sparse-checkout-cone-mode: false
+
+      - name: Require scripts_ref for cross-repo callers (CI-034)
+        env:
+          SCRIPTS_REF: ${{ inputs.scripts_ref }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -eu
+          if [ "${REPO}" != "pirlruc/commondevops" ] && [ -z "${SCRIPTS_REF}" ]; then
+            echo "CI-034: cross-repo callers must pass scripts_ref matching the uses: pin" >&2
+            exit 1
+          fi
+
+      - name: Log in to GHCR
+        env:
+          GHCR_TOKEN: ${{ github.token }}
+          GHCR_USER: ${{ github.actor }}
+        run: printf '%s' "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
+
+      - name: OpenTofu
+        id: tofu
+        continue-on-error: true
+        env:
+          IMAGE: ${{ inputs.image }}
+          WORKDIR: ${{ inputs.working_directory }}
+        run: sh "${GITHUB_WORKSPACE}/_commondevops/scripts/run-in-ci-iac.sh" "${IMAGE}" sh /workspace/_commondevops/scripts/check-tofu.sh "/workspace/${WORKDIR}"
+
+      - name: Gate — OpenTofu
+        if: always()
+        env:
+          ADVISORY: ${{ inputs.blocking == false }}
+          OUTCOME: ${{ steps.tofu.outcome }}
+        run: |
+          set -eu
+          if [ "${OUTCOME}" = "success" ]; then
+            echo "OpenTofu gates passed."
+            exit 0
+          fi
+          echo "OpenTofu gate outcome: ${OUTCOME}"
+          if [ "${ADVISORY}" = "true" ]; then
+            echo "advisory — not failing the job (pass blocking=true to enforce findings)."
+            exit 0
+          fi
+          echo "::error::OpenTofu gates failed (${OUTCOME})"
+          exit 1

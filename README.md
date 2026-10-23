@@ -1,14 +1,14 @@
 # commondevops
 
 Reusable GitHub Actions, scripts, and shared CI toolchain images (`ci-lint`,
-`ci-supply-chain`) for org-wide infra lint, secrets/SAST, supply-chain,
-Scorecard, and release gates.
+`ci-supply-chain`, `ci-iac`) for org-wide infra lint, secrets/SAST,
+supply-chain, Scorecard, OpenTofu, SOPS, and release gates.
 
 | | |
 |---|---|
 | **Remote** | https://github.com/pirlruc/commondevops |
 | **Role** | Cross-language CI infrastructure (pairs with [containerdevops](https://github.com/pirlruc/containerdevops) and [pydevops](https://github.com/pirlruc/pydevops)) |
-| **Guardrails** | Pinned at `docs/guardrails/` ([pirlruc/guardrails](https://github.com/pirlruc/guardrails) tag `1.8.0`) |
+| **Guardrails** | Pinned at `docs/guardrails/` ([pirlruc/guardrails](https://github.com/pirlruc/guardrails) tag `1.12.0`) |
 | **Changelog** | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Reusable workflows
@@ -27,6 +27,12 @@ Pin every `uses:` to a **commit SHA** (not `@main`). Pass the same SHA as
 | [`common-scorecard.yml`](.github/workflows/common-scorecard.yml) | OpenSSF Scorecard |
 | [`common-release.yml`](.github/workflows/common-release.yml) | Tag validation + GitHub Release |
 | [`artifact-sweep.yml`](.github/workflows/artifact-sweep.yml) | Scheduled delete of leftover `container-image*` artifacts |
+| [`common-ansible-verify.yml`](.github/workflows/common-ansible-verify.yml) | yamllint, ansible-lint, the caller guardrail script, and Molecule |
+| [`common-token-audit.yml`](.github/workflows/common-token-audit.yml) | Expiry check for the PATs the caller passes |
+| [`common-tofu-verify.yml`](.github/workflows/common-tofu-verify.yml) | `tofu fmt`, `tofu validate`, and tflint from `ci-iac` |
+| [`common-sops-verify.yml`](.github/workflows/common-sops-verify.yml) | SOPS ciphertext check from `ci-iac`. No Age private key |
+| [`common-pins-verify.yml`](.github/workflows/common-pins-verify.yml) | Caller submodule gitlink assert |
+| [`common-threshold-drift.yml`](.github/workflows/common-threshold-drift.yml) | Vendored threshold keys against the guardrails pin |
 
 See [docs/workflows.md](docs/workflows.md) for inputs, secrets, the caller-permission
 matrix, and examples.
@@ -61,21 +67,24 @@ sh scripts/check-ci-local.sh
 
 | Image | Contents | Docs |
 |-------|----------|------|
-| `ghcr.io/pirlruc/ci-lint` | actionlint, hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep — Alpine (default) and Debian (`-debian`) variants | [Hub](docs/docker-hub-ci-lint.md) · [GHCR](docs/github-packages-ci-lint.md) |
-| `ghcr.io/pirlruc/ci-supply-chain` | syft, grype, trivy, grant — Alpine (default) and Debian (`-debian`) variants | [Hub](docs/docker-hub-ci-supply-chain.md) · [GHCR](docs/github-packages-ci-supply-chain.md) |
+| `ghcr.io/pirlruc/ci-lint` | actionlint, hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep. Debian owns the unsuffixed tag. Alpine is `-alpine` and does not include semgrep | [Hub](docs/docker-hub-ci-lint.md) · [GHCR](docs/github-packages-ci-lint.md) |
+| `ghcr.io/pirlruc/ci-supply-chain` | syft, grype, trivy, grant. Alpine owns the unsuffixed tag. Debian is `-debian` | [Hub](docs/docker-hub-ci-supply-chain.md) · [GHCR](docs/github-packages-ci-supply-chain.md) |
+| `ghcr.io/pirlruc/ci-iac` | OpenTofu, tflint, sops, age, ansible-lint. Debian only. Published with release 5.4.0 | [Hub](docs/docker-hub-ci-iac.md) · [GHCR](docs/github-packages-ci-iac.md) |
 
-Built via [`ci-lint-image.yml`](.github/workflows/ci-lint-image.yml) and
-[`ci-supply-chain-image.yml`](.github/workflows/ci-supply-chain-image.yml)
+Built via [`ci-lint-image.yml`](.github/workflows/ci-lint-image.yml),
+[`ci-supply-chain-image.yml`](.github/workflows/ci-supply-chain-image.yml), and
+[`ci-iac-image.yml`](.github/workflows/ci-iac-image.yml)
 using [containerdevops](https://github.com/pirlruc/containerdevops).
-Both images publish Debian (`-debian`) and Alpine (`-alpine`) variants;
-Alpine owns the unsuffixed tags.
+Both `ci-lint` and `ci-supply-chain` publish Debian and Alpine variants.
+From 5.3.0, Debian owns the unsuffixed `ci-lint` tags. Alpine owns the
+unsuffixed `ci-supply-chain` tags. `ci-iac` is Debian only.
 
 ## Submodules
 
 | Path | Remote | Pin |
 |------|--------|-----|
-| `docs/guardrails` | https://github.com/pirlruc/guardrails.git | tag `1.8.0` → commit `aa5184ce…` |
-| `.github/scaffold` | https://github.com/pirlruc/github-scaffold.git | tag `1.7.0` → commit `e76bb3fd…` |
+| `docs/guardrails` | https://github.com/pirlruc/guardrails.git | tag `1.12.0` |
+| `.github/scaffold` | https://github.com/pirlruc/github-scaffold.git | tag `1.10.0` |
 
 ```bash
 git submodule update --init --recursive
