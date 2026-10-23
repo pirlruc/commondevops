@@ -151,12 +151,23 @@ install_if_missing grant bash -c "
   rm -f /tmp/grant.tgz
 "
 
-install_if_missing shfmt bash -c "
-  curl -sSfL -o '${DEST}/shfmt' \
-    'https://github.com/mvdan/sh/releases/download/v${SHFMT_VERSION}/shfmt_v${SHFMT_VERSION}_linux_amd64'
-  verify_sha256 '${DEST}/shfmt' '${SHFMT_SHA256}'
-  chmod +x '${DEST}/shfmt'
-"
+install_shfmt() {
+	local url="https://github.com/mvdan/sh/releases/download/v${SHFMT_VERSION}/shfmt_v${SHFMT_VERSION}_linux_amd64"
+	if command -v curl >/dev/null 2>&1; then
+		curl -sSfL -o "${DEST}/shfmt" "${url}"
+	else
+		# ci-lint has Python and no curl. The job container is where shfmt is installed.
+		python3 -c 'import urllib.request, sys; urllib.request.urlretrieve(sys.argv[1], sys.argv[2])' \
+			"${url}" "${DEST}/shfmt"
+	fi
+	verify_sha256 "${DEST}/shfmt" "${SHFMT_SHA256}"
+	chmod +x "${DEST}/shfmt"
+}
+
+if should_install shfmt && ! command -v shfmt >/dev/null 2>&1; then
+	echo "Installing shfmt…"
+	install_shfmt
+fi
 
 install_if_missing lychee bash -c "
   curl -sSfL -o /tmp/lychee.tgz \
