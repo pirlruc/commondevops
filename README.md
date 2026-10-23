@@ -8,14 +8,16 @@ supply-chain, Scorecard, OpenTofu, SOPS, and release gates.
 |---|---|
 | **Remote** | https://github.com/pirlruc/commondevops |
 | **Role** | Cross-language CI infrastructure (pairs with [containerdevops](https://github.com/pirlruc/containerdevops) and [pydevops](https://github.com/pirlruc/pydevops)) |
-| **Guardrails** | Pinned at `docs/guardrails/` ([pirlruc/guardrails](https://github.com/pirlruc/guardrails) tag `1.12.0`) |
+| **Guardrails** | Pinned at `docs/guardrails/` ([pirlruc/guardrails](https://github.com/pirlruc/guardrails) tag `1.13.1`) |
 | **Changelog** | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Reusable workflows
 
 Pin every `uses:` to a **commit SHA** (not `@main`). Pass the same SHA as
 `scripts_ref`, and pass `checkout_token` when the caller is a different
-**private** repository.
+**private** repository. Callers of `common-infra-lint`, `common-secrets-sast`,
+and `common-supply-chain` also grant `packages: read`. Those jobs pull a
+private `ghcr.io/pirlruc` image with `container.credentials`.
 
 | Workflow | Purpose |
 |----------|---------|
@@ -83,7 +85,7 @@ unsuffixed `ci-supply-chain` tags. `ci-iac` is Debian only.
 
 | Path | Remote | Pin |
 |------|--------|-----|
-| `docs/guardrails` | https://github.com/pirlruc/guardrails.git | tag `1.12.0` |
+| `docs/guardrails` | https://github.com/pirlruc/guardrails.git | tag `1.13.1` |
 | `.github/scaffold` | https://github.com/pirlruc/github-scaffold.git | tag `1.10.0` |
 
 ```bash

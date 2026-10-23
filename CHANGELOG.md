@@ -5,6 +5,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.4.3] - 2026-10-23
+
+### Changed
+
+- Pin guardrails **1.13.1** (`1945211a`). 1.13.0 adds the Kotlin ABI check.
+  There is no Kotlin consumer here. 1.13.1 only moves common-doc-verify to
+  the 5.4.1 SHA this repo already tags.
+- `common-infra-lint`, `common-secrets-sast`, and `common-supply-chain` pull
+  private `ghcr.io/pirlruc` job containers with `packages: read` and
+  `container.credentials` (CMN-PRIV-001). A caller of those workflows grants
+  `packages: read`. The published images have no git, so the job mounts the
+  runner's git and the libcurl-gnutls libraries `git-remote-https` needs.
+  The script checkout is a full tree; sparse checkout fails in that container.
+  OpenTofu and SOPS stay on the runner
+  and log in with `docker`, because those jobs need the Docker daemon.
+- Hub Overviews update on a push to `main` when `docs/docker-hub*.md`
+  changes. That path does not publish an image.
+
 ## [5.4.2] - 2026-10-23
 
 ### Changed

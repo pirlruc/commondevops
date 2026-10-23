@@ -1,9 +1,15 @@
 # Push Docker Hub Overviews without rebuilding images.
-# Dispatched by hand. Does not run on pull request or push.
+# Push to main when a Hub page changes. workflow_dispatch remains.
+# A release event republishes images, so this workflow does not listen for it.
 
 name: Hub description
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/docker-hub*.md"
+      - ".github/workflows/hub-description.yml"
   workflow_dispatch:
 
 permissions:
