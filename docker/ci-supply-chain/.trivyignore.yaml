@@ -1,8 +1,23 @@
 # Vendor-static toolchain binaries in ci-supply-chain.
-# grant v0.6.8 rebuilt on Go 1.26.8 cleared stdlib CVEs. Module CVEs stay until
-# upstream ships a release (CMN-CVE-001). grype 0.119.0 still embeds an unfixed
-# moby client. Every entry expires 2026-11-01.
+# syft, grype, trivy, and grant are rebuilt on Go 1.26.10. Unfixed module
+# findings stay until upstream ships a release (SC-TRIAGE-001). grype still
+# embeds an unfixed moby client. The trivy entries are the scanner reading a
+# dirty pseudo-version of source that is tag v0.71.2.
 vulnerabilities:
+  - id: CVE-2026-54448
+    paths:
+      - "**/trivy"
+    expired_at: 2026-11-22
+    statement: >-
+      Binary is built from trivy v0.71.2 (055a5c8a). go.mod patches make the
+      module version dirty, so the scanner treats it as older than 0.71.0.
+  - id: CVE-2026-55092
+    paths:
+      - "**/trivy"
+    expired_at: 2026-11-22
+    statement: >-
+      Binary is built from trivy v0.71.2 (055a5c8a), which is newer than the
+      0.71.1 fix. The dirty module version is what the scanner matches.
   - id: CVE-2026-41567
     paths:
       - "**/grype"
