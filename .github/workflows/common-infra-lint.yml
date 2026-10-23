@@ -86,7 +86,7 @@ jobs:
     # Private package. Debian owns unsuffixed ci-lint 5.3.3 (semgrep has no musl wheel).
     # Callers grant packages: read (CI-028). --user root so the runner can write.
     container:
-      image: ghcr.io/pirlruc/ci-lint@sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b
+      image: ghcr.io/pirlruc/ci-lint@sha256:63320d087a1c6752cf8a22f0633aa73b2dcc5d6041db629d34635d5ecc0d7c91
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
