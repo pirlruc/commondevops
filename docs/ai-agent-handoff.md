@@ -148,11 +148,12 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. Wire token-audit callers in containerdevops, cppdevops, and pydevops to the PATs those repos already have (`GUARDRAILS_READ_TOKEN`, `CONTAINERDEVOPS_READ_TOKEN` via `containerdevops_token`, `COMMONDEVOPS_READ_TOKEN` as `checkout_token`). Do not add `SCORECARD_TOKEN`. Confirm PAT expiries before the first scheduled run.
-2. CMN-PRIV-001 is still open (private GHCR job credentials).
+1. CMN-PRIV-001 is still open (private GHCR job credentials).
+2. Hub Overviews are pushed by `workflow_dispatch` on `.github/workflows/hub-description.yml`. That calls [container-hub-description](https://github.com/pirlruc/containerdevops/blob/6.3.0/.github/workflows/container-hub-description.yml) and does not republish images. `DOCKERHUB_DESCRIPTION_TOKEN` stays out of image workflows until the Hub step.
 
 ## Recent history
 
+- 2026-10-23: Hub Overview dispatch for `ci-lint`, `ci-supply-chain`, and `ci-iac`. It does not republish images.
 - 2026-10-23: **5.4.2** — record the `ci-iac` digest from the 5.4.1 release publish (`sha256:3a25e6c3…`). Tag only, so the image workflow does not publish again.
 - 2026-10-23: **5.4.1** — image callers pin containerdevops **6.3.0**. The release publish moved `ci-iac` `latest`.
 - 2026-10-23: **5.4.0** — `ci-iac` (OpenTofu, tflint, sops, age, ansible-lint), `common-tofu-verify`, `common-sops-verify`, `common-pins-verify`, `common-threshold-drift`. Vendored `license_deny_list` matches guardrails 1.12.0.
@@ -233,4 +234,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-23 (5.4.2 records the ci-iac digest from the 5.4.1 publish)*
+*Last updated: 2026-10-23 (Hub Overview dispatch for ci-lint, ci-supply-chain, and ci-iac)*

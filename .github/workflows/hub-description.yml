@@ -1,0 +1,50 @@
+# Push Docker Hub Overviews without rebuilding images.
+# Dispatched by hand. Does not run on pull request or push.
+
+name: Hub description
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ci-lint:
+    permissions:
+      contents: read
+    uses: pirlruc/containerdevops/.github/workflows/container-hub-description.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    with:
+      dockerhub_image: pirlruc/ci-lint
+      dockerhub_readme: docs/docker-hub-ci-lint.md
+      dockerhub_short_description: >-
+        CI toolchain: actionlint, hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_DESCRIPTION_TOKEN: ${{ secrets.DOCKERHUB_DESCRIPTION_TOKEN }}
+
+  ci-supply-chain:
+    permissions:
+      contents: read
+    uses: pirlruc/containerdevops/.github/workflows/container-hub-description.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    with:
+      dockerhub_image: pirlruc/ci-supply-chain
+      dockerhub_readme: docs/docker-hub-ci-supply-chain.md
+      dockerhub_short_description: >-
+        CI toolchain: syft, grype, trivy, grant for SBOM and vulnerability/license gates
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_DESCRIPTION_TOKEN: ${{ secrets.DOCKERHUB_DESCRIPTION_TOKEN }}
+
+  ci-iac:
+    permissions:
+      contents: read
+    uses: pirlruc/containerdevops/.github/workflows/container-hub-description.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    with:
+      dockerhub_image: pirlruc/ci-iac
+      dockerhub_readme: docs/docker-hub-ci-iac.md
+      dockerhub_short_description: >-
+        CI image for OpenTofu, tflint, sops, age, and ansible-lint
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_DESCRIPTION_TOKEN: ${{ secrets.DOCKERHUB_DESCRIPTION_TOKEN }}
