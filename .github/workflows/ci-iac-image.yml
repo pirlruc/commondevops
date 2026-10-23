@@ -171,8 +171,12 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
+  # The first ci-run tag is the package's only version. GitHub returns 400
+  # ("cannot delete the last tagged version") and the shared cleanup then
+  # fails. Later pulls have a published version beside the PR tag.
   cleanup:
     needs: [build, scan]
+    continue-on-error: true
     if: always() && github.event_name == 'pull_request' && needs.build.outputs.handoff_tag != ''
     permissions:
       packages: write
