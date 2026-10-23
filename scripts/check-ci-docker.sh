@@ -23,56 +23,56 @@ BUILD_LOCAL="${COMMONDEVOPS_BUILD_LOCAL:-1}"
 ADVISORY="${COMMONDEVOPS_ADVISORY:-0}"
 
 if [ -z "${COMMONDEVOPS_DOCKER_STEPS:-}" ]; then
-  echo "COMMONDEVOPS_DOCKER_STEPS is required (e.g. actionlint shellcheck hadolint zizmor)" >&2
-  exit 1
+	echo "COMMONDEVOPS_DOCKER_STEPS is required (e.g. actionlint shellcheck hadolint zizmor)" >&2
+	exit 1
 fi
 
 if ! command -v docker >/dev/null 2>&1; then
-  echo "docker is required for host-unavailable CI checks" >&2
-  exit 1
+	echo "docker is required for host-unavailable CI checks" >&2
+	exit 1
 fi
 
 if ! docker info >/dev/null 2>&1; then
-  echo "Docker engine is not running" >&2
-  exit 1
+	echo "Docker engine is not running" >&2
+	exit 1
 fi
 
 ensure_image() {
-  img="$1"
-  if docker image inspect "${img}" >/dev/null 2>&1; then
-    return 0
-  fi
-  echo "==> Pulling ${img}"
-  if docker pull "${img}"; then
-    return 0
-  fi
-  case "${img}" in
-    *@*)
-      echo "error: cannot pull digest-pinned ${img}" >&2
-      echo "Set COMMONDEVOPS_CI_IMAGE to a local tag (e.g. ci-lint:alpine-local):" >&2
-      echo "  docker build -t ci-lint:alpine-local -f docker/ci-lint/Dockerfile.alpine docker/ci-lint" >&2
-      exit 1
-      ;;
-  esac
-  if [ "${BUILD_LOCAL}" = "1" ]; then
-    echo "==> Pull failed; building local docker/ci-lint as ${img}"
-    docker build -t "${img}" -f "${ROOT}/docker/ci-lint/Dockerfile.alpine" "${ROOT}/docker/ci-lint"
-    return 0
-  fi
-  echo "error: cannot pull ${img} and COMMONDEVOPS_BUILD_LOCAL!=1" >&2
-  exit 1
+	img="$1"
+	if docker image inspect "${img}" >/dev/null 2>&1; then
+		return 0
+	fi
+	echo "==> Pulling ${img}"
+	if docker pull "${img}"; then
+		return 0
+	fi
+	case "${img}" in
+	*@*)
+		echo "error: cannot pull digest-pinned ${img}" >&2
+		echo "Set COMMONDEVOPS_CI_IMAGE to a local tag (e.g. ci-lint:alpine-local):" >&2
+		echo "  docker build -t ci-lint:alpine-local -f docker/ci-lint/Dockerfile.alpine docker/ci-lint" >&2
+		exit 1
+		;;
+	esac
+	if [ "${BUILD_LOCAL}" = "1" ]; then
+		echo "==> Pull failed; building local docker/ci-lint as ${img}"
+		docker build -t "${img}" -f "${ROOT}/docker/ci-lint/Dockerfile.alpine" "${ROOT}/docker/ci-lint"
+		return 0
+	fi
+	echo "error: cannot pull ${img} and COMMONDEVOPS_BUILD_LOCAL!=1" >&2
+	exit 1
 }
 
 ensure_image "${IMAGE}"
 
 echo "==> Running in Docker (${IMAGE}): ${COMMONDEVOPS_DOCKER_STEPS}"
 docker run --rm \
-  -v "${ROOT}:/workspace:ro" \
-  -w /workspace \
-  -e "COMMONDEVOPS_DOCKER_STEPS=${COMMONDEVOPS_DOCKER_STEPS}" \
-  -e "COMMONDEVOPS_ADVISORY=${ADVISORY}" \
-  "${IMAGE}" \
-  sh -c '
+	-v "${ROOT}:/workspace:ro" \
+	-w /workspace \
+	-e "COMMONDEVOPS_DOCKER_STEPS=${COMMONDEVOPS_DOCKER_STEPS}" \
+	-e "COMMONDEVOPS_ADVISORY=${ADVISORY}" \
+	"${IMAGE}" \
+	sh -c '
     set -eu
     # shellcheck source=scripts/ci-steps.sh
     . ./scripts/ci-steps.sh

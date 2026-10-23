@@ -74,6 +74,7 @@ jobs:
       working_directory: .
       shell_scripts: scripts/*.sh
       dockerfiles: docker/ci-lint/Dockerfile docker/ci-lint/Dockerfile.alpine docker/ci-supply-chain/Dockerfile docker/ci-supply-chain/Dockerfile.alpine docker/ci-iac/Dockerfile
+      run_shfmt: true
       scripts_ref: ${{ github.sha }}
 
   secrets-sast:

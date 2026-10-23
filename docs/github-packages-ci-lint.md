@@ -41,16 +41,16 @@ the digest, not `latest`.
 If the package is public, anonymous pulls work:
 
 ```bash
-docker pull ghcr.io/pirlruc/ci-lint:5.3.0
+docker pull ghcr.io/pirlruc/ci-lint:5.3.3
 ```
 
 If the package is private, authenticate with a PAT that has `read:packages`:
 
 ```bash
 echo "$CR_PAT" | docker login ghcr.io -u USERNAME --password-stdin
-docker pull ghcr.io/pirlruc/ci-lint:5.3.0
+docker pull ghcr.io/pirlruc/ci-lint:5.3.3
 # or
-docker pull ghcr.io/pirlruc/ci-lint@sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82a19826db7432ae35c45
+docker pull ghcr.io/pirlruc/ci-lint@sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b
 ```
 
 ## Use as a GitHub Actions job container
@@ -60,7 +60,7 @@ jobs:
   lint:
     runs-on: ubuntu-24.04
     container:
-      image: ghcr.io/pirlruc/ci-lint:5.3.0
+      image: ghcr.io/pirlruc/ci-lint:5.3.3
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -76,7 +76,7 @@ Grant the package **Actions** Read access for the calling repository when using
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  ghcr.io/pirlruc/ci-lint:5.3.0 \
+  ghcr.io/pirlruc/ci-lint:5.3.3 \
   actionlint .github/workflows/*.yml
 ```
 
@@ -89,7 +89,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  ghcr.io/pirlruc/ci-lint:5.3.0 \
+  ghcr.io/pirlruc/ci-lint:5.3.3 \
   semgrep scan --config auto --error .
 ```
 
@@ -111,12 +111,12 @@ and `ci-container`).
 ## Verify a publish
 
 ```bash
-docker pull ghcr.io/pirlruc/ci-lint@sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82a19826db7432ae35c45
+docker pull ghcr.io/pirlruc/ci-lint@sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b
 
 cosign verify \
   --certificate-identity-regexp 'https://github.com/pirlruc/commondevops/.github/workflows/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  ghcr.io/pirlruc/ci-lint@sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82a19826db7432ae35c45
+  ghcr.io/pirlruc/ci-lint@sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b
 ```
 
 Signing runs only when the source repository is public.

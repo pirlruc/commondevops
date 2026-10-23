@@ -11,73 +11,79 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 mapfile -t FILES < <(
-  if [[ $# -gt 0 ]]; then
-    printf '%s\n' "$@"
-  else
-    printf '%s\n' \
-      "${ROOT}/docker/ci-lint/Dockerfile" \
-      "${ROOT}/docker/ci-lint/Dockerfile.alpine" \
-      "${ROOT}/docker/ci-supply-chain/Dockerfile" \
-      "${ROOT}/docker/ci-supply-chain/Dockerfile.alpine"
-  fi
+	if [[ $# -gt 0 ]]; then
+		printf '%s\n' "$@"
+	else
+		printf '%s\n' \
+			"${ROOT}/docker/ci-lint/Dockerfile" \
+			"${ROOT}/docker/ci-lint/Dockerfile.alpine" \
+			"${ROOT}/docker/ci-supply-chain/Dockerfile" \
+			"${ROOT}/docker/ci-supply-chain/Dockerfile.alpine"
+	fi
 )
 
 digest_for() {
-  local ref="$1"
-  docker buildx imagetools inspect "${ref}" --format '{{.Manifest.Digest}}'
+	local ref="$1"
+	docker buildx imagetools inspect "${ref}" --format '{{.Manifest.Digest}}'
 }
 
 refs_in_file() {
-  local file="$1"
-  grep -oE 'dhi\.io/[A-Za-z0-9._/-]+:[A-Za-z0-9._-]+' "${file}" | sort -u || true
+	local file="$1"
+	grep -oE 'dhi\.io/[A-Za-z0-9._/-]+:[A-Za-z0-9._-]+' "${file}" | sort -u || true
 }
 
 declare -A DIGESTS=()
 
 if [[ -n "${DHI_FROM_REFS:-}" ]]; then
-  # Read into an array without unquoted word-split (SC2206).
-  read -r -a forced <<< "${DHI_FROM_REFS}"
-  for ref in "${forced[@]}"; do
-    DIGESTS["${ref}"]=pending
-  done
+	# Read into an array without unquoted word-split (SC2206).
+	read -r -a forced <<<"${DHI_FROM_REFS}"
+	for ref in "${forced[@]}"; do
+		DIGESTS["${ref}"]=pending
+	done
 else
-  for file in "${FILES[@]}"; do
-    [[ -f "${file}" ]] || { echo "missing ${file}" >&2; exit 1; }
-    while IFS= read -r ref; do
-      [[ -n "${ref}" ]] || continue
-      DIGESTS["${ref}"]=pending
-    done < <(refs_in_file "${file}")
-  done
+	for file in "${FILES[@]}"; do
+		[[ -f "${file}" ]] || {
+			echo "missing ${file}" >&2
+			exit 1
+		}
+		while IFS= read -r ref; do
+			[[ -n "${ref}" ]] || continue
+			DIGESTS["${ref}"]=pending
+		done < <(refs_in_file "${file}")
+	done
 fi
 
 if [[ ${#DIGESTS[@]} -eq 0 ]]; then
-  echo "No dhi.io FROM refs found." >&2
-  exit 1
+	echo "No dhi.io FROM refs found." >&2
+	exit 1
 fi
 
 for ref in "${!DIGESTS[@]}"; do
-  echo "Pulling ${ref} ..."
-  docker pull "${ref}"
-  if command -v cosign >/dev/null 2>&1; then
-    # DHI images are signed. Identity varies by publisher; require a signature
-    # and do not accept an unsigned ref (SC-SIGN-002 / GR-SEC-002-T3).
-    cosign verify "${ref}" \
-      --certificate-identity-regexp '.*' \
-      --certificate-oidc-issuer-regexp '.*'
-  else
-    echo "error: cosign is required to verify ${ref}" >&2
-    exit 1
-  fi
-  dig="$(digest_for "${ref}")"
-  [[ "${dig}" == sha256:* ]] || { echo "error: bad digest for ${ref}: ${dig}" >&2; exit 1; }
-  DIGESTS["${ref}"]="${dig}"
-  echo "  ${ref}@${dig}"
+	echo "Pulling ${ref} ..."
+	docker pull "${ref}"
+	if command -v cosign >/dev/null 2>&1; then
+		# DHI images are signed. Identity varies by publisher; require a signature
+		# and do not accept an unsigned ref (SC-SIGN-002 / GR-SEC-002-T3).
+		cosign verify "${ref}" \
+			--certificate-identity-regexp '.*' \
+			--certificate-oidc-issuer-regexp '.*'
+	else
+		echo "error: cosign is required to verify ${ref}" >&2
+		exit 1
+	fi
+	dig="$(digest_for "${ref}")"
+	[[ "${dig}" == sha256:* ]] || {
+		echo "error: bad digest for ${ref}: ${dig}" >&2
+		exit 1
+	}
+	DIGESTS["${ref}"]="${dig}"
+	echo "  ${ref}@${dig}"
 done
 
 PINMAP="$(mktemp)"
 trap 'rm -f "${PINMAP}"' EXIT
 for ref in "${!DIGESTS[@]}"; do
-  printf '%s\t%s\n' "${ref}" "${DIGESTS[${ref}]}" >> "${PINMAP}"
+	printf '%s\t%s\n' "${ref}" "${DIGESTS[${ref}]}" >>"${PINMAP}"
 done
 
 python3 - "${PINMAP}" "${FILES[@]}" <<'PY'

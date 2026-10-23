@@ -5,6 +5,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+
+- Self-CI runs shfmt (SHELL-LINT-002). Scripts under `scripts/` are
+  formatted with shfmt's default (tabs).
+- Dependabot pip entries for `/scripts`, `/docker/ci-lint`, and
+  `/docker/ci-iac` stay off the git registry. Attaching `github-private`
+  makes the pip graph update fail with `unexpected_external_code`.
+- Hub and GHCR examples pin ci-lint and ci-supply-chain 5.3.3 digests.
+  ci-iac is documented as published with 5.4.1.
+- grype and grant Trivy ignores are re-triaged to 2026-11-22. Grant has
+  no release after 0.6.8. Grype 0.121.0 and Trivy 0.76.1 exist upstream
+  and belong on the next image cut, not a workflow-only tag.
+- github-scaffold submodule is 1.10.2. Synced agent files were already
+  current, so the tree diff is the gitlink.
+
 ## [5.4.3] - 2026-10-23
 
 ### Changed

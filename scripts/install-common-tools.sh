@@ -45,44 +45,44 @@ LYCHEE_VERSION="${LYCHEE_VERSION:-0.18.1}"
 LYCHEE_SHA256="${LYCHEE_SHA256:-0d48569e2dc11c1917fa98321dfd7aa675fba03b79f41e8e74afa3223e30d379}"
 
 verify_sha256() {
-  local file="$1"
-  local expected="$2"
-  local actual
-  actual="$(sha256sum "${file}" | awk '{print $1}')"
-  if [[ "${actual}" != "${expected}" ]]; then
-    echo "error: SHA256 mismatch for ${file}" >&2
-    echo "  expected: ${expected}" >&2
-    echo "  actual:   ${actual}" >&2
-    return 1
-  fi
+	local file="$1"
+	local expected="$2"
+	local actual
+	actual="$(sha256sum "${file}" | awk '{print $1}')"
+	if [[ "${actual}" != "${expected}" ]]; then
+		echo "error: SHA256 mismatch for ${file}" >&2
+		echo "  expected: ${expected}" >&2
+		echo "  actual:   ${actual}" >&2
+		return 1
+	fi
 }
 export -f verify_sha256
 
 should_install() {
-  local name="$1"
-  local only="${INSTALL_ONLY:-}"
-  if [[ -z "${only}" ]]; then
-    return 0
-  fi
-  [[ ",${only}," == *",${name},"* ]]
+	local name="$1"
+	local only="${INSTALL_ONLY:-}"
+	if [[ -z "${only}" ]]; then
+		return 0
+	fi
+	[[ ",${only}," == *",${name},"* ]]
 }
 
 install_if_missing() {
-  local name="$1"
-  shift
-  if ! should_install "${name}"; then
-    return 0
-  fi
-  if command -v "${name}" >/dev/null 2>&1; then
-    echo "${name}: already on PATH ($(command -v "${name}"))"
-    return 0
-  fi
-  echo "Installing ${name}…"
-  "$@"
-  if ! command -v "${name}" >/dev/null 2>&1; then
-    echo "error: ${name} not on PATH after install (PATH=${PATH})" >&2
-    return 1
-  fi
+	local name="$1"
+	shift
+	if ! should_install "${name}"; then
+		return 0
+	fi
+	if command -v "${name}" >/dev/null 2>&1; then
+		echo "${name}: already on PATH ($(command -v "${name}"))"
+		return 0
+	fi
+	echo "Installing ${name}…"
+	"$@"
+	if ! command -v "${name}" >/dev/null 2>&1; then
+		echo "error: ${name} not on PATH after install (PATH=${PATH})" >&2
+		return 1
+	fi
 }
 
 install_if_missing hadolint bash -c "
