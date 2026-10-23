@@ -171,16 +171,64 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
-  # The first ci-run tag is the package's only version. GitHub returns 400
-  # ("cannot delete the last tagged version") and the shared cleanup then
-  # fails. Later pulls have a published version beside the PR tag.
+  # Inlined from container-handoff-cleanup. GitHub returns 400 when the
+  # ci-run tag is the package's only version, which is true for the first
+  # ci-iac pull request. That case is not a failed cleanup.
   cleanup:
     needs: [build, scan]
-    continue-on-error: true
     if: always() && github.event_name == 'pull_request' && needs.build.outputs.handoff_tag != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     permissions:
       packages: write
-    uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@2ad052e69d2587cdaf8ccac59b9dae5c60f5560b
-    with:
-      package: ${{ needs.build.outputs.handoff_package }}
-      tag: ${{ needs.build.outputs.handoff_tag }}
+    steps:
+      - name: Delete ephemeral GHCR tag version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
+          PKG: ${{ needs.build.outputs.handoff_package }}
+          TAG: ${{ needs.build.outputs.handoff_tag }}
+        run: |
+          set -euo pipefail
+          enc="$(python3 -c 'import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=""))' "${PKG}")"
+          set +e
+          ids="$(gh api --paginate "/users/${OWNER}/packages/container/${enc}/versions" \
+            --jq ".[] | select(.metadata.container.tags[]? == \"${TAG}\") | .id" 2>versions.err)"
+          rc=$?
+          set -e
+          if [[ "${rc}" -ne 0 ]]; then
+            if grep -q 'HTTP 404' versions.err; then
+              echo "no package ${OWNER}/${PKG} — nothing to delete"
+              exit 0
+            fi
+            cat versions.err >&2
+            echo "error: listing ${OWNER}/${PKG} versions failed" >&2
+            exit 1
+          fi
+          if [[ -z "${ids}" ]]; then
+            echo "no version found for ${OWNER}/${PKG}:${TAG}"
+            exit 0
+          fi
+          while IFS= read -r id; do
+            [[ -z "${id}" ]] && continue
+            tags="$(gh api "/users/${OWNER}/packages/container/${enc}/versions/${id}" \
+              --jq '[.metadata.container.tags[]?] | join(",")')"
+            extra="$(printf '%s' "${tags}" | tr ',' '\n' | grep -v -e "^${TAG}$" -e '^$' || true)"
+            if [[ -n "${extra}" ]]; then
+              echo "refusing to delete version ${id} — also tagged: ${extra}"
+              continue
+            fi
+            echo "deleting ${OWNER}/${PKG} version ${id} (tag ${TAG})"
+            set +e
+            gh api -X DELETE "/users/${OWNER}/packages/container/${enc}/versions/${id}" 2>delete.err
+            rc=$?
+            set -e
+            if [[ "${rc}" -ne 0 ]]; then
+              if grep -q 'last tagged version' delete.err; then
+                echo "leaving the only version of ${OWNER}/${PKG}"
+                continue
+              fi
+              cat delete.err >&2
+              exit 1
+            fi
+          done <<< "${ids}"
