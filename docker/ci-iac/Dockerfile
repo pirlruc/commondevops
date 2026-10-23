@@ -8,7 +8,7 @@
 # age and sops are rebuilt on Go 1.26.10. OpenTofu 1.13.2 requires Go 1.27.3,
 # so that stage sets GOTOOLCHAIN. tflint 0.65.0 stays the upstream release.
 
-FROM dhi.io/golang:1.26-debian13-dev@sha256:2f42240398e49b12de0bafef6cee3b35a654d196921eb294f9e56c9ab34ee4ce AS age-build
+FROM dhi.io/golang:1.27-debian13-dev@sha256:4bbc77c673289765ba1facc2cc56678cd8d613db25a123b7e2ecc1315a53620a AS age-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/FiloSottile/age.git \
@@ -18,7 +18,7 @@ RUN git init \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/age ./cmd/age \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/age-keygen ./cmd/age-keygen
 
-FROM dhi.io/golang:1.26-debian13-dev@sha256:2f42240398e49b12de0bafef6cee3b35a654d196921eb294f9e56c9ab34ee4ce AS sops-build
+FROM dhi.io/golang:1.27-debian13-dev@sha256:4bbc77c673289765ba1facc2cc56678cd8d613db25a123b7e2ecc1315a53620a AS sops-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/getsops/sops.git \
@@ -28,7 +28,7 @@ RUN git init \
  && go get golang.org/x/crypto@v0.57.0 golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 google.golang.org/grpc@v1.83.2 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/sops ./cmd/sops
 
-FROM dhi.io/golang:1.26-debian13-dev@sha256:2f42240398e49b12de0bafef6cee3b35a654d196921eb294f9e56c9ab34ee4ce AS tofu-build
+FROM dhi.io/golang:1.27-debian13-dev@sha256:4bbc77c673289765ba1facc2cc56678cd8d613db25a123b7e2ecc1315a53620a AS tofu-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/opentofu/opentofu.git \
