@@ -133,9 +133,6 @@ jobs:
           token: ${{ secrets.checkout_token || github.token }}
           persist-credentials: false
           path: _commondevops
-          sparse-checkout: |
-            scripts
-          sparse-checkout-cone-mode: false
 
       - name: Require scripts_ref for cross-repo callers (CI-034)
         env:
