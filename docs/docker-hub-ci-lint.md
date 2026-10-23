@@ -37,17 +37,17 @@ in production. A monthly rebuild may move `latest` off the SemVer tag — pin
 the digest, not `latest`.
 
 ```bash
-docker pull pirlruc/ci-lint:5.3.0
+docker pull pirlruc/ci-lint:5.3.3
 # or
-docker pull pirlruc/ci-lint:5.3.0-alpine
-docker pull pirlruc/ci-lint@sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82a19826db7432ae35c45
+docker pull pirlruc/ci-lint:5.3.3-alpine
+docker pull pirlruc/ci-lint@sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b
 ```
 
 ## Quick start
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-lint:5.3.0 \
+  pirlruc/ci-lint:5.3.3 \
   actionlint .github/workflows/*.yml
 ```
 
@@ -60,7 +60,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-lint:5.3.0 \
+  pirlruc/ci-lint:5.3.3 \
   semgrep scan --config auto --error .
 ```
 
@@ -82,12 +82,12 @@ and `ci-container`).
 ## Verify a publish
 
 ```bash
-docker pull pirlruc/ci-lint@sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82a19826db7432ae35c45
+docker pull pirlruc/ci-lint@sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b
 
 cosign verify \
   --certificate-identity-regexp 'https://github.com/pirlruc/commondevops/.github/workflows/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  pirlruc/ci-lint@sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82a19826db7432ae35c45
+  pirlruc/ci-lint@sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b
 ```
 
 Signing runs only when the source repository is public.

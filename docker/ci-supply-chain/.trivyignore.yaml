@@ -21,50 +21,56 @@ vulnerabilities:
   - id: CVE-2026-41567
     paths:
       - "**/grype"
-    expired_at: 2026-11-01
-    statement: Embedded moby client in grype 0.119.0; no fixed version.
+    expired_at: 2026-11-22
+    statement: >-
+      Embedded moby client in the grype 0.116.1 binary shipped in 5.4.x.
+      Upstream 0.121.0 is the candidate for the next image cut. Re-triaged
+      2026-10-23; clock stays inside vuln_ignore_max_days.
   - id: CVE-2026-42306
     paths:
       - "**/grype"
-    expired_at: 2026-11-01
-    statement: Embedded moby client in grype 0.119.0; no fixed version.
+    expired_at: 2026-11-22
+    statement: >-
+      Embedded moby client in the grype 0.116.1 binary shipped in 5.4.x.
+      Upstream 0.121.0 is the candidate for the next image cut. Re-triaged
+      2026-10-23; clock stays inside vuln_ignore_max_days.
   - id: CVE-2026-71556
     paths:
       - "**/grant"
-    expired_at: 2026-11-01
+    expired_at: 2026-11-22
     statement: Embedded go-git in grant 0.6.8 rebuilt on Go 1.26.8; no newer release.
   - id: CVE-2026-56852
     paths:
       - "**/grant"
-    expired_at: 2026-11-01
+    expired_at: 2026-11-22
     statement: Embedded golang.org/x/text in grant 0.6.8; no newer release.
   - id: GHSA-hrxh-6v49-42gf
     paths:
       - "**/grant"
-    expired_at: 2026-11-01
+    expired_at: 2026-11-22
     statement: Embedded gRPC-Go in grant 0.6.8; no newer release.
   - id: CVE-2026-56854
     paths:
       - "**/grant"
-    expired_at: 2026-11-01
+    expired_at: 2026-11-22
     statement: golang.org/x/crypto embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-56864
     paths:
       - "**/grant"
-    expired_at: 2026-11-01
+    expired_at: 2026-11-22
     statement: golang.org/x/mod embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-56865
     paths:
       - "**/grant"
-    expired_at: 2026-11-01
+    expired_at: 2026-11-22
     statement: golang.org/x/mod embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-84304
     paths:
       - "**/grant"
-    expired_at: 2026-11-01
+    expired_at: 2026-11-22
     statement: gRPC-Go embedded in grant 0.6.8; no newer release.
   - id: CVE-2026-84445
     paths:
       - "**/grant"
-    expired_at: 2026-11-01
+    expired_at: 2026-11-22
     statement: gRPC-Go embedded in grant 0.6.8; no newer release.
