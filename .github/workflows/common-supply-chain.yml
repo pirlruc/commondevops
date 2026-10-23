@@ -80,7 +80,7 @@ jobs:
     runs-on: ubuntu-24.04
     # Private package. Debian ci-supply-chain 5.3.3 (CI-028). The SARIF job stays on the runner.
     container:
-      image: ghcr.io/pirlruc/ci-supply-chain@sha256:c4319ff77a65c1223f214ca27c545a1bc81da023ea0ee33a697fc817c54c2099
+      image: ghcr.io/pirlruc/ci-supply-chain@sha256:a062d78ef4f44114af77147e89786375ea213d5a3433919e610cc05590e400a1
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}

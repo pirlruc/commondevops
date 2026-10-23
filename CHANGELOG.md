@@ -5,6 +5,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+
+- `common-infra-lint` and `common-secrets-sast` pin the 5.4.4
+  ci-lint linux/amd64 digest. `common-supply-chain` pins the 5.4.4
+  Debian linux/amd64 digest, because the Alpine image has no bash.
+  A `container:` image must be that manifest. The 5.3.3 digests those
+  workflows still named are no longer on GHCR.
+
 ## [5.4.4] - 2026-10-23
 
 ### Changed
