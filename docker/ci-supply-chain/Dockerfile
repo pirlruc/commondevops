@@ -13,7 +13,7 @@
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
 # grant v0.6.8 rebuilt with Go 1.26.10. Stdlib fixes only; modules stay at go.sum.
-FROM dhi.io/golang:1.26-debian13-dev@sha256:2f42240398e49b12de0bafef6cee3b35a654d196921eb294f9e56c9ab34ee4ce AS grant-build
+FROM dhi.io/golang:1.27-debian13-dev@sha256:4bbc77c673289765ba1facc2cc56678cd8d613db25a123b7e2ecc1315a53620a AS grant-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/anchore/grant.git \
@@ -24,7 +24,7 @@ RUN git init \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/grant ./cmd/grant
 
 # syft 1.50.0 (16223e6d), grype 0.116.1 (30394f17), trivy 0.71.2 (055a5c8a).
-FROM dhi.io/golang:1.26-debian13-dev@sha256:2f42240398e49b12de0bafef6cee3b35a654d196921eb294f9e56c9ab34ee4ce AS syft-build
+FROM dhi.io/golang:1.27-debian13-dev@sha256:4bbc77c673289765ba1facc2cc56678cd8d613db25a123b7e2ecc1315a53620a AS syft-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/anchore/syft.git \
@@ -34,7 +34,7 @@ RUN git init \
  && go get golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 github.com/containerd/containerd/v2@v2.3.4 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/syft ./cmd/syft
 
-FROM dhi.io/golang:1.26-debian13-dev@sha256:2f42240398e49b12de0bafef6cee3b35a654d196921eb294f9e56c9ab34ee4ce AS grype-build
+FROM dhi.io/golang:1.27-debian13-dev@sha256:4bbc77c673289765ba1facc2cc56678cd8d613db25a123b7e2ecc1315a53620a AS grype-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/anchore/grype.git \
@@ -44,7 +44,7 @@ RUN git init \
  && go get golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 github.com/anchore/syft@v1.50.0 github.com/containerd/containerd/v2@v2.3.4 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/grype ./cmd/grype
 
-FROM dhi.io/golang:1.26-debian13-dev@sha256:2f42240398e49b12de0bafef6cee3b35a654d196921eb294f9e56c9ab34ee4ce AS trivy-build
+FROM dhi.io/golang:1.27-debian13-dev@sha256:4bbc77c673289765ba1facc2cc56678cd8d613db25a123b7e2ecc1315a53620a AS trivy-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/aquasecurity/trivy.git \
