@@ -83,14 +83,23 @@ jobs:
     # CI-024: Dependabot PRs cannot use Actions secrets for private reusable workflows.
     if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-24.04
+    # Private package. Debian owns unsuffixed ci-lint 5.3.3 (semgrep has no musl wheel).
+    # Callers grant packages: read (CI-028). --user root so the runner can write.
+    container:
+      image: ghcr.io/pirlruc/ci-lint@sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      # The published image has no git. Mount the runner's git so actions/checkout
+      # works without republishing the image.
+      options: --user root -v /usr/bin/git:/usr/bin/git:ro -v /usr/lib/git-core:/usr/lib/git-core:ro
     timeout-minutes: 20
     permissions:
       contents: read
+      packages: read
     defaults:
       run:
         working-directory: ${{ inputs.working_directory }}
-    # Prefer ghcr.io/pirlruc/ci-lint@sha256:0a4691ba… (4.0.0 Alpine) once Actions package access is granted.
-    # v1: bare ubuntu-24.04 + install-common-tools.sh from this repo.
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

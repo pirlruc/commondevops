@@ -1596,7 +1596,7 @@ milestones:
               - rg -n 'common-ansible-verify|common-token-audit' README.md
 
       - id: CMN-PRIV-001
-        status: open
+        status: done
         title: Pull private GHCR job containers with the job token
         overview:
           problem: >-
@@ -1615,7 +1615,7 @@ milestones:
         - Job containers that pull ghcr.io/pirlruc set credentials and packages read
         tasks:
         - id: CMN-PRIV-001-T1
-          status: open
+          status: done
           title: Add credentials to the private image pulls
           instructions:
             files:

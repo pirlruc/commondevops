@@ -66,6 +66,7 @@ jobs:
     if: github.event.pull_request.user.login != 'dependabot[bot]'
     permissions:
       contents: read
+      packages: read
     uses: ./.github/workflows/common-infra-lint.yml
     with:
       # Push/PR are blocking; workflow_dispatch honours the input.
@@ -79,6 +80,7 @@ jobs:
     if: github.event.pull_request.user.login != 'dependabot[bot]'
     permissions:
       contents: read
+      packages: read
     uses: ./.github/workflows/common-secrets-sast.yml
     with:
       blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
@@ -90,6 +92,7 @@ jobs:
     permissions:
       contents: read
       actions: read
+      packages: read
       security-events: write
     uses: ./.github/workflows/common-supply-chain.yml
     with:

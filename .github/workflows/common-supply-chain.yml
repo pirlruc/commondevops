@@ -59,6 +59,7 @@ on:
 permissions:
   contents: read
   actions: read
+  packages: read
   security-events: write
 
 concurrency:
@@ -77,9 +78,19 @@ jobs:
     # CI-024
     if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-24.04
+    # Private package. Debian ci-supply-chain 5.3.3 (CI-028). The SARIF job stays on the runner.
+    container:
+      image: ghcr.io/pirlruc/ci-supply-chain@sha256:c4319ff77a65c1223f214ca27c545a1bc81da023ea0ee33a697fc817c54c2099
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      # The published image has no git. Mount the runner's git so actions/checkout
+      # works without republishing the image.
+      options: --user root -v /usr/bin/git:/usr/bin/git:ro -v /usr/lib/git-core:/usr/lib/git-core:ro
     timeout-minutes: 30
     permissions:
       contents: read
+      packages: read
     defaults:
       run:
         working-directory: ${{ inputs.working_directory }}

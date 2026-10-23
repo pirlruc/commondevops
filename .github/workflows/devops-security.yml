@@ -18,6 +18,7 @@ jobs:
     if: github.event.pull_request.user.login != 'dependabot[bot]'
     permissions:
       contents: read
+      packages: read
     uses: ./.github/workflows/common-secrets-sast.yml
     with:
       blocking: true
@@ -29,6 +30,7 @@ jobs:
     permissions:
       contents: read
       actions: read
+      packages: read
       security-events: write
     uses: ./.github/workflows/common-supply-chain.yml
     with:
