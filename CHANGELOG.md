@@ -5,6 +5,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.4.4] - 2026-10-23
+
 ### Changed
 
 - Self-CI runs shfmt (SHELL-LINT-002). Scripts under `scripts/` are
@@ -21,8 +23,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
   current, so the tree diff is the gitlink.
 - Refresh DHI base digests in the ci-lint, ci-supply-chain, and ci-iac
   Dockerfiles. The previous python digest was past the 30-day age gate
-  (DOCKER-BUILD-006). Publishing this needs a GitHub Release because the
-  image workflows run on `release`.
+  (DOCKER-BUILD-006). This release republishes the images. Grype and Trivy
+  stay on the binaries already in the image until the next cut.
+- CI-032 records the active default-branch ruleset. The repository still
+  returns to private, where that ruleset cannot be enforced.
 
 ## [5.4.3] - 2026-10-23
 
