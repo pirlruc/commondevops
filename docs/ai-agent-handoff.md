@@ -163,6 +163,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
+- 2026-10-23: Dismissed Scorecard Token-Permissions alerts 318, 312, and 314 under CI-042. Each token's only write scope is `security-events: write` for the dedicated SARIF upload job. Review 2026-12-31. Scan jobs that upload SARIF themselves stay open.
 - 2026-10-23: **5.4.3** — guardrails 1.13.1. CMN-PRIV-001 job-container credentials. Hub Overview push when `docs/docker-hub*.md` changes. Tag only. No GitHub Release.
 - 2026-10-23: Hub Overview dispatch for `ci-lint`, `ci-supply-chain`, and `ci-iac`. It does not republish images.
 - 2026-10-23: **5.4.2** — record the `ci-iac` digest from the 5.4.1 release publish (`sha256:3a25e6c3…`). Tag only, so the image workflow does not publish again.
@@ -245,4 +246,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-23 (guardrails 1.13.1, CMN-PRIV-001, Hub Overview push, tag 5.4.3)*
+*Last updated: 2026-10-23 (CI-042 Scorecard dismissals 318, 312, 314)*
