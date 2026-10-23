@@ -8,13 +8,13 @@ https://github.com/pirlruc/commondevops/blob/main/docs/docker-hub-ci-iac.md.
 Pull with a token that has `read:packages` on this private package:
 
 ```bash
-docker pull ghcr.io/pirlruc/ci-iac:5.4.0
+docker pull ghcr.io/pirlruc/ci-iac:5.4.1
 ```
 
 Pin the digest. `latest` moves on the monthly rebuild.
 
 ```bash
-docker pull ghcr.io/pirlruc/ci-iac@sha256:c3a4d978d820027737a388357a778d99075625667a838b20567747012f6205c0
+docker pull ghcr.io/pirlruc/ci-iac@sha256:3a25e6c307ebe0e06466e3026b7ed91b1c5a7b24d45382eb986c578fa4cd0a03
 ```
 
 The package is private. Actions jobs that use it need `packages: read`, and
