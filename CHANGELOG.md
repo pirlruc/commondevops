@@ -5,6 +5,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.4.2] - 2026-10-23
+
+### Changed
+
+- Record the `ci-iac` digest from the 5.4.1 release publish. `latest` moved.
+
 ## [5.4.1] - 2026-10-23
 
 ### Changed

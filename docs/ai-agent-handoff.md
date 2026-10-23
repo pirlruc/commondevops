@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
-| **Branch** | `feature-pin-541` → release **5.4.1** |
+| **Branch** | `feature-ci-iac-digest` records the **5.4.1** `ci-iac` digest. **5.4.1** is released |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
@@ -59,9 +59,9 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | `ghcr.io/pirlruc/ci-lint` (alpine) | `5.3.3-alpine` `sha256:bdd9c2ea12ad700da6ebd8426845d883510156a188b741f32ffd9ceb3f43f830` |
 | `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.3.3` `sha256:eaa177b7c527ebe54449bb77b39dfd3eb9e7f403c799044a1b6647677a0aba74` |
 | `ghcr.io/pirlruc/ci-supply-chain` (debian) | `5.3.3-debian` `sha256:c4319ff77a65c1223f214ca27c545a1bc81da023ea0ee33a697fc817c54c2099` |
-| `ghcr.io/pirlruc/ci-iac` | `5.4.0` `sha256:c3a4d978d820027737a388357a778d99075625667a838b20567747012f6205c0` |
-| Release (reusables) | **5.4.1** (this branch; tag after merge). **5.4.0** is `76b416c74415d27453836ea50fa037990496686b` |
-| Release (images) | **5.4.0** published `ci-iac`. This release does not republish images |
+| `ghcr.io/pirlruc/ci-iac` | `5.4.1` `sha256:3a25e6c307ebe0e06466e3026b7ed91b1c5a7b24d45382eb986c578fa4cd0a03` |
+| Release (reusables) | **5.4.1** is `d03953476f3d5fa1081a0834d9882007ff26dd91`. **5.4.0** is `76b416c74415d27453836ea50fa037990496686b` |
+| Release (images) | **5.4.1** republished the three images and moved `latest`. The `ci-lint` and `ci-supply-chain` rows below are the last digests written into the docs (5.3.3), not `latest` |
 
 ## Local image sizes / posture (2026-08-12, `du -sxm /`)
 
@@ -153,7 +153,8 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
-- 2026-10-23: **5.4.1** — image callers pin containerdevops **6.3.0**. Record the published `ci-iac` digest `sha256:c3a4d978…`.
+- 2026-10-23: **5.4.2** — record the `ci-iac` digest from the 5.4.1 release publish (`sha256:3a25e6c3…`). Tag only, so the image workflow does not publish again.
+- 2026-10-23: **5.4.1** — image callers pin containerdevops **6.3.0**. The release publish moved `ci-iac` `latest`.
 - 2026-10-23: **5.4.0** — `ci-iac` (OpenTofu, tflint, sops, age, ansible-lint), `common-tofu-verify`, `common-sops-verify`, `common-pins-verify`, `common-threshold-drift`. Vendored `license_deny_list` matches guardrails 1.12.0.
 - 2026-10-02: Rebuild actionlint and grant on DHI Go 1.26.8; hashed ci-lint
   lock; retire SC-PROV-001; `common-token-audit.yml`. Images not republished
@@ -232,4 +233,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-23 (5.4.1 pins containerdevops 6.3.0, records the ci-iac digest)*
+*Last updated: 2026-10-23 (5.4.2 records the ci-iac digest from the 5.4.1 publish)*
