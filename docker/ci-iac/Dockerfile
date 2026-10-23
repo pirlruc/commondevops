@@ -8,7 +8,7 @@
 # age and sops are rebuilt on Go 1.26.10. OpenTofu 1.13.2 requires Go 1.27.3,
 # so that stage sets GOTOOLCHAIN. tflint 0.65.0 stays the upstream release.
 
-FROM dhi.io/golang:1.26-debian13-dev@sha256:5bff7bbb70c4f0791e039b58deb70eb0609dcc2d503c5524af3565b86d8b7544 AS age-build
+FROM dhi.io/golang:1.26-debian13-dev@sha256:2f42240398e49b12de0bafef6cee3b35a654d196921eb294f9e56c9ab34ee4ce AS age-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/FiloSottile/age.git \
@@ -18,7 +18,7 @@ RUN git init \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/age ./cmd/age \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/age-keygen ./cmd/age-keygen
 
-FROM dhi.io/golang:1.26-debian13-dev@sha256:5bff7bbb70c4f0791e039b58deb70eb0609dcc2d503c5524af3565b86d8b7544 AS sops-build
+FROM dhi.io/golang:1.26-debian13-dev@sha256:2f42240398e49b12de0bafef6cee3b35a654d196921eb294f9e56c9ab34ee4ce AS sops-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/getsops/sops.git \
@@ -28,7 +28,7 @@ RUN git init \
  && go get golang.org/x/crypto@v0.57.0 golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 google.golang.org/grpc@v1.83.2 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/sops ./cmd/sops
 
-FROM dhi.io/golang:1.26-debian13-dev@sha256:5bff7bbb70c4f0791e039b58deb70eb0609dcc2d503c5524af3565b86d8b7544 AS tofu-build
+FROM dhi.io/golang:1.26-debian13-dev@sha256:2f42240398e49b12de0bafef6cee3b35a654d196921eb294f9e56c9ab34ee4ce AS tofu-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/opentofu/opentofu.git \
@@ -38,7 +38,7 @@ RUN git init \
  && GOTOOLCHAIN=go1.27.3 go get golang.org/x/crypto@v0.57.0 golang.org/x/mod@v0.41.0 golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 google.golang.org/grpc@v1.83.2 \
  && CGO_ENABLED=0 GOTOOLCHAIN=go1.27.3 go build -trimpath -ldflags="-s -w" -o /out/tofu ./cmd/tofu
 
-FROM dhi.io/python:3.13-debian13-dev@sha256:cb32401c177600c7bacdb96a49ef51dd10d9967a868614288c428acc41e65604 AS fetch
+FROM dhi.io/python:3.13-debian13-dev@sha256:e06c1af7512805e1822259b7e9fe6ab27462a09c71c9520bc47b5c5388e3fce6 AS fetch
 USER root
 RUN python3 - <<'PY'
 import hashlib
@@ -65,7 +65,7 @@ PY
 
 USER 1000
 
-FROM dhi.io/python:3.13-debian13-dev@sha256:cb32401c177600c7bacdb96a49ef51dd10d9967a868614288c428acc41e65604 AS pybuild
+FROM dhi.io/python:3.13-debian13-dev@sha256:e06c1af7512805e1822259b7e9fe6ab27462a09c71c9520bc47b5c5388e3fce6 AS pybuild
 COPY --from=ghcr.io/astral-sh/uv:0.12.0@sha256:606e70c71c852d03f611b1e56a195d08648507018a7057fab82c4974c4eae105 \
   /uv /usr/local/bin/uv
 ENV UV_SYSTEM_PYTHON=1 \
@@ -75,7 +75,7 @@ COPY requirements.txt /tmp/requirements.txt
 RUN uv pip install --system --no-cache --require-hashes -r /tmp/requirements.txt \
  && rm -f /tmp/requirements.txt
 
-FROM dhi.io/python:3.13-debian13-dev@sha256:cb32401c177600c7bacdb96a49ef51dd10d9967a868614288c428acc41e65604
+FROM dhi.io/python:3.13-debian13-dev@sha256:e06c1af7512805e1822259b7e9fe6ab27462a09c71c9520bc47b5c5388e3fce6
 
 LABEL org.opencontainers.image.title="ci-iac" \
       org.opencontainers.image.description="Short-lived CI image for OpenTofu, tflint, sops, age, and ansible-lint. Non-root 1000:1000, linux/amd64." \

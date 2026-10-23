@@ -13,7 +13,7 @@
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
 # grant v0.6.8 rebuilt with Go 1.26.10. Stdlib fixes only; modules stay at go.sum.
-FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:c48766f47ce584f72b290949310376b0c6dfdc7565aed51f219507d42807501e AS grant-build
+FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:6a223ab4d5afe13feec0d7b9c5929baa3c0eb3ab998be0bd2bfb7395946f47ca AS grant-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/anchore/grant.git \
@@ -23,7 +23,7 @@ RUN git init \
  && go get golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 github.com/klauspost/compress@v1.18.7 github.com/containerd/containerd/v2@v2.3.4 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/grant ./cmd/grant
 
-FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:c48766f47ce584f72b290949310376b0c6dfdc7565aed51f219507d42807501e AS syft-build
+FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:6a223ab4d5afe13feec0d7b9c5929baa3c0eb3ab998be0bd2bfb7395946f47ca AS syft-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/anchore/syft.git \
@@ -33,7 +33,7 @@ RUN git init \
  && go get golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 github.com/containerd/containerd/v2@v2.3.4 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/syft ./cmd/syft
 
-FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:c48766f47ce584f72b290949310376b0c6dfdc7565aed51f219507d42807501e AS grype-build
+FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:6a223ab4d5afe13feec0d7b9c5929baa3c0eb3ab998be0bd2bfb7395946f47ca AS grype-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/anchore/grype.git \
@@ -43,7 +43,7 @@ RUN git init \
  && go get golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 github.com/anchore/syft@v1.50.0 github.com/containerd/containerd/v2@v2.3.4 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/grype ./cmd/grype
 
-FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:c48766f47ce584f72b290949310376b0c6dfdc7565aed51f219507d42807501e AS trivy-build
+FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:6a223ab4d5afe13feec0d7b9c5929baa3c0eb3ab998be0bd2bfb7395946f47ca AS trivy-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/aquasecurity/trivy.git \
@@ -54,7 +54,7 @@ RUN git init \
  && CGO_ENABLED=0 GOEXPERIMENT=jsonv2 go build -trimpath -ldflags="-s -w" -o /out/trivy ./cmd/trivy
 
 # dhi.io/python:3.13-alpine3.24-dev — digest pinned (DOCKER-BUILD-003 / CI-026)
-FROM dhi.io/python:3.13-alpine3.24-dev@sha256:b638b0f214ccf84e1bf0814dfcb81774e470f7aaa206f7bf77edd8ba357ee79a
+FROM dhi.io/python:3.13-alpine3.24-dev@sha256:2a4476d39430b26eaef7b6afe06999bddb2c3ec32438e5290957e7b42c79e097
 
 LABEL org.opencontainers.image.title="ci-supply-chain" \
       org.opencontainers.image.description="Short-lived CI toolchain image for SBOM generation and vulnerability/license gates: syft, grype, trivy, grant. Alpine 3.24 variant. Non-root 1000:1000, linux/amd64." \

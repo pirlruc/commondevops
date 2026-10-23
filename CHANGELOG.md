@@ -19,6 +19,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
   and belong on the next image cut, not a workflow-only tag.
 - github-scaffold submodule is 1.10.2. Synced agent files were already
   current, so the tree diff is the gitlink.
+- Refresh DHI base digests in the ci-lint, ci-supply-chain, and ci-iac
+  Dockerfiles. The previous python digest was past the 30-day age gate
+  (DOCKER-BUILD-006). Publishing this needs a GitHub Release because the
+  image workflows run on `release`.
 
 ## [5.4.3] - 2026-10-23
 
