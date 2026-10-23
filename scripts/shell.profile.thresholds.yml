@@ -1,3 +1,4 @@
-# Vendored from guardrails 1.9.0 shell/profile.thresholds.yml.
+# Vendored from guardrails shell/profile.thresholds.yml.
 # Callers with docs/guardrails checked out win; this file is the fallback.
 shellcheck_failure_threshold: error    # SHELL-LINT-001
+shfmt_required: true                   # SHELL-LINT-002

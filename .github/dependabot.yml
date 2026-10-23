@@ -73,6 +73,20 @@ updates:
       - dependency-name: "python"
         versions: [">= 3.14"]
 
+  - package-ecosystem: docker
+    directory: /docker/ci-iac
+    patterns: ["*"]
+    multi-ecosystem-group: all-dependencies
+    registries:
+      - github-private
+      - dhi
+    cooldown:
+      default-days: 7
+    ignore:
+      # PY-RUN-003 keeps Python 3.13 until 2027-04. SC-DEP-003 carve-out (guardrails 1.10.0).
+      - dependency-name: "python"
+        versions: [">= 3.14"]
+
   - package-ecosystem: pip
     directory: /scripts
     patterns: ["*"]

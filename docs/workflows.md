@@ -29,10 +29,15 @@ or the reusable job fails at startup with no useful callee message.
 | `common-scaffold-verify.yml` | `contents: read`, `issues: read` |
 | `common-secrets-sast.yml` | `contents: read` |
 | `common-ansible-verify.yml` | `contents: read` |
-| `common-supply-chain.yml` | `contents: read`, `security-events: write` |
+| `common-token-audit.yml` | none (the job sets no token scopes) |
+| `common-tofu-verify.yml` | `contents: read`, `packages: read` |
+| `common-sops-verify.yml` | `contents: read`, `packages: read` |
+| `common-pins-verify.yml` | `contents: read` |
+| `common-threshold-drift.yml` | `contents: read` |
+| `common-supply-chain.yml` | `contents: read`, `actions: read`, `security-events: write` |
 | `common-scorecard.yml` | `contents: read`, `security-events: write`, `id-token: write` |
 | `common-release.yml` | `contents: write`, `id-token: write` |
-| `ci-lint-image.yml` / `ci-supply-chain-image.yml` | `contents: read`; `packages: write` on build; `packages: read` on scan; `packages: write` on publish |
+| `ci-lint-image.yml` / `ci-supply-chain-image.yml` / `ci-iac-image.yml` | `contents: read`; `packages: write` on build; `packages: read` on scan; `packages: write` on publish |
 
 GHCR visibility and Actions package access cannot be set via API. The dispatch-only helper
 [`.github/workflows/ghcr-package-visibility.yml`](../.github/workflows/ghcr-package-visibility.yml)
@@ -291,7 +296,7 @@ These jobs do not replace a Kotlin or Android gate:
   `auto`). That is not `p/kotlin` (KT-SEC-002). Pass `semgrep_config: p/kotlin`.
 - `common-supply-chain` Syft-on-directory does not see a Gradle graph, so it is
   not the Android CycloneDX grype gate (KT-SEC-004).
-- `common-release` and `artifact-sweep` are for image publishers.
+- `common-release` and `artifact-sweep` are for image publishers. `artifact-sweep.yml` is also `workflow_call`, so another repository can run the same sweep.
 
 `common-doc-verify` looks in `scripts/` and then `.github/scaffold/scripts/`
 for the YAML and link checkers, and fails closed when neither copy exists.
@@ -305,4 +310,36 @@ closed. `run_shfmt: true` runs `shfmt --diff` (off by default).
 are true. `common-ansible-verify` runs yamllint, ansible-lint, the caller's
 guardrail script, and Molecule. `results_retention_days` on
 `common-supply-chain` defaults to 1.
+
+## `common-tofu-verify.yml`
+
+Runs `scripts/check-tofu.sh` inside the caller-supplied `ci-iac` image:
+`tofu fmt -check -recursive`, `tflint --recursive`, and `tofu init
+-backend=false` plus `tofu validate` in every directory that commits a
+`.terraform.lock.hcl`. The job does not plan or apply. Pass `image` as a
+digest. `blocking` defaults to true. A repository with no `.tf` files
+succeeds.
+
+## `common-sops-verify.yml`
+
+Runs `scripts/check-sops-ciphertext.sh` inside the same image. A `*.sops.*`
+file must contain `sops:` metadata, and `.sops.yaml` must name a real Age
+recipient. The workflow requests no Age private key and does not decrypt.
+`blocking` defaults to true. A repository with no SOPS files succeeds.
+
+## `common-pins-verify.yml`
+
+Checks out the caller and runs `scripts/check-submodule-pins.sh`. The
+expected gitlinks stay in that caller script. Cross-repo callers pass
+`scripts_ref` equal to the `uses:` pin. The script is not checked out from
+this repository.
+
+## `common-threshold-drift.yml`
+
+Checks out the caller, then checks out `pirlruc/guardrails` at the
+`docs/guardrails` gitlink, and runs `scripts/check-threshold-drift.sh`.
+Pass `checkout_token` when that submodule is private
+(`GUARDRAILS_READ_TOKEN`). Dependabot pull requests skip this job because
+they cannot read Actions secrets.
+
 

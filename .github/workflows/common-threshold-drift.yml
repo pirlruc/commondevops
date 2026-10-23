@@ -1,0 +1,88 @@
+name: Common Threshold Drift (reusable)
+
+# Fail when the caller's vendored threshold keys disagree with the pinned
+# guardrails submodule. The script stays in the caller. Token-free.
+
+on:
+  workflow_call:
+    inputs:
+      drift_script:
+        description: Caller script that compares vendored thresholds
+        required: false
+        type: string
+        default: scripts/check-threshold-drift.sh
+      scripts_ref:
+        description: Must equal the caller's uses pin (CI-034). Not checked out.
+        required: false
+        type: string
+        default: ""
+    secrets:
+      checkout_token:
+        description: Token that can read the private guardrails submodule
+        required: false
+  workflow_dispatch:
+    inputs:
+      drift_script:
+        type: string
+        default: scripts/check-threshold-drift.sh
+      scripts_ref:
+        type: string
+        default: ""
+
+permissions: {}
+
+concurrency:
+  group: >-
+    ${{ github.event_name == 'workflow_dispatch'
+        && format('dispatch-{0}-{1}', github.workflow, github.ref)
+        || format('call-threshold-drift-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
+
+jobs:
+  drift:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Guardrails gitlink
+        id: guardrails
+        run: echo "sha=$(git rev-parse 'HEAD:docs/guardrails')" >> "${GITHUB_OUTPUT}"
+
+      - name: Clear the guardrails gitlink directory
+        run: rm -rf docs/guardrails
+
+      - name: Checkout guardrails at the gitlink
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pirlruc/guardrails
+          ref: ${{ steps.guardrails.outputs.sha }}
+          token: ${{ secrets.checkout_token || github.token }}
+          persist-credentials: false
+          path: docs/guardrails
+
+      - name: Require scripts_ref for cross-repo callers (CI-034)
+        env:
+          SCRIPTS_REF: ${{ inputs.scripts_ref }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -eu
+          if [ "${REPO}" != "pirlruc/commondevops" ] && [ -z "${SCRIPTS_REF}" ]; then
+            echo "CI-034: cross-repo callers must pass scripts_ref matching the uses: pin" >&2
+            exit 1
+          fi
+
+      - name: Threshold drift
+        env:
+          DRIFT_SCRIPT: ${{ inputs.drift_script }}
+        run: |
+          set -eu
+          if [ ! -f "${DRIFT_SCRIPT}" ]; then
+            echo "error: ${DRIFT_SCRIPT} not found" >&2
+            exit 1
+          fi
+          sh "${DRIFT_SCRIPT}"

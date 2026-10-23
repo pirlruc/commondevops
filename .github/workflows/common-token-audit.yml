@@ -5,6 +5,15 @@ name: Common Token Audit (reusable)
 
 on:
   workflow_call:
+    inputs:
+      scripts_ref:
+        description: >
+          Commit of this repo to check out. Required for a cross-repo caller
+          and must match the uses: pin (CI-034). github.workflow_sha is the
+          caller, not this repository.
+        required: false
+        type: string
+        default: ""
     secrets:
       scorecard_token:
         required: false
@@ -33,12 +42,22 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: pirlruc/commondevops
-          ref: ${{ github.workflow_sha }}
+          # github.workflow_sha is the caller. Same-repo runs fall back to github.sha.
+          ref: ${{ inputs.scripts_ref || github.sha }}
           token: ${{ secrets.checkout_token || github.token }}
           persist-credentials: false
           sparse-checkout: |
             scripts/check-token-expiry.sh
           sparse-checkout-cone-mode: false
+      - name: Require scripts_ref for cross-repo callers (CI-034)
+        env:
+          SCRIPTS_REF: ${{ inputs.scripts_ref }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ "${REPO}" != "pirlruc/commondevops" ] && [ -z "${SCRIPTS_REF}" ]; then
+            echo "CI-034: cross-repo callers must pass scripts_ref matching the uses: pin" >&2
+            exit 1
+          fi
       - name: Check PAT expiry
         env:
           SCORECARD_TOKEN: ${{ secrets.scorecard_token }}

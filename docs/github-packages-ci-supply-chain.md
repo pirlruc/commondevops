@@ -16,8 +16,10 @@ runtime — no `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `5.3.0` / `5.3.0-alpine` | Immutable Alpine `sha256:71ad1ca2f404147d00351b492d051c1213dacffeb961fcd96f2053e7715ab17e` |
-| `5.3.0-debian` | Immutable Debian `sha256:6706b44d46e252537af3ad77b797c6c880f98afa2059e954cbf0d597ff054900` |
+| `5.3.3` / `5.3.3-alpine` / `latest` / `latest-alpine` | Alpine `sha256:eaa177b7c527ebe54449bb77b39dfd3eb9e7f403c799044a1b6647677a0aba74` |
+| `5.3.3-debian` / `latest-debian` | Debian `sha256:c4319ff77a65c1223f214ca27c545a1bc81da023ea0ee33a697fc817c54c2099` |
+| `5.3.0` / `5.3.0-alpine` | Previous Alpine `sha256:71ad1ca2f404147d00351b492d051c1213dacffeb961fcd96f2053e7715ab17e` |
+| `5.3.0-debian` | Previous Debian `sha256:6706b44d46e252537af3ad77b797c6c880f98afa2059e954cbf0d597ff054900` |
 | `5.2.4` / `5.2.4-alpine` | Previous Alpine `sha256:f7abb77fd31aeb68bf31ff391ed0e54825f706314607dc1570088e19d3d6c55c` |
 | `5.2.4-debian` | Previous Debian `sha256:99aa0689b82930919e525e2f6afdbfde5819bb1ab587e2fd2be20022a0f204fc` |
 | `5.2.2` / `5.2.2-alpine` | Previous Alpine `sha256:2ea8da1b95fd393e8b2897fb0d11eba97d9036d9df011519bed058df172a9257` |

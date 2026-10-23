@@ -1,0 +1,48 @@
+schemaVersion: "2.0.0"
+metadataTest:
+  cmd: ["sh"]
+  envVars:
+    - key: PYTHONDONTWRITEBYTECODE
+      value: "1"
+    - key: PYTHONUNBUFFERED
+      value: "1"
+commandTests:
+  - name: tofu
+    command: "tofu"
+    args: ["version"]
+    exitCode: 0
+  - name: tflint
+    command: "tflint"
+    args: ["--version"]
+    exitCode: 0
+  - name: sops
+    command: "sops"
+    args: ["--version"]
+    exitCode: 0
+  - name: age
+    command: "age"
+    args: ["--version"]
+    exitCode: 0
+  - name: age-keygen
+    command: "age-keygen"
+    args: ["--version"]
+    exitCode: 0
+  - name: ansible-lint
+    command: "ansible-lint"
+    args: ["--version"]
+    exitCode: 0
+  - name: "no setuid or setgid files"
+    command: "sh"
+    args:
+      - "-c"
+      - "! find / -xdev -type f -perm -4000 -print | grep -q . && ! find / -xdev -type f -perm -2000 -print | grep -q ."
+fileExistenceTests:
+  - name: shell present
+    path: "/bin/sh"
+    shouldExist: true
+  - name: tofu binary
+    path: "/usr/local/bin/tofu"
+    shouldExist: true
+  - name: uv absent
+    path: "/usr/local/bin/uv"
+    shouldExist: false

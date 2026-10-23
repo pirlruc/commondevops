@@ -6,6 +6,7 @@ name: Artifact sweep (container-image*, build records, stale caches)
 # default branch.
 
 on:
+  workflow_call:
   schedule:
     - cron: "12 4 * * *"
   workflow_dispatch:

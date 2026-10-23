@@ -66,6 +66,12 @@ run_or_queue yamllint
 echo "==> license_gate dry-run (no SBOM → skip with exit 0)"
 python3 scripts/license_gate.py
 
+echo "==> submodule pins"
+sh scripts/check-submodule-pins.sh
+
+echo "==> threshold drift"
+sh scripts/check-threshold-drift.sh
+
 if [ -n "${DOCKER_STEPS}" ]; then
   if [ "${USE_DOCKER}" = "1" ]; then
     # shellcheck disable=SC2086

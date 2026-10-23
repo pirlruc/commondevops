@@ -1,0 +1,13 @@
+# ci-iac library scan.
+# age, sops, and OpenTofu are rebuilt. tflint 0.65.0 is the upstream release.
+# The OpenTofu entry is the scanner reading a dirty pseudo-version of tag v1.13.2.
+# Review: 2026-11-22
+vulnerabilities:
+  - id: GHSA-q7j3-v8qv-22vq
+    paths:
+      - "**/tofu"
+    expired_at: 2026-11-22
+    statement: >-
+      Binary is built from OpenTofu v1.13.2 (765062032c46), which is newer
+      than the 1.12.3 fix. go.mod patches make the module version dirty, so
+      the scanner treats it as older than that fix.

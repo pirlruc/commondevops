@@ -5,6 +5,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.4.0] - 2026-10-23
+
+### Added
+
+- `ci-iac` image (Debian) with OpenTofu 1.13.2, tflint 0.65.0, sops 3.13.3,
+  age 1.3.2, and ansible-lint 26.10.1. These tools stay off `ci-lint`.
+- `common-tofu-verify.yml` and `common-sops-verify.yml` run from that image.
+  The SOPS job does not receive an Age private key and does not decrypt.
+- `common-pins-verify.yml` and `common-threshold-drift.yml`.
+
+### Changed
+
+- Vendored supply-chain `license_deny_list` matches guardrails 1.12.0.
+- README lists `common-ansible-verify` and `common-token-audit`.
+
 ## [5.3.4] - 2026-10-12
 
 ### Fixed
