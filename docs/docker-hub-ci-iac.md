@@ -17,13 +17,13 @@ secrets scanning stay on `ci-lint`.
 
 | Tag | Meaning |
 |-----|---------|
-| `5.4.0` / `latest` | Debian image published with commondevops 5.4.0. The digest is recorded after that publish |
+| `5.4.0` / `latest` | Debian `sha256:c3a4d978d820027737a388357a778d99075625667a838b20567747012f6205c0` |
 | `sha-<git>` | Git commit of the published image |
 
 Pin the digest. A monthly rebuild can move `latest`.
 
 ```bash
-docker pull pirlruc/ci-iac:5.4.0
+docker pull pirlruc/ci-iac@sha256:c3a4d978d820027737a388357a778d99075625667a838b20567747012f6205c0
 ```
 
 ## Tools

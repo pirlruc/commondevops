@@ -19,6 +19,9 @@ on:
         required: false
       guardrails_token:
         required: false
+      containerdevops_token:
+        description: CONTAINERDEVOPS_READ_TOKEN when the caller has that secret
+        required: false
       checkout_token:
         description: Token that can read pirlruc/commondevops when the caller is another repo
         required: false
@@ -62,6 +65,7 @@ jobs:
         env:
           SCORECARD_TOKEN: ${{ secrets.scorecard_token }}
           GUARDRAILS_TOKEN: ${{ secrets.guardrails_token }}
+          CONTAINERDEVOPS_TOKEN: ${{ secrets.containerdevops_token }}
           CHECKOUT_TOKEN: ${{ secrets.checkout_token }}
           MAX_DAYS: "90"
           WARN_DAYS: "7"

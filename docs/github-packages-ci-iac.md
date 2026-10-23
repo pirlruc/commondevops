@@ -11,7 +11,11 @@ Pull with a token that has `read:packages` on this private package:
 docker pull ghcr.io/pirlruc/ci-iac:5.4.0
 ```
 
-Pin the digest after the 5.4.0 publish. `latest` moves on the monthly rebuild.
+Pin the digest. `latest` moves on the monthly rebuild.
+
+```bash
+docker pull ghcr.io/pirlruc/ci-iac@sha256:c3a4d978d820027737a388357a778d99075625667a838b20567747012f6205c0
+```
 
 The package is private. Actions jobs that use it need `packages: read`, and
 the package's Actions access list must include the caller repository.

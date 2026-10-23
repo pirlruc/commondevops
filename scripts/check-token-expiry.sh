@@ -39,6 +39,7 @@ check_one() {
 fail=0
 check_one scorecard_token "${SCORECARD_TOKEN:-}" || fail=1
 check_one guardrails_token "${GUARDRAILS_TOKEN:-}" || fail=1
+check_one containerdevops_token "${CONTAINERDEVOPS_TOKEN:-}" || fail=1
 check_one checkout_token "${CHECKOUT_TOKEN:-}" || fail=1
 if [ "${checked}" -eq 0 ]; then
   echo "error: no PAT was passed to the token audit" >&2
