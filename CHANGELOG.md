@@ -7,6 +7,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+- Tools installed into `~/.local/bin` on a public job image are added to
+  `GITHUB_PATH`, so later steps can run them. `pip install --user` sets
+  `PIP_BREAK_SYSTEM_PACKAGES` because Ubuntu 24.04 pip is externally
+  managed.
 - Job containers for infra lint, secrets, and supply-chain authenticate
   with `checkout_token` when a caller passes one. The caller's
   `GITHUB_TOKEN` cannot pull this repo's private images. A caller that
