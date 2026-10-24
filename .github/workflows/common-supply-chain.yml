@@ -116,6 +116,7 @@ jobs:
       packages: read
     defaults:
       run:
+        shell: bash
         working-directory: ${{ inputs.working_directory }}
     env:
       PIP_BREAK_SYSTEM_PACKAGES: ${{ inputs.install_runner_packages && '1' || '' }}

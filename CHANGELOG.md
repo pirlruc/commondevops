@@ -12,8 +12,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
   `GITHUB_TOKEN` cannot pull this repo's private images. A caller that
   still cannot pull them passes a public `container_image`.
   `mount_runner_git` stays on for the private image, which has no git,
-  and off when the image already has bash and git. The default image
-  stays the private linux/amd64 digest.
+  and off when the image already has bash and git. Job `run` steps
+  use `bash`, because a container's default shell is `sh`. The default
+  image stays the private linux/amd64 digest.
 - `common-infra-lint` and `common-secrets-sast` pin the 5.4.4
   ci-lint linux/amd64 digest. `common-supply-chain` pins the 5.4.4
   Debian linux/amd64 digest, because the Alpine image has no bash.
