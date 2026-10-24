@@ -157,6 +157,7 @@ Do not recommend removing these without **requires user decision**:
 6. DHI digests stay pinned; do not float `latest` on production FROM lines
 7. Caller jobs must grant every permission the reusable job declares (no escalation)
 8. The artifact sweep may delete pull and tag Actions caches; it must not delete published GHCR or Docker Hub tags
+9. A job container uses bash. A public image that cannot use the runner git libraries sets the git mount off. Tools installed under `~/.local/bin` are added to `GITHUB_PATH`. A workflow-only annotated tag has no GitHub Release, so images are not republished. The git tag does not carry an image digest
 
 ## Automation configuration
 

@@ -5,8 +5,8 @@
 | Field | Value |
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
-| **Remote** | https://github.com/pirlruc/commondevops (PRIVATE) |
-| **Branch** | `main`. **5.4.3** is an annotated tag only (guardrails 1.13.1 and CMN-PRIV-001). **5.4.1** remains the caller pin |
+| **Remote** | https://github.com/pirlruc/commondevops (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
+| **Branch** | `main` at `0932c7bf` (PR 232). GitHub Release **5.4.4** is `4a7c8c43` and carries the digest table. Annotated tags **5.4.5**–**5.4.8** have no Release. **5.4.8** is `32075ce`. HEAD is not tagged. Changelog headings on those commits stay `[Unreleased]`. Do not move `5.4.4`–`5.4.8`. |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
@@ -158,11 +158,12 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. CMN-PRIV-001 is done. `common-infra-lint`, `common-secrets-sast`, and `common-supply-chain` pull private GHCR job containers with `packages: read` and `container.credentials`. Callers grant `packages: read`. OpenTofu and SOPS stay on the runner.
+1. Do not tag `5.4.9` for the PATH fix. pixeldive pins `0932c7bf`, which is past **5.4.8**. Job containers that use a public image set `mount_runner_git: false` and `shell: bash`. Tools copied to `~/.local/bin` are appended to `GITHUB_PATH`. `pip install --user` sets `PIP_BREAK_SYSTEM_PACKAGES`. Hub pages still show the 5.3.3 digests on purpose. The 5.4.4 digests live in the GitHub Release.
 2. Hub Overviews update on a push to `main` when `docs/docker-hub*.md` changes, and on `workflow_dispatch`. That calls [container-hub-description](https://github.com/pirlruc/containerdevops/blob/6.3.0/.github/workflows/container-hub-description.yml) and does not republish images. `DOCKERHUB_DESCRIPTION_TOKEN` stays out of image workflows.
 
 ## Recent history
 
+- 2026-10-24: **5.4.8** on `32075ce` (PR 231) sets bash shells and an optional git mount. PR 232 merged as `0932c7bf` and adds `GITHUB_PATH` plus `PIP_BREAK_SYSTEM_PACKAGES`. No tag on `0932c7bf`. No GitHub Release after 5.4.4, so the images were not republished. Do not move `5.4.4`–`5.4.8`.
 - 2026-10-23: Dismissed Scorecard Token-Permissions alerts 318, 312, and 314 under CI-042. Each token's only write scope is `security-events: write` for the dedicated SARIF upload job. Review 2026-12-31. Scan jobs that upload SARIF themselves stay open.
 - 2026-10-23: **5.4.3** — guardrails 1.13.1. CMN-PRIV-001 job-container credentials. Hub Overview push when `docs/docker-hub*.md` changes. Tag only. No GitHub Release.
 - 2026-10-23: Hub Overview dispatch for `ci-lint`, `ci-supply-chain`, and `ci-iac`. It does not republish images.
@@ -246,4 +247,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-23 (CI-042 Scorecard dismissals 318, 312, 314)*
+*Last updated: 2026-10-24 (5.4.8 and untagged PATH fix on main)*
