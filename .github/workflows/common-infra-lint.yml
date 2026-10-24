@@ -125,7 +125,9 @@ jobs:
         shell: bash
         working-directory: ${{ inputs.working_directory }}
     env:
-      PIP_BREAK_SYSTEM_PACKAGES: ${{ inputs.install_runner_packages && '1' || '' }}
+      # Ubuntu 24.04 pip is externally managed. --user installs need this
+      # on a public image; the private image ignores it.
+      PIP_BREAK_SYSTEM_PACKAGES: "1"
     steps:
       - name: Install Python and curl on a public image
         if: inputs.install_runner_packages
