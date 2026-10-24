@@ -182,6 +182,6 @@ echo "Tool install complete. PATH=${PATH}"
 # Later steps do not inherit this process PATH. The private images already
 # have the binaries; a public image only has the copies under DEST.
 if [[ -n "${GITHUB_PATH:-}" ]]; then
-	echo "${DEST}" >> "${GITHUB_PATH}"
+	echo "${DEST}" >>"${GITHUB_PATH}"
 fi
 echo "Note: prefer ghcr.io/pirlruc/ci-lint and ghcr.io/pirlruc/ci-supply-chain for DHI-pinned toolchain images when available."
