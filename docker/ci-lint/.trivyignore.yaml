@@ -1,5 +1,5 @@
 # ci-lint library scan, 2026-10-02.
 # actionlint v1.7.12 rebuilt on Go 1.26.8 and hadolint v2.15.1 cleared the
 # previous HIGH findings. No path-scoped ignores remain.
-# Review: 2026-11-01
+# Review: 2026-11-22. The list is empty.
 vulnerabilities: []

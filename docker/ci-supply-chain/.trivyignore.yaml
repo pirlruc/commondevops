@@ -1,76 +1,34 @@
 # Vendor-static toolchain binaries in ci-supply-chain.
-# syft, grype, trivy, and grant are rebuilt on Go 1.26.10. Unfixed module
-# findings stay until upstream ships a release (SC-TRIAGE-001). grype still
-# embeds an unfixed moby client. The trivy entries are the scanner reading a
-# dirty pseudo-version of source that is tag v0.71.2.
+# syft, grype, trivy, and grant are rebuilt on Go 1.27. Unfixed module
+# findings stay until upstream ships a release (SC-TRIAGE-001). grype 0.121.0
+# still embeds an unfixed moby client. The trivy entries are the scanner
+# matching a pseudo-version of source that is tag v0.76.1.
 vulnerabilities:
   - id: CVE-2026-54448
     paths:
       - "**/trivy"
     expired_at: 2026-11-22
     statement: >-
-      Binary is built from trivy v0.71.2 (055a5c8a). go.mod patches make the
-      module version dirty, so the scanner treats it as older than 0.71.0.
+      Binary is built from trivy v0.76.1 (e713f67f). The main module version
+      is a pseudo-version, so the scanner treats it as older than 0.71.0.
   - id: CVE-2026-55092
     paths:
       - "**/trivy"
     expired_at: 2026-11-22
     statement: >-
-      Binary is built from trivy v0.71.2 (055a5c8a), which is newer than the
-      0.71.1 fix. The dirty module version is what the scanner matches.
+      Binary is built from trivy v0.76.1 (e713f67f), which is newer than the
+      0.71.1 fix. The pseudo-version is what the scanner matches.
   - id: CVE-2026-41567
     paths:
       - "**/grype"
     expired_at: 2026-11-22
     statement: >-
-      Embedded moby client in the grype 0.116.1 binary shipped in 5.4.x.
-      Upstream 0.121.0 is the candidate for the next image cut. Re-triaged
-      2026-10-23; clock stays inside vuln_ignore_max_days.
+      Embedded moby client in the grype 0.121.0 binary. Upstream has no fix.
+      Re-triaged 2026-10-27; clock stays inside vuln_ignore_max_days.
   - id: CVE-2026-42306
     paths:
       - "**/grype"
     expired_at: 2026-11-22
     statement: >-
-      Embedded moby client in the grype 0.116.1 binary shipped in 5.4.x.
-      Upstream 0.121.0 is the candidate for the next image cut. Re-triaged
-      2026-10-23; clock stays inside vuln_ignore_max_days.
-  - id: CVE-2026-71556
-    paths:
-      - "**/grant"
-    expired_at: 2026-11-22
-    statement: Embedded go-git in grant 0.6.8 rebuilt on Go 1.26.8; no newer release.
-  - id: CVE-2026-56852
-    paths:
-      - "**/grant"
-    expired_at: 2026-11-22
-    statement: Embedded golang.org/x/text in grant 0.6.8; no newer release.
-  - id: GHSA-hrxh-6v49-42gf
-    paths:
-      - "**/grant"
-    expired_at: 2026-11-22
-    statement: Embedded gRPC-Go in grant 0.6.8; no newer release.
-  - id: CVE-2026-56854
-    paths:
-      - "**/grant"
-    expired_at: 2026-11-22
-    statement: golang.org/x/crypto embedded in grant 0.6.8; no newer release.
-  - id: CVE-2026-56864
-    paths:
-      - "**/grant"
-    expired_at: 2026-11-22
-    statement: golang.org/x/mod embedded in grant 0.6.8; no newer release.
-  - id: CVE-2026-56865
-    paths:
-      - "**/grant"
-    expired_at: 2026-11-22
-    statement: golang.org/x/mod embedded in grant 0.6.8; no newer release.
-  - id: CVE-2026-84304
-    paths:
-      - "**/grant"
-    expired_at: 2026-11-22
-    statement: gRPC-Go embedded in grant 0.6.8; no newer release.
-  - id: CVE-2026-84445
-    paths:
-      - "**/grant"
-    expired_at: 2026-11-22
-    statement: gRPC-Go embedded in grant 0.6.8; no newer release.
+      Embedded moby client in the grype 0.121.0 binary. Upstream has no fix.
+      Re-triaged 2026-10-27; clock stays inside vuln_ignore_max_days.

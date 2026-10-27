@@ -82,10 +82,10 @@ permissions:
 
 concurrency:
   group: >-
-    ${{ github.event_name == 'workflow_dispatch'
+    ${{ github.event_name == 'workflow_dispatch' && github.workflow == 'Common Supply Chain (reusable)'
         && format('dispatch-{0}-{1}', github.workflow, github.ref)
         || format('call-supply-chain-{0}', github.run_id) }}
-  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' && github.workflow == 'Common Supply Chain (reusable)' }}
 
 
 env:
