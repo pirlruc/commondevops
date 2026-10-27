@@ -163,6 +163,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
+- 2026-10-27: pull request 234 is the 5.5.0 image refresh (trivy 0.76.1, grype 0.121.0, grant without a forced containerd). The Debian supply-chain build failed once on a proxy stream error. Do not tag 5.5.0 until that build is green. Do not move `5.4.4`–`5.4.8`.
 - 2026-10-24: **5.4.8** on `32075ce` (PR 231) sets bash shells and an optional git mount. PR 232 merged as `0932c7bf` and adds `GITHUB_PATH` plus `PIP_BREAK_SYSTEM_PACKAGES`. No tag on `0932c7bf`. No GitHub Release after 5.4.4, so the images were not republished. Do not move `5.4.4`–`5.4.8`.
 - 2026-10-23: Dismissed Scorecard Token-Permissions alerts 318, 312, and 314 under CI-042. Each token's only write scope is `security-events: write` for the dedicated SARIF upload job. Review 2026-12-31. Scan jobs that upload SARIF themselves stay open.
 - 2026-10-23: **5.4.3** — guardrails 1.13.1. CMN-PRIV-001 job-container credentials. Hub Overview push when `docs/docker-hub*.md` changes. Tag only. No GitHub Release.
@@ -247,4 +248,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-24 (5.4.8 and untagged PATH fix on main)*
+*Last updated: 2026-10-27 (pull request 234 is the 5.5.0 image refresh, not released)*
