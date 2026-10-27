@@ -14,7 +14,7 @@
 
 # actionlint v1.7.12 rebuilt with Go 1.26.10. Stdlib fixes only; modules stay
 # at the upstream go.sum (CMN-CVE-001).
-FROM dhi.io/golang:1.26-debian13-dev@sha256:2f42240398e49b12de0bafef6cee3b35a654d196921eb294f9e56c9ab34ee4ce AS actionlint-build
+FROM dhi.io/golang:1.27-debian13-dev@sha256:4bbc77c673289765ba1facc2cc56678cd8d613db25a123b7e2ecc1315a53620a AS actionlint-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/rhysd/actionlint.git \
@@ -24,7 +24,7 @@ RUN git init \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/actionlint ./cmd/actionlint
 
 # gitleaks v8.30.1 rebuilt with Go 1.26.10. The DHI donor is still Go 1.26.9.
-FROM dhi.io/golang:1.26-debian13-dev@sha256:2f42240398e49b12de0bafef6cee3b35a654d196921eb294f9e56c9ab34ee4ce AS gitleaks-build
+FROM dhi.io/golang:1.27-debian13-dev@sha256:4bbc77c673289765ba1facc2cc56678cd8d613db25a123b7e2ecc1315a53620a AS gitleaks-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/gitleaks/gitleaks.git \
