@@ -70,12 +70,13 @@ jobs:
     if: github.event.pull_request.user.login != 'dependabot[bot]'
     permissions:
       contents: read
+      actions: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
-      image: ghcr.io/pirlruc/ci-lint:5.2.4@sha256:e0a51c64b004c6f4e4ca1672f3bb865aaf03d91bd8a2e228e0fa39be1174dfb4
-      scripts_ref: dd884203c9ffe30e4d4da838cc9e88a888a484a1
+      image: ghcr.io/pirlruc/ci-lint:5.4.4@sha256:63320d087a1c6752cf8a22f0633aa73b2dcc5d6041db629d34635d5ecc0d7c91
+      scripts_ref: c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
       pkg_types: library
       ignorefile: docker/ci-lint/.trivyignore.yaml
       results_artifact: published-ci-lint-scan
@@ -88,16 +89,36 @@ jobs:
     if: github.event.pull_request.user.login != 'dependabot[bot]'
     permissions:
       contents: read
+      actions: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
-      image: ghcr.io/pirlruc/ci-supply-chain:5.2.4@sha256:f7abb77fd31aeb68bf31ff391ed0e54825f706314607dc1570088e19d3d6c55c
-      scripts_ref: dd884203c9ffe30e4d4da838cc9e88a888a484a1
+      image: ghcr.io/pirlruc/ci-supply-chain:5.4.4-alpine@sha256:e27d26a7bf1af4fa695aa9036cc96ee7ad151a7a41d42b711688a0a3fd4e9c3a
+      scripts_ref: c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
       pkg_types: library
       ignorefile: docker/ci-supply-chain/.trivyignore.yaml
       results_artifact: published-ci-supply-chain-scan
       sarif_category: trivy-ci-supply-chain
+      blocking: true
+    secrets:
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  published-ci-iac-rescan:
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+      packages: read
+    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
+    with:
+      image: ghcr.io/pirlruc/ci-iac:5.4.4@sha256:44fd34c6ad15a673a784609cfaf6c6f93757ac7ad6e4e06789b45b51cb3167c5
+      scripts_ref: c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
+      pkg_types: library
+      ignorefile: docker/ci-iac/.trivyignore.yaml
+      results_artifact: published-ci-iac-scan
+      sarif_category: trivy-ci-iac
       blocking: true
     secrets:
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}

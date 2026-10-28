@@ -31,10 +31,10 @@ permissions: {}
 
 concurrency:
   group: >-
-    ${{ github.event_name == 'workflow_dispatch'
+    ${{ github.event_name == 'workflow_dispatch' && github.workflow == 'Common Token Audit (reusable)'
         && format('dispatch-token-audit-{0}', github.ref)
         || format('call-token-audit-{0}', github.run_id) }}
-  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' && github.workflow == 'Common Token Audit (reusable)' }}
 
 jobs:
   audit:

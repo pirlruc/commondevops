@@ -3,8 +3,9 @@
 # Refresh digests: docker login dhi.io && bash scripts/pin-dhi-digests.sh docker/ci-supply-chain/Dockerfile.alpine
 #
 # Binary path discoveries (2026-08-12):
-#   syft 1.50.0, grype 0.116.1, trivy 0.71.2, and grant 0.6.8 are rebuilt
-#   in-image on Go 1.26.10. Donor images were still Go 1.26.8.
+#   syft 1.50.0, grype 0.121.0, trivy 0.76.1, and grant 0.6.8 are rebuilt
+#   in-image on Go 1.27. trivy 0.76.1 needs Go 1.27. grype 0.121.0
+#   still embeds unfixed moby.
 #
 # cosign is intentionally omitted: container-publish installs it on the runner
 # via INSTALL_ONLY when sign=true (~109 MB saved).
@@ -12,18 +13,18 @@
 # No HEALTHCHECK: short-lived CI toolchain (CLI job container), not a supervised
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
-# grant v0.6.8 rebuilt with Go 1.26.10. Stdlib fixes only; modules stay at go.sum.
-FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:6a223ab4d5afe13feec0d7b9c5929baa3c0eb3ab998be0bd2bfb7395946f47ca AS grant-build
+# grant v0.6.8 rebuilt on Go 1.27 with x/crypto and x/mod overrides.
+FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:2ceb813d69b9c82501323484e0c0ae612efde281f5dffce2a3d83a79a9c87304 AS grant-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/anchore/grant.git \
  && git fetch --depth 1 origin 0fb3c502202139efcf4a20aa72014cf6eafab930 \
  && git checkout --detach FETCH_HEAD \
  && test "$(git rev-parse HEAD)" = "0fb3c502202139efcf4a20aa72014cf6eafab930" \
- && go get golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 github.com/klauspost/compress@v1.18.7 github.com/containerd/containerd/v2@v2.3.4 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 \
+ && go get golang.org/x/crypto@v0.57.0 golang.org/x/mod@v0.41.0 golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 github.com/klauspost/compress@v1.18.7 github.com/containerd/containerd/v2@v2.3.4 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/grant ./cmd/grant
 
-FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:6a223ab4d5afe13feec0d7b9c5929baa3c0eb3ab998be0bd2bfb7395946f47ca AS syft-build
+FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:2ceb813d69b9c82501323484e0c0ae612efde281f5dffce2a3d83a79a9c87304 AS syft-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/anchore/syft.git \
@@ -33,28 +34,27 @@ RUN git init \
  && go get golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 github.com/containerd/containerd/v2@v2.3.4 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/syft ./cmd/syft
 
-FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:6a223ab4d5afe13feec0d7b9c5929baa3c0eb3ab998be0bd2bfb7395946f47ca AS grype-build
+FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:2ceb813d69b9c82501323484e0c0ae612efde281f5dffce2a3d83a79a9c87304 AS grype-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/anchore/grype.git \
- && git fetch --depth 1 origin 30394f177175da63ae36b35cdd809c248eb4de7f \
+ && git fetch --depth 1 origin afe2742527d98d822da06c9f32eed86fe3d193e0 \
  && git checkout --detach FETCH_HEAD \
- && test "$(git rev-parse HEAD)" = "30394f177175da63ae36b35cdd809c248eb4de7f" \
- && go get golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 github.com/anchore/syft@v1.50.0 github.com/containerd/containerd/v2@v2.3.4 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 \
+ && test "$(git rev-parse HEAD)" = "afe2742527d98d822da06c9f32eed86fe3d193e0" \
+ && go get golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/grype ./cmd/grype
 
-FROM dhi.io/golang:1.26-alpine3.24-dev@sha256:6a223ab4d5afe13feec0d7b9c5929baa3c0eb3ab998be0bd2bfb7395946f47ca AS trivy-build
+FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:2ceb813d69b9c82501323484e0c0ae612efde281f5dffce2a3d83a79a9c87304 AS trivy-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/aquasecurity/trivy.git \
- && git fetch --depth 1 origin 055a5c8a53bfd61f7a8e276a5b2f0c3fc1673420 \
+ && git fetch --depth 1 origin e713f67f7d54decdcd9b3132c9751833dcced698 \
  && git checkout --detach FETCH_HEAD \
- && test "$(git rev-parse HEAD)" = "055a5c8a53bfd61f7a8e276a5b2f0c3fc1673420" \
- && go get golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 github.com/klauspost/compress@v1.18.7 github.com/containerd/containerd/v2@v2.3.4 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 oras.land/oras-go/v2@v2.6.2 \
+ && test "$(git rev-parse HEAD)" = "e713f67f7d54decdcd9b3132c9751833dcced698" \
  && CGO_ENABLED=0 GOEXPERIMENT=jsonv2 go build -trimpath -ldflags="-s -w" -o /out/trivy ./cmd/trivy
 
 # dhi.io/python:3.13-alpine3.24-dev — digest pinned (DOCKER-BUILD-003 / CI-026)
-FROM dhi.io/python:3.13-alpine3.24-dev@sha256:2a4476d39430b26eaef7b6afe06999bddb2c3ec32438e5290957e7b42c79e097
+FROM dhi.io/python:3.13-alpine3.24-dev@sha256:9be22b80fca9ab4c488cf55c026412074705ca3b7fc652ad9bb79cc863f49920
 
 LABEL org.opencontainers.image.title="ci-supply-chain" \
       org.opencontainers.image.description="Short-lived CI toolchain image for SBOM generation and vulnerability/license gates: syft, grype, trivy, grant. Alpine 3.24 variant. Non-root 1000:1000, linux/amd64." \

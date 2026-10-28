@@ -3,7 +3,20 @@
 All notable changes to this repository are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased]
+## [5.5.0] - 2026-10-27
+
+### Changed
+
+- ci-lint, ci-supply-chain, and ci-iac build on Go 1.27. trivy is 0.76.1
+  and grype is 0.121.0. grant's build adds x/crypto 0.57.0 and x/mod 0.41.0.
+- semgrep stays on mcp 1.29.0. The 2.x lock from Dependabot does not install.
+- markdownlint-cli2 is 0.24.0. The high and moderate npm alerts clear.
+  Four low alerts remain inside that tool.
+- Published rescans use the 5.4.4 linux/amd64 images, including ci-iac,
+  through containerdevops 6.3.5. Callers grant `actions: read`.
+- A called reusable no longer joins the dispatch concurrency group.
+- README names github-scaffold 1.10.2. The guardrail approval link is
+  methodologies 1.9.2.
 
 ### Fixed
 

@@ -29,7 +29,7 @@ def _parse_deny_list(raw: str) -> list[str]:
     """
     deny = json.loads(raw)
     if not isinstance(deny, list):
-        raise ValueError('LICENSE_DENY_LIST must be a JSON array')
+        raise TypeError('LICENSE_DENY_LIST must be a JSON array')
 
     out: list[str] = []
     for x in deny:
@@ -51,7 +51,7 @@ def _deny_from_thresholds(path: Path) -> list[str]:
 
     text = path.read_text(encoding='utf-8', errors='replace')
     # Match: license_deny_list: []  or  license_deny_list: ["GPL", "AGPL"]
-    m = re.search(r'^license_deny_list:\s*(\[[^\]]*\])\s*(?:#.*)?$', text, flags=re.M)
+    m = re.search(r'^license_deny_list:\s*(\[[^\]]*\])\s*(?:#.*)?$', text, flags=re.MULTILINE)
     if not m:
         raise ValueError(f'license_deny_list key missing in {path}')
     try:

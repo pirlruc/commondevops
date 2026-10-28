@@ -20,7 +20,6 @@ import re
 import sys
 from pathlib import Path
 
-
 DEFAULT_THRESHOLDS = 'scripts/supply-chain.profile.thresholds.yml'
 DEFAULT_OUT = '.grant.yaml'
 
@@ -29,7 +28,7 @@ def _parse_allow_list(raw: str) -> list[str]:
     """Return non-empty string patterns from a JSON array string."""
     data = json.loads(raw)
     if not isinstance(data, list):
-        raise ValueError('LICENSE_ALLOW_LIST must be a JSON array')
+        raise TypeError('LICENSE_ALLOW_LIST must be a JSON array')
     out: list[str] = []
     for x in data:
         if isinstance(x, str):
@@ -46,7 +45,7 @@ def _allow_from_thresholds(path: Path) -> list[str]:
 
     text = path.read_text(encoding='utf-8', errors='replace')
     # Inline JSON array form
-    m = re.search(r'^license_allow_list:\s*(\[[^\]]*\])\s*(?:#.*)?$', text, flags=re.M)
+    m = re.search(r'^license_allow_list:\s*(\[[^\]]*\])\s*(?:#.*)?$', text, flags=re.MULTILINE)
     if m:
         return _parse_allow_list(m.group(1))
 
@@ -54,7 +53,7 @@ def _allow_from_thresholds(path: Path) -> list[str]:
     # license_allow_list:
     #   - "MIT"
     #   - Apache-*
-    m = re.search(r'^license_allow_list:\s*(?:#.*)?$', text, flags=re.M)
+    m = re.search(r'^license_allow_list:\s*(?:#.*)?$', text, flags=re.MULTILINE)
     if not m:
         raise ValueError(f'license_allow_list key missing in {path}')
 

@@ -86,7 +86,7 @@ unsuffixed `ci-supply-chain` tags. `ci-iac` is Debian only.
 | Path | Remote | Pin |
 |------|--------|-----|
 | `docs/guardrails` | https://github.com/pirlruc/guardrails.git | tag `1.13.1` |
-| `.github/scaffold` | https://github.com/pirlruc/github-scaffold.git | tag `1.10.0` |
+| `.github/scaffold` | https://github.com/pirlruc/github-scaffold.git | tag `1.10.2` |
 
 ```bash
 git submodule update --init --recursive

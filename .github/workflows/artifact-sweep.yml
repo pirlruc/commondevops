@@ -15,10 +15,10 @@ permissions: {}
 
 concurrency:
   group: >-
-    ${{ github.event_name == 'workflow_dispatch'
+    ${{ github.event_name == 'workflow_dispatch' && github.workflow == 'Artifact sweep (container-image*, build records, stale caches)'
         && format('dispatch-{0}-{1}', github.workflow, github.ref)
         || format('call-artifact-sweep-{0}', github.run_id) }}
-  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' && github.workflow == 'Artifact sweep (container-image*, build records, stale caches)' }}
 
 
 jobs:
