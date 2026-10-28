@@ -37,7 +37,7 @@ on:
         description: Job image. Callers that cannot pull the private package pass a public image.
         required: false
         type: string
-        default: ghcr.io/pirlruc/ci-supply-chain@sha256:a062d78ef4f44114af77147e89786375ea213d5a3433919e610cc05590e400a1
+        default: ghcr.io/pirlruc/ci-supply-chain@sha256:c4319ff77a65c1223f214ca27c545a1bc81da023ea0ee33a697fc817c54c2099
       install_runner_packages:
         description: apt-install Python and curl. For a public image that is not ci-supply-chain.
         required: false

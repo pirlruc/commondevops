@@ -3,6 +3,14 @@
 All notable changes to this repository are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [5.5.3] - 2026-10-28
+
+### Fixed
+
+- Reusable defaults are the 5.3.3 digests callers already pull.
+  The 5.4.4 and 5.5.0 digests return `manifest unknown` from other
+  repositories. In-repo rescans still use the 5.5.0 digests.
+
 ## [5.5.2] - 2026-10-28
 
 ### Fixed
