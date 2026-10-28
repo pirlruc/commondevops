@@ -55,7 +55,7 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | methodologies (links only; not a submodule) | tag **1.9.1** |
 | containerdevops (image callers + security rescan) | tag **6.3.0** → `dd884203c9ffe30e4d4da838cc9e88a888a484a1` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
-| `ghcr.io/pirlruc/ci-lint` (debian, unsuffixed) | `5.3.3` `sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b` (`latest` == debian) |
+| `ghcr.io/pirlruc/ci-lint` (debian, unsuffixed) | `5.5.0` index `sha256:5551873fd68cc807611f3feddfdca79c5f73dc8cab87031c8e548cae29e6661a`. Actions amd64 `sha256:4d96a0235459c9e2cc724a724f42008dcdc3294940c57edb8b33b11e38efddba`. |
 | `ghcr.io/pirlruc/ci-lint` (alpine) | `5.3.3-alpine` `sha256:bdd9c2ea12ad700da6ebd8426845d883510156a188b741f32ffd9ceb3f43f830` |
 | `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.3.3` `sha256:eaa177b7c527ebe54449bb77b39dfd3eb9e7f403c799044a1b6647677a0aba74` |
 | `ghcr.io/pirlruc/ci-supply-chain` (debian) | `5.3.3-debian` `sha256:c4319ff77a65c1223f214ca27c545a1bc81da023ea0ee33a697fc817c54c2099` |
@@ -163,6 +163,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
+- 2026-10-28: **5.5.0** on `66f9b4a` published the images. **5.5.1** pins the linux/amd64 digests. Do not move `5.4.4`–`5.5.0`.
 - 2026-10-27: pull request 234 is the 5.5.0 image refresh (trivy 0.76.1, grype 0.121.0, grant without a forced containerd). The Debian supply-chain build failed once on a proxy stream error. Do not tag 5.5.0 until that build is green. Do not move `5.4.4`–`5.4.8`.
 - 2026-10-24: **5.4.8** on `32075ce` (PR 231) sets bash shells and an optional git mount. PR 232 merged as `0932c7bf` and adds `GITHUB_PATH` plus `PIP_BREAK_SYSTEM_PACKAGES`. No tag on `0932c7bf`. No GitHub Release after 5.4.4, so the images were not republished. Do not move `5.4.4`–`5.4.8`.
 - 2026-10-23: Dismissed Scorecard Token-Permissions alerts 318, 312, and 314 under CI-042. Each token's only write scope is `security-events: write` for the dedicated SARIF upload job. Review 2026-12-31. Scan jobs that upload SARIF themselves stay open.
@@ -248,4 +249,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-27 (pull request 234 is the 5.5.0 image refresh, not released)*
+*Last updated: 2026-10-28 (5.5.0 published the images; 5.5.1 pins the amd64 digests)*

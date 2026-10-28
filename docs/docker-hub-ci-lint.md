@@ -16,8 +16,10 @@ and semgrep. Not a product runtime — no `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `5.3.3` / `5.3.3-debian` / `latest` / `latest-debian` | Debian `sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b` |
-| `5.3.3-alpine` / `latest-alpine` | Alpine `sha256:bdd9c2ea12ad700da6ebd8426845d883510156a188b741f32ffd9ceb3f43f830` |
+| `5.5.0` / `5.5.0-debian` / `latest` / `latest-debian` | Debian index `sha256:5551873fd68cc807611f3feddfdca79c5f73dc8cab87031c8e548cae29e6661a` |
+| `5.5.0-alpine` / `latest-alpine` | Alpine index `sha256:8234f7bf2f905dec59e7a63625a8ad58d8105e2b33e09d704757d2a1ef0af842` |
+| `5.3.3` / `5.3.3-debian` | Previous Debian `sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b` |
+| `5.3.3-alpine` | Previous Alpine `sha256:bdd9c2ea12ad700da6ebd8426845d883510156a188b741f32ffd9ceb3f43f830` |
 | `5.3.0` / `5.3.0-debian` | Previous Debian `sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82a19826db7432ae35c45` |
 | `5.3.0-alpine` | Previous Alpine `sha256:c55c8f74f2d99d7725cd5a2f785a3782b37d92939baa482a6774308cc5846bf9` |
 | `5.2.4` / `5.2.4-alpine` | Previous Alpine `sha256:e0a51c64b004c6f4e4ca1672f3bb865aaf03d91bd8a2e228e0fa39be1174dfb4` |
@@ -40,7 +42,7 @@ the digest, not `latest`.
 docker pull pirlruc/ci-lint:5.3.3
 # or
 docker pull pirlruc/ci-lint:5.3.3-alpine
-docker pull pirlruc/ci-lint@sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b
+docker pull pirlruc/ci-lint@sha256:5551873fd68cc807611f3feddfdca79c5f73dc8cab87031c8e548cae29e6661a
 ```
 
 ## Quick start
@@ -82,12 +84,12 @@ and `ci-container`).
 ## Verify a publish
 
 ```bash
-docker pull pirlruc/ci-lint@sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b
+docker pull pirlruc/ci-lint@sha256:5551873fd68cc807611f3feddfdca79c5f73dc8cab87031c8e548cae29e6661a
 
 cosign verify \
   --certificate-identity-regexp 'https://github.com/pirlruc/commondevops/.github/workflows/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  pirlruc/ci-lint@sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b
+  pirlruc/ci-lint@sha256:5551873fd68cc807611f3feddfdca79c5f73dc8cab87031c8e548cae29e6661a
 ```
 
 Signing runs only when the source repository is public.

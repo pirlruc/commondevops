@@ -220,7 +220,7 @@ reusables against this repository (`scripts_ref: ${{ github.sha }}`).
 ## `devops-security.yml` (scheduled)
 
 Weekly secrets/SAST, supply-chain, Scorecard, and registry rescans of
-digest-pinned `ghcr.io/pirlruc/ci-lint:5.3.3@sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b`
+digest-pinned `ghcr.io/pirlruc/ci-lint:5.5.0@sha256:4d96a0235459c9e2cc724a724f42008dcdc3294940c57edb8b33b11e38efddba`
 and
 `ghcr.io/pirlruc/ci-supply-chain:5.3.3@sha256:eaa177b7c527ebe54449bb77b39dfd3eb9e7f403c799044a1b6647677a0aba74`
 via containerdevops
@@ -236,7 +236,7 @@ Consumers should not copy `check-ci-docker.sh`. Pin this repo, sparse-checkout
 
 ```sh
 # After checking out pirlruc/commondevops@<sha> into _commondevops/scripts
-COMMONDEVOPS_CI_IMAGE="${MY_CI_IMAGE:-ghcr.io/pirlruc/ci-lint:5.3.3@sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b}"
+COMMONDEVOPS_CI_IMAGE="${MY_CI_IMAGE:-ghcr.io/pirlruc/ci-lint:5.5.0@sha256:4d96a0235459c9e2cc724a724f42008dcdc3294940c57edb8b33b11e38efddba}"
 COMMONDEVOPS_DOCKER_STEPS="actionlint shellcheck hadolint zizmor yamllint"
 export COMMONDEVOPS_CI_IMAGE COMMONDEVOPS_DOCKER_STEPS
 sh _commondevops/scripts/check-ci-docker.sh
