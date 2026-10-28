@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
-| **Branch** | `main` after the GHCR login fix. GitHub Release **5.6.0** republishes the images with go-jose/v4 4.1.6. Annotated tags **5.5.1**–**5.5.3** stay put. Job-container login uses `github.token`. Image workflows pin containerdevops 6.3.5. Do not move `5.4.4`–`5.5.3`. |
+| **Branch** | `main`. GitHub Release **5.6.1** published the go-jose/v4 4.1.6 images. Tag **5.6.0** did not publish. Tag **5.6.2** records the linux/amd64 digests and does not republish. Job-container login uses `github.token`. Image workflows pin containerdevops 6.3.5. Do not move `5.4.4`–`5.6.1`. |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
@@ -55,13 +55,13 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | methodologies (links only; not a submodule) | tag **1.9.1** |
 | containerdevops (image callers + security rescan) | tag **6.3.5** → `c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
-| `ghcr.io/pirlruc/ci-lint` (debian, unsuffixed) | `5.5.0` index `sha256:5551873fd68cc807611f3feddfdca79c5f73dc8cab87031c8e548cae29e6661a`. Actions amd64 `sha256:4d96a0235459c9e2cc724a724f42008dcdc3294940c57edb8b33b11e38efddba`. |
-| `ghcr.io/pirlruc/ci-lint` (alpine) | `5.3.3-alpine` `sha256:bdd9c2ea12ad700da6ebd8426845d883510156a188b741f32ffd9ceb3f43f830` |
-| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.3.3` `sha256:eaa177b7c527ebe54449bb77b39dfd3eb9e7f403c799044a1b6647677a0aba74` |
-| `ghcr.io/pirlruc/ci-supply-chain` (debian) | `5.3.3-debian` `sha256:c4319ff77a65c1223f214ca27c545a1bc81da023ea0ee33a697fc817c54c2099` |
-| `ghcr.io/pirlruc/ci-iac` | `5.4.1` `sha256:3a25e6c307ebe0e06466e3026b7ed91b1c5a7b24d45382eb986c578fa4cd0a03` |
+| `ghcr.io/pirlruc/ci-lint` (debian, unsuffixed) | `5.6.1` index `sha256:8f1c48449167ba92fd2f922a249e65fcc9e58fc81582430cf7ce2d0c49aa24fa`. Actions amd64 `sha256:f9001c4c8726f72107545094237d4fc0592baca023cfa299a532634666d88111`. |
+| `ghcr.io/pirlruc/ci-lint` (alpine) | `5.6.1-alpine` index `sha256:a9aac8fa6dd5c9d8c2ab6c0b4f50a58fe42d0b50c13ebf284ef226462dbb79ab`. Actions amd64 `sha256:207ab77b5ced7d067cb03f7ad6a135a30cf60dfc4a0ed417f61589a7f3d48fc0`. |
+| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.6.1` index `sha256:e922f8f384919c8c242a6e71bd81b16cfa2b0debdff759b312cb774b4bc4121a`. Actions amd64 `sha256:7bbd542d5971594f6192da0ed0c49e29fc0c58328333d0920ab3143a2a0e04d3`. |
+| `ghcr.io/pirlruc/ci-supply-chain` (debian) | `5.6.1-debian` index `sha256:c08f61772815421d43c050de0591f85919a701f97269e33a6d2dcb22a493bf90`. Actions amd64 `sha256:dc83deb4465d5989a03b14ccabef46c3f3426231048b962c69b8e434a7200d48`. |
+| `ghcr.io/pirlruc/ci-iac` | `5.6.1` index `sha256:a34500c4c4d873e77763e6a90ca255beca504018c323366b6b2047c47a42a5a4`. Actions amd64 `sha256:a42f9816c45cea97a5164835306abe5b4b535d2164cb177e32889d5175b09930`. |
 | Release (reusables) | **5.4.1** is `d03953476f3d5fa1081a0834d9882007ff26dd91`. **5.4.0** is `76b416c74415d27453836ea50fa037990496686b` |
-| Release (images) | **5.4.1** republished the three images and moved `latest`. The `ci-lint` and `ci-supply-chain` rows below are the last digests written into the docs (5.3.3), not `latest` |
+| Release (images) | **5.6.1** published the three images. **5.6.2** records those digests and does not republish. **5.6.0** published nothing. |
 
 ## Local image sizes / posture (2026-08-12, `du -sxm /`)
 
@@ -163,7 +163,8 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
-- 2026-10-28: Job containers log in to GHCR with `github.token`. Image scans use separate SARIF categories. Image workflows pin containerdevops 6.3.5. The next GitHub Release republishes the go-jose 4.1.6 images.
+- 2026-10-28: **5.6.1** published ci-lint, ci-supply-chain, and ci-iac with go-jose/v4 4.1.6. **5.6.0** died at startup and stays put. **5.6.2** pins the linux/amd64 manifests in the reusable defaults, the rescan, and the Hub/GHCR pages. No second publish.
+- 2026-10-28: Job containers log in to GHCR with `github.token`. Image scans use separate SARIF categories. Image workflows pin containerdevops 6.3.5. Lint callers grant `packages: read`. Scan callers grant `actions: read`.
 - 2026-10-28: `common-doc-verify` no longer skips Dependabot. Callers pass `DEPENDABOT_GITHUB_TOKEN` on those pulls and `COMMONDEVOPS_READ_TOKEN` on Actions runs. grant, syft, grype, trivy, sops, tofu, and tflint Docker builds request go-jose/v4 4.1.6. tflint v0.65.0 is rebuilt from `502b6a38`. No tag and no image republish, so the 5.5.0 rescan still scans the published binaries.
 - 2026-10-28: The 5.5.0 Debian posture SARIF for ci-lint and ci-supply-chain was uploaded to `refs/heads/main` at `2eac235`. Five of the 38 `trivy-posture-debian` alerts closed as fixed (138, 175, 176, 177, 257). The other 33 are still in the 5.5.0 ci-lint posture and stay open. Supply-chain adds 37 open alerts on the same commit. `trivy-ci-lint` and `trivy-ci-supply-chain` were last analyzed on 2026-10-26 at `4e6f3385` and did not close. Do not move `5.4.4`–`5.5.3`.
 - 2026-10-28: **5.5.3** on `c8ab717` puts reusable defaults back on the 5.3.3 digests. ci-lint and ci-supply-chain 5.5.0 are private, so other repos stay on commondevops `4a7c8c43`. Do not move `5.4.4`–`5.5.3`.
@@ -253,4 +254,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-28 (doc-verify runs on Dependabot; go-jose 4.1.6 is in the Dockerfiles; tags 5.4.4–5.5.3 stay)*
+*Last updated: 2026-10-28 (5.6.1 published the images; 5.6.2 records the linux/amd64 digests; tags 5.4.4–5.6.1 stay)*

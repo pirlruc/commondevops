@@ -16,8 +16,10 @@ and semgrep. Not a product runtime — no `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `5.5.0` / `5.5.0-debian` / `latest` / `latest-debian` | Debian index `sha256:5551873fd68cc807611f3feddfdca79c5f73dc8cab87031c8e548cae29e6661a` |
-| `5.5.0-alpine` / `latest-alpine` | Alpine index `sha256:8234f7bf2f905dec59e7a63625a8ad58d8105e2b33e09d704757d2a1ef0af842` |
+| `5.6.1` / `5.6.1-debian` / `latest` / `latest-debian` | Debian index `sha256:8f1c48449167ba92fd2f922a249e65fcc9e58fc81582430cf7ce2d0c49aa24fa` |
+| `5.6.1-alpine` / `latest-alpine` | Alpine index `sha256:a9aac8fa6dd5c9d8c2ab6c0b4f50a58fe42d0b50c13ebf284ef226462dbb79ab` |
+| `5.5.0` / `5.5.0-debian` | Debian index `sha256:5551873fd68cc807611f3feddfdca79c5f73dc8cab87031c8e548cae29e6661a` |
+| `5.5.0-alpine` | Alpine index `sha256:8234f7bf2f905dec59e7a63625a8ad58d8105e2b33e09d704757d2a1ef0af842` |
 | `5.3.3` / `5.3.3-debian` | Previous Debian `sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b` |
 | `5.3.3-alpine` | Previous Alpine `sha256:bdd9c2ea12ad700da6ebd8426845d883510156a188b741f32ffd9ceb3f43f830` |
 | `5.3.0` / `5.3.0-debian` | Previous Debian `sha256:38b9afe1086295b011e69d092cf06ee133c17b9784e82a19826db7432ae35c45` |
@@ -39,17 +41,17 @@ in production. A monthly rebuild may move `latest` off the SemVer tag — pin
 the digest, not `latest`.
 
 ```bash
-docker pull pirlruc/ci-lint:5.5.0
+docker pull pirlruc/ci-lint:5.6.1
 # or
-docker pull pirlruc/ci-lint:5.5.0-alpine
-docker pull pirlruc/ci-lint@sha256:5551873fd68cc807611f3feddfdca79c5f73dc8cab87031c8e548cae29e6661a
+docker pull pirlruc/ci-lint:5.6.1-alpine
+docker pull pirlruc/ci-lint@sha256:8f1c48449167ba92fd2f922a249e65fcc9e58fc81582430cf7ce2d0c49aa24fa
 ```
 
 ## Quick start
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-lint:5.5.0 \
+  pirlruc/ci-lint:5.6.1 \
   actionlint .github/workflows/*.yml
 ```
 
@@ -62,7 +64,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-lint:5.5.0 \
+  pirlruc/ci-lint:5.6.1 \
   semgrep scan --config auto --error .
 ```
 
@@ -84,12 +86,12 @@ and `ci-container`).
 ## Verify a publish
 
 ```bash
-docker pull pirlruc/ci-lint@sha256:5551873fd68cc807611f3feddfdca79c5f73dc8cab87031c8e548cae29e6661a
+docker pull pirlruc/ci-lint@sha256:8f1c48449167ba92fd2f922a249e65fcc9e58fc81582430cf7ce2d0c49aa24fa
 
 cosign verify \
   --certificate-identity-regexp 'https://github.com/pirlruc/commondevops/.github/workflows/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  pirlruc/ci-lint@sha256:5551873fd68cc807611f3feddfdca79c5f73dc8cab87031c8e548cae29e6661a
+  pirlruc/ci-lint@sha256:8f1c48449167ba92fd2f922a249e65fcc9e58fc81582430cf7ce2d0c49aa24fa
 ```
 
 Signing runs only when the source repository is public.
