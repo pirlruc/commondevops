@@ -5,6 +5,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.6.1] - 2026-10-28
+
+### Fixed
+
+- Image callers grant `packages: read` to container-lint and `actions: read`
+  to container-scan. Release 5.6.0 died at workflow startup, so it published
+  no images. This release publishes them. Tag 5.6.0 stays put.
+
 ## [5.6.0] - 2026-10-28
 
 ### Fixed
