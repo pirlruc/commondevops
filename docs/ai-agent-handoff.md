@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
-| **Branch** | `main` at `2eac235` (PR 238). GitHub Release **5.5.0** is `66f9b4a`. Annotated tags **5.5.1**–**5.5.3** have no Release. **5.5.3** is `c8ab717`. Reusable defaults stay on the pullable 5.3.3 digests. In-repo rescans use the 5.5.0 digests. Do not move `5.4.4`–`5.5.3`. |
+| **Branch** | `main`. GitHub Release **5.5.0** is `66f9b4a`. Annotated tags **5.5.1**–**5.5.3** have no Release. **5.5.3** is `c8ab717`. Reusable defaults stay on the pullable 5.3.3 digests. In-repo rescans use the 5.5.0 digests. `common-doc-verify` runs on Dependabot. Image Dockerfiles request go-jose/v4 4.1.6. Do not move `5.4.4`–`5.5.3`. Do not republish the 5.5.0 images from this change. |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
@@ -163,7 +163,8 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
-- 2026-10-28: The 5.5.0 Debian posture SARIF for ci-lint and ci-supply-chain was uploaded to `refs/heads/main` at `2eac235`. Five of the 38 `trivy-posture-debian` alerts closed as fixed (138, 175, 176, 177, 257). The other 33 are still in the 5.5.0 ci-lint posture and stay open. Supply-chain adds 37 open alerts on the same commit. `trivy-ci-lint` and `trivy-ci-supply-chain` were last analyzed on 2026-10-26 at `4e6f3385` and did not close. Callers stay at `4a7c8c43`. Do not move `5.4.4`–`5.5.3`.
+- 2026-10-28: `common-doc-verify` no longer skips Dependabot. Callers pass `DEPENDABOT_GITHUB_TOKEN` on those pulls and `COMMONDEVOPS_READ_TOKEN` on Actions runs. grant, syft, grype, trivy, sops, tofu, and tflint Docker builds request go-jose/v4 4.1.6. tflint v0.65.0 is rebuilt from `502b6a38`. No tag and no image republish, so the 5.5.0 rescan still scans the published binaries.
+- 2026-10-28: The 5.5.0 Debian posture SARIF for ci-lint and ci-supply-chain was uploaded to `refs/heads/main` at `2eac235`. Five of the 38 `trivy-posture-debian` alerts closed as fixed (138, 175, 176, 177, 257). The other 33 are still in the 5.5.0 ci-lint posture and stay open. Supply-chain adds 37 open alerts on the same commit. `trivy-ci-lint` and `trivy-ci-supply-chain` were last analyzed on 2026-10-26 at `4e6f3385` and did not close. Do not move `5.4.4`–`5.5.3`.
 - 2026-10-28: **5.5.3** on `c8ab717` puts reusable defaults back on the 5.3.3 digests. ci-lint and ci-supply-chain 5.5.0 are private, so other repos stay on commondevops `4a7c8c43`. Do not move `5.4.4`–`5.5.3`.
 - 2026-10-28: **5.5.0** on `66f9b4a` published the images. **5.5.1** pins the linux/amd64 digests. Do not move `5.4.4`–`5.5.0`.
 - 2026-10-27: pull request 234 is the 5.5.0 image refresh (trivy 0.76.1, grype 0.121.0, grant without a forced containerd). The Debian supply-chain build failed once on a proxy stream error. Do not tag 5.5.0 until that build is green. Do not move `5.4.4`–`5.4.8`.
@@ -251,4 +252,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-28 (5.5.0 Debian posture uploaded to main; callers stay at 4a7c8c43)*
+*Last updated: 2026-10-28 (doc-verify runs on Dependabot; go-jose 4.1.6 is in the Dockerfiles; tags 5.4.4–5.5.3 stay)*

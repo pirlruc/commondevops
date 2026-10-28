@@ -2,8 +2,9 @@ name: Common Doc Verify (reusable)
 
 # Shellcheck, ruff, caller-vendored YAML parse, and markdown link lint.
 # Intended for documentation repos (guardrails, methodologies, github-scaffold).
-# Cross-repo callers pass checkout_token (COMMONDEVOPS_READ_TOKEN) so scripts_ref
-# can be checked out from this private repo; missing token is a caller gap.
+# Cross-repo callers pass checkout_token so scripts_ref can be checked out from
+# this private repo. Dependabot pull requests pass DEPENDABOT_GITHUB_TOKEN.
+# Actions runs pass COMMONDEVOPS_READ_TOKEN. A missing token is a caller gap.
 
 on:
   workflow_call:
@@ -104,8 +105,10 @@ env:
 
 jobs:
   verify:
-    # CI-024: Dependabot PRs cannot use Actions secrets for private reusable workflows.
-    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    # Runs on Dependabot. The caller passes DEPENDABOT_GITHUB_TOKEN as
+    # checkout_token; Actions runs pass COMMONDEVOPS_READ_TOKEN. Same-repo
+    # runs fall back to github.token. CI-024 still skips secret-backed jobs
+    # that cannot use a Dependabot token.
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:

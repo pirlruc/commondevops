@@ -3,6 +3,19 @@
 All notable changes to this repository are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Fixed
+
+- `common-doc-verify` runs on Dependabot pull requests. Cross-repo callers
+  pass `DEPENDABOT_GITHUB_TOKEN` as `checkout_token`. Actions runs pass
+  `COMMONDEVOPS_READ_TOKEN`. Same-repo runs use `github.token`.
+- grant, syft, grype, trivy, sops, tofu, and tflint builds request
+  `github.com/go-jose/go-jose/v4@v4.1.6` (CVE-2026-116587). tflint v0.65.0
+  is rebuilt from `502b6a38` because the upstream zip embeds v4.1.4.
+  Tags `5.4.4` through `5.5.3` stay put. Images are not republished, so
+  the 5.5.0 rescans still see the published binaries.
+
 ## [5.5.3] - 2026-10-28
 
 ### Fixed
