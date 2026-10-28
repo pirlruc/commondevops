@@ -8,13 +8,13 @@ https://github.com/pirlruc/commondevops/blob/main/docs/docker-hub-ci-iac.md.
 Pull with a token that has `read:packages` on this private package:
 
 ```bash
-docker pull ghcr.io/pirlruc/ci-iac:5.5.0
+docker pull ghcr.io/pirlruc/ci-iac:5.6.1
 ```
 
 Pin the digest. `latest` moves on the monthly rebuild.
 
 ```bash
-docker pull ghcr.io/pirlruc/ci-iac@sha256:b4ca9d6c75c4e7c0b6905f0125dd69910d2a92996f27dd2442dd815e4feaac5f
+docker pull ghcr.io/pirlruc/ci-iac@sha256:a34500c4c4d873e77763e6a90ca255beca504018c323366b6b2047c47a42a5a4
 ```
 
 The package is private. Actions jobs that use it need `packages: read`, and
@@ -23,7 +23,7 @@ Pin the linux/amd64 manifest, not the index, in `container.image`:
 
 ```yaml
 container:
-  image: ghcr.io/pirlruc/ci-iac@sha256:48976387ca78d6dea75d9d5a3ab26be0e738f9bb2d946de31c4ab4f7c433165f
+  image: ghcr.io/pirlruc/ci-iac@sha256:a42f9816c45cea97a5164835306abe5b4b535d2164cb177e32889d5175b09930
   credentials:
     username: ${{ github.actor }}
     password: ${{ github.token }}
@@ -33,7 +33,7 @@ Local check:
 
 ```bash
 docker run --rm -v "$PWD:/workspace" -w /workspace \
-  ghcr.io/pirlruc/ci-iac:5.5.0 \
+  ghcr.io/pirlruc/ci-iac:5.6.1 \
   tofu version
 ```
 

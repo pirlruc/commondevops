@@ -5,6 +5,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.6.2] - 2026-10-28
+
+### Changed
+
+- Reusable job-container defaults and the scheduled rescan pin the 5.6.1
+  linux/amd64 manifests. ci-lint Debian
+  `sha256:f9001c4c8726f72107545094237d4fc0592baca023cfa299a532634666d88111`.
+  ci-lint Alpine
+  `sha256:207ab77b5ced7d067cb03f7ad6a135a30cf60dfc4a0ed417f61589a7f3d48fc0`.
+  ci-supply-chain Debian
+  `sha256:dc83deb4465d5989a03b14ccabef46c3f3426231048b962c69b8e434a7200d48`.
+  ci-supply-chain Alpine
+  `sha256:7bbd542d5971594f6192da0ed0c49e29fc0c58328333d0920ab3143a2a0e04d3`.
+  ci-iac
+  `sha256:a42f9816c45cea97a5164835306abe5b4b535d2164cb177e32889d5175b09930`.
+  No image republish. Tags 5.6.0 and 5.6.1 stay put.
+
 ## [5.6.1] - 2026-10-28
 
 ### Fixed

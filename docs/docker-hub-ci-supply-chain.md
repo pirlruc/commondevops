@@ -16,8 +16,10 @@ runtime — no `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `5.5.0` / `5.5.0-alpine` / `latest` / `latest-alpine` | Alpine index `sha256:5e5485a8634cbfb0f7cc48eae61145b871f2a897439d4199c9229887a86f414e` |
-| `5.5.0-debian` / `latest-debian` | Debian index `sha256:690fc19c4b533022e24ecbbb553e3ad52e027ad419523b1e904234313d8baaeb` |
+| `5.6.1` / `5.6.1-alpine` / `latest` / `latest-alpine` | Alpine index `sha256:e922f8f384919c8c242a6e71bd81b16cfa2b0debdff759b312cb774b4bc4121a` |
+| `5.6.1-debian` / `latest-debian` | Debian index `sha256:c08f61772815421d43c050de0591f85919a701f97269e33a6d2dcb22a493bf90` |
+| `5.5.0` / `5.5.0-alpine` | Alpine index `sha256:5e5485a8634cbfb0f7cc48eae61145b871f2a897439d4199c9229887a86f414e` |
+| `5.5.0-debian` | Debian index `sha256:690fc19c4b533022e24ecbbb553e3ad52e027ad419523b1e904234313d8baaeb` |
 | `5.3.3` / `5.3.3-alpine` | Previous Alpine `sha256:eaa177b7c527ebe54449bb77b39dfd3eb9e7f403c799044a1b6647677a0aba74` |
 | `5.3.3-debian` | Previous Debian `sha256:c4319ff77a65c1223f214ca27c545a1bc81da023ea0ee33a697fc817c54c2099` |
 | `5.3.0` / `5.3.0-alpine` | Previous Alpine `sha256:71ad1ca2f404147d00351b492d051c1213dacffeb961fcd96f2053e7715ab17e` |
@@ -39,16 +41,16 @@ libc matters; prefer a digest in production.
 move `latest` off the SemVer tag — pin the digest, not `latest`.
 
 ```bash
-docker pull pirlruc/ci-supply-chain:5.5.0
-docker pull pirlruc/ci-supply-chain:5.5.0-debian
-docker pull pirlruc/ci-supply-chain@sha256:5e5485a8634cbfb0f7cc48eae61145b871f2a897439d4199c9229887a86f414e
+docker pull pirlruc/ci-supply-chain:5.6.1
+docker pull pirlruc/ci-supply-chain:5.6.1-debian
+docker pull pirlruc/ci-supply-chain@sha256:e922f8f384919c8c242a6e71bd81b16cfa2b0debdff759b312cb774b4bc4121a
 ```
 
 ## Quick start
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-supply-chain:5.5.0 \
+  pirlruc/ci-supply-chain:5.6.1 \
   syft . -o spdx-json
 ```
 
@@ -61,7 +63,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-supply-chain:5.5.0 \
+  pirlruc/ci-supply-chain:5.6.1 \
   trivy fs --scanners vuln --severity HIGH,CRITICAL .
 ```
 
@@ -81,12 +83,12 @@ semgrep (see `ci-lint`), cosign (installed on the publish runner), dive (see
 ## Verify a publish
 
 ```bash
-docker pull pirlruc/ci-supply-chain@sha256:5e5485a8634cbfb0f7cc48eae61145b871f2a897439d4199c9229887a86f414e
+docker pull pirlruc/ci-supply-chain@sha256:e922f8f384919c8c242a6e71bd81b16cfa2b0debdff759b312cb774b4bc4121a
 
 cosign verify \
   --certificate-identity-regexp 'https://github.com/pirlruc/commondevops/.github/workflows/' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  pirlruc/ci-supply-chain@sha256:5e5485a8634cbfb0f7cc48eae61145b871f2a897439d4199c9229887a86f414e
+  pirlruc/ci-supply-chain@sha256:e922f8f384919c8c242a6e71bd81b16cfa2b0debdff759b312cb774b4bc4121a
 ```
 
 Signing runs only when the source repository is public.
