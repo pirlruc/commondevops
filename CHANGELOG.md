@@ -3,6 +3,15 @@
 All notable changes to this repository are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [5.5.2] - 2026-10-28
+
+### Fixed
+
+- Reusable job defaults stay on the 5.4.4 digests. ci-lint and
+  ci-supply-chain 5.5.0 are private, and other repositories get
+  `manifest unknown` when they pull those digests. The in-repo
+  rescan still uses the 5.5.0 digests.
+
 ## [5.5.1] - 2026-10-27
 
 ### Changed
