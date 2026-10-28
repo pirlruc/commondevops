@@ -25,7 +25,7 @@ secrets scanning stay on `ci-lint`.
 Pin the digest. A monthly rebuild can move `latest`.
 
 ```bash
-docker pull pirlruc/ci-iac@sha256:3a25e6c307ebe0e06466e3026b7ed91b1c5a7b24d45382eb986c578fa4cd0a03
+docker pull pirlruc/ci-iac@sha256:b4ca9d6c75c4e7c0b6905f0125dd69910d2a92996f27dd2442dd815e4feaac5f
 ```
 
 ## Tools
