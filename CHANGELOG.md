@@ -3,6 +3,18 @@
 All notable changes to this repository are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [5.5.1] - 2026-10-27
+
+### Changed
+
+- Job containers and the published rescans use the 5.5.0 linux/amd64
+  digests. ci-lint `sha256:4d96a0235459c9e2cc724a724f42008dcdc3294940c57edb8b33b11e38efddba`.
+  ci-supply-chain Debian `sha256:b43eb3a99bc4c2003eb64ef5d6d0cdcbbc22d78904aa6b24d76ad0426035a7f6`.
+  ci-supply-chain Alpine `sha256:418d50c4ac06a0b913f00f63f228f8df219584b13f3d55502b8f94a14c410b87`.
+  ci-iac `sha256:48976387ca78d6dea75d9d5a3ab26be0e738f9bb2d946de31c4ab4f7c433165f`.
+- Hub latest rows match the 5.5.0 indexes. The 5.5.0 release uploaded
+  fresh image posture. Older tag alerts stay until they are dismissed.
+
 ## [5.5.0] - 2026-10-27
 
 ### Changed

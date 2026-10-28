@@ -17,7 +17,8 @@ secrets scanning stay on `ci-lint`.
 
 | Tag | Meaning |
 |-----|---------|
-| `5.4.1` / `latest` | Debian `sha256:3a25e6c307ebe0e06466e3026b7ed91b1c5a7b24d45382eb986c578fa4cd0a03` |
+| `5.5.0` / `latest` | Debian index `sha256:b4ca9d6c75c4e7c0b6905f0125dd69910d2a92996f27dd2442dd815e4feaac5f` |
+| `5.4.1` | Previous Debian `sha256:3a25e6c307ebe0e06466e3026b7ed91b1c5a7b24d45382eb986c578fa4cd0a03` |
 | `5.4.0` | Previous Debian `sha256:c3a4d978d820027737a388357a778d99075625667a838b20567747012f6205c0` |
 | `sha-<git>` | Git commit of the published image |
 
