@@ -71,7 +71,7 @@ sh scripts/check-ci-local.sh
 |-------|----------|------|
 | `ghcr.io/pirlruc/ci-lint` | actionlint, hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep. Debian owns the unsuffixed tag. Alpine is `-alpine` and does not include semgrep | [Hub](docs/docker-hub-ci-lint.md) · [GHCR](docs/github-packages-ci-lint.md) |
 | `ghcr.io/pirlruc/ci-supply-chain` | syft, grype, trivy, grant. Alpine owns the unsuffixed tag. Debian is `-debian` | [Hub](docs/docker-hub-ci-supply-chain.md) · [GHCR](docs/github-packages-ci-supply-chain.md) |
-| `ghcr.io/pirlruc/ci-iac` | OpenTofu, tflint, sops, age, ansible-lint. Debian only. Published with release 5.4.1 | [Hub](docs/docker-hub-ci-iac.md) · [GHCR](docs/github-packages-ci-iac.md) |
+| `ghcr.io/pirlruc/ci-iac` | OpenTofu, tflint, sops, age, ansible-lint. Debian only. Published with release 5.5.0 | [Hub](docs/docker-hub-ci-iac.md) · [GHCR](docs/github-packages-ci-iac.md) |
 
 Built via [`ci-lint-image.yml`](.github/workflows/ci-lint-image.yml),
 [`ci-supply-chain-image.yml`](.github/workflows/ci-supply-chain-image.yml), and

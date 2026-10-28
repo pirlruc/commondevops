@@ -1,7 +1,7 @@
 ---
 # Thin caller — publishes ghcr.io/pirlruc/ci-lint (+ Docker Hub when secrets set).
 # Debian and Alpine variants. Debian owns unsuffixed tags: semgrep 1.179 has no musl wheel.
-# containerdevops pin: tag 6.3.0 (handoff_package + digest; image_ref is secret-masked).
+# containerdevops pin: tag 6.3.5 (handoff_package + digest; image_ref is secret-masked).
 name: CI Lint Image
 
 on:
@@ -41,11 +41,11 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
       dockerfile: docker/ci-lint/Dockerfile
       working_directory: .
-      scripts_ref: dd884203c9ffe30e4d4da838cc9e88a888a484a1
+      scripts_ref: c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
       runner_image: ""
       run_infra_lint: false
       run_secrets_scan: true
@@ -62,11 +62,11 @@ jobs:
     permissions:
       contents: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
       dockerfile: docker/ci-lint/Dockerfile.alpine
       working_directory: .
-      scripts_ref: dd884203c9ffe30e4d4da838cc9e88a888a484a1
+      scripts_ref: c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
       runner_image: ""
       run_infra_lint: false
       run_secrets_scan: true
@@ -84,7 +84,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile
@@ -92,7 +92,7 @@ jobs:
       artifact_name: container-image-debian
       handoff_package: ci-lint
       structure_test_config: docker/ci-lint/container-structure-test.yml
-      scripts_ref: dd884203c9ffe30e4d4da838cc9e88a888a484a1
+      scripts_ref: c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
       size_class: ci_toolchain
       image_title: ci-lint
@@ -115,7 +115,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile.alpine
@@ -123,7 +123,7 @@ jobs:
       artifact_name: container-image-alpine
       handoff_package: ci-lint
       structure_test_config: docker/ci-lint/container-structure-test.alpine.yml
-      scripts_ref: dd884203c9ffe30e4d4da838cc9e88a888a484a1
+      scripts_ref: c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
       size_class: ci_toolchain
       image_title: ci-lint
@@ -147,12 +147,12 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
       image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build.outputs.handoff_package, needs.build.outputs.digest) }}
       results_artifact: container-scan-results-debian
-      sarif_category: trivy-image-debian
-      scripts_ref: dd884203c9ffe30e4d4da838cc9e88a888a484a1
+      sarif_category: trivy-ci-lint-debian
+      scripts_ref: c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
       pkg_types: library
       ignorefile: docker/ci-lint/.trivyignore.yaml
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -169,12 +169,12 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
       image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build-alpine.outputs.handoff_package, needs.build-alpine.outputs.digest) }}
       results_artifact: container-scan-results-alpine
-      sarif_category: trivy-image-alpine
-      scripts_ref: dd884203c9ffe30e4d4da838cc9e88a888a484a1
+      sarif_category: trivy-ci-lint-alpine
+      scripts_ref: c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
       pkg_types: library
       ignorefile: docker/ci-lint/.trivyignore.yaml
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
@@ -192,12 +192,12 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
       image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build.outputs.handoff_package, needs.build.outputs.digest) }}
       results_artifact: container-scan-posture-debian
-      sarif_category: trivy-posture-debian
-      scripts_ref: dd884203c9ffe30e4d4da838cc9e88a888a484a1
+      sarif_category: trivy-ci-lint-posture-debian
+      scripts_ref: c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
       pkg_types: os,library
       ignorefile: none
       blocking: false
@@ -214,12 +214,12 @@ jobs:
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
       image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build-alpine.outputs.handoff_package, needs.build-alpine.outputs.digest) }}
       results_artifact: container-scan-posture-alpine
-      sarif_category: trivy-posture-alpine
-      scripts_ref: dd884203c9ffe30e4d4da838cc9e88a888a484a1
+      sarif_category: trivy-ci-lint-posture-alpine
+      scripts_ref: c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
       pkg_types: os,library
       ignorefile: none
       blocking: false
@@ -238,13 +238,13 @@ jobs:
       packages: write
       id-token: write
       attestations: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile
       image_name: ci-lint
       dockerhub_image: pirlruc/ci-lint
-      scripts_ref: dd884203c9ffe30e4d4da838cc9e88a888a484a1
+      scripts_ref: c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
       platforms: linux/amd64
       tag_suffix: -debian
       tag_alias_unsuffixed: true
@@ -282,13 +282,13 @@ jobs:
       packages: write
       id-token: write
       attestations: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
       context: docker/ci-lint
       dockerfile: docker/ci-lint/Dockerfile.alpine
       image_name: ci-lint
       dockerhub_image: pirlruc/ci-lint
-      scripts_ref: dd884203c9ffe30e4d4da838cc9e88a888a484a1
+      scripts_ref: c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
       platforms: linux/amd64
       tag_suffix: -alpine
       tag_alias_unsuffixed: false
@@ -320,7 +320,7 @@ jobs:
     if: always() && github.event_name == 'pull_request' && needs.build.outputs.handoff_tag != ''
     permissions:
       packages: write
-    uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
       package: ${{ needs.build.outputs.handoff_package }}
       tag: ${{ needs.build.outputs.handoff_tag }}
@@ -330,7 +330,7 @@ jobs:
     if: always() && github.event_name == 'pull_request' && needs.build-alpine.outputs.handoff_tag != ''
     permissions:
       packages: write
-    uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
       package: ${{ needs.build-alpine.outputs.handoff_package }}
       tag: ${{ needs.build-alpine.outputs.handoff_tag }}

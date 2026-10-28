@@ -43,14 +43,14 @@ the digest, not `latest`.
 If the package is public, anonymous pulls work:
 
 ```bash
-docker pull ghcr.io/pirlruc/ci-lint:5.3.3
+docker pull ghcr.io/pirlruc/ci-lint:5.5.0
 ```
 
 If the package is private, authenticate with a PAT that has `read:packages`:
 
 ```bash
 echo "$CR_PAT" | docker login ghcr.io -u USERNAME --password-stdin
-docker pull ghcr.io/pirlruc/ci-lint:5.3.3
+docker pull ghcr.io/pirlruc/ci-lint:5.5.0
 # or
 docker pull ghcr.io/pirlruc/ci-lint@sha256:5551873fd68cc807611f3feddfdca79c5f73dc8cab87031c8e548cae29e6661a
 ```
@@ -62,7 +62,7 @@ jobs:
   lint:
     runs-on: ubuntu-24.04
     container:
-      image: ghcr.io/pirlruc/ci-lint:5.3.3
+      image: ghcr.io/pirlruc/ci-lint@sha256:4d96a0235459c9e2cc724a724f42008dcdc3294940c57edb8b33b11e38efddba
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -78,7 +78,7 @@ Grant the package **Actions** Read access for the calling repository when using
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  ghcr.io/pirlruc/ci-lint:5.3.3 \
+  ghcr.io/pirlruc/ci-lint:5.5.0 \
   actionlint .github/workflows/*.yml
 ```
 
@@ -91,7 +91,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  ghcr.io/pirlruc/ci-lint:5.3.3 \
+  ghcr.io/pirlruc/ci-lint:5.5.0 \
   semgrep scan --config auto --error .
 ```
 

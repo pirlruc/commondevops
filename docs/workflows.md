@@ -82,8 +82,7 @@ Empty path inputs skip that tool.
 Doc repos still need `COMMONDEVOPS_READ_TOKEN` to fetch this private reusable
 and its `scripts/`. Ship the workflow first; wire callers after the token exists.
 
-Pin the commit that introduced this file (after commondevops PR #62 merges);
-do not reuse older consumer pins that predate it.
+Pin `uses:` and `scripts_ref` to the same commit (CI-018).
 
 ---
 
@@ -100,7 +99,7 @@ Needs `contents: read`. Fetches tags so `git describe` works on PRs.
 `scripts_ref` must still equal the caller `uses:` pin (CI-018). This reusable
 does not sparse-checkout commondevops scripts.
 
-Pin the commit that introduced this file (after PR #62 merges).
+Pin `uses:` and `scripts_ref` to the same commit (CI-018).
 
 ---
 
@@ -219,13 +218,12 @@ reusables against this repository (`scripts_ref: ${{ github.sha }}`).
 
 ## `devops-security.yml` (scheduled)
 
-Weekly secrets/SAST, supply-chain, Scorecard, and registry rescans of
-digest-pinned `ghcr.io/pirlruc/ci-lint:5.5.0@sha256:4d96a0235459c9e2cc724a724f42008dcdc3294940c57edb8b33b11e38efddba`
-and
-`ghcr.io/pirlruc/ci-supply-chain:5.3.3@sha256:eaa177b7c527ebe54449bb77b39dfd3eb9e7f403c799044a1b6647677a0aba74`
-via containerdevops
-`container-published-rescan.yml@5.0.2` (`32384866…`). Image CI still calls
-`container-scan.yml` at the same SHA.
+Weekly secrets/SAST, supply-chain, Scorecard, and registry rescans of the
+published linux/amd64 images through containerdevops
+`container-published-rescan.yml` at 6.3.5
+(`c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e`). The rescan targets move
+with each image release. Image CI calls `container-scan.yml` at that
+same commit.
 
 ---
 

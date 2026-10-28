@@ -34,8 +34,8 @@ docker pull pirlruc/ci-iac@sha256:b4ca9d6c75c4e7c0b6905f0125dd69910d2a92996f27dd
 |------|---------|
 | OpenTofu | 1.13.2, rebuilt with Go 1.27.3 |
 | tflint | 0.65.0 |
-| sops | 3.13.3, rebuilt with Go 1.26.10 |
-| age | 1.3.2, rebuilt with Go 1.26.10 |
+| sops | 3.13.3, rebuilt with Go 1.27 |
+| age | 1.3.2, rebuilt with Go 1.27 |
 | ansible-lint | 26.10.1 |
 
 ## Quick start
@@ -44,7 +44,7 @@ docker pull pirlruc/ci-iac@sha256:b4ca9d6c75c4e7c0b6905f0125dd69910d2a92996f27dd
 docker run --rm -v "$PWD:/workspace" -w /workspace \
   --read-only --cap-drop ALL --security-opt no-new-privileges \
   --tmpfs /tmp \
-  pirlruc/ci-iac:5.4.1 \
+  pirlruc/ci-iac:5.5.0 \
   tofu fmt -check -recursive
 ```
 

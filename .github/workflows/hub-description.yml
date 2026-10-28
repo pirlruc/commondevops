@@ -19,7 +19,7 @@ jobs:
   ci-lint:
     permissions:
       contents: read
-    uses: pirlruc/containerdevops/.github/workflows/container-hub-description.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-hub-description.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
       dockerhub_image: pirlruc/ci-lint
       dockerhub_readme: docs/docker-hub-ci-lint.md
@@ -32,7 +32,7 @@ jobs:
   ci-supply-chain:
     permissions:
       contents: read
-    uses: pirlruc/containerdevops/.github/workflows/container-hub-description.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-hub-description.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
       dockerhub_image: pirlruc/ci-supply-chain
       dockerhub_readme: docs/docker-hub-ci-supply-chain.md
@@ -45,7 +45,7 @@ jobs:
   ci-iac:
     permissions:
       contents: read
-    uses: pirlruc/containerdevops/.github/workflows/container-hub-description.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-hub-description.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
       dockerhub_image: pirlruc/ci-iac
       dockerhub_readme: docs/docker-hub-ci-iac.md
