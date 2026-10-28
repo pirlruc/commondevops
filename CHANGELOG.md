@@ -5,6 +5,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.6.0] - 2026-10-28
+
 ### Fixed
 
 - Job-container registry login uses `github.token`. A fine-grained

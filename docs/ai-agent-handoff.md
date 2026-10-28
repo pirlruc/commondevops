@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
-| **Branch** | `feature-jose-credentials`. GitHub Release **5.5.0** is `66f9b4a`. Annotated tags **5.5.1**–**5.5.3** stay put. Job-container login uses `github.token`. Image workflows pin containerdevops 6.3.5. The next image release republishes go-jose/v4 4.1.6. Do not move `5.4.4`–`5.5.3`. |
+| **Branch** | `main` after the GHCR login fix. GitHub Release **5.6.0** republishes the images with go-jose/v4 4.1.6. Annotated tags **5.5.1**–**5.5.3** stay put. Job-container login uses `github.token`. Image workflows pin containerdevops 6.3.5. Do not move `5.4.4`–`5.5.3`. |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
