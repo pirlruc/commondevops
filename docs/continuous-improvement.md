@@ -150,7 +150,7 @@ Ecosystem (URL only): [guardrails](https://github.com/pirlruc/guardrails),
 Do not recommend removing these without **requires user decision**:
 
 1. Consumers pin reusable workflows by **commit SHA** with matching `scripts_ref`
-2. Private cross-repo callers pass `checkout_token` (CI-024 Dependabot skip stays)
+2. Private cross-repo callers pass `checkout_token`. Dependabot pulls pass `DEPENDABOT_GITHUB_TOKEN` into doc-verify and scaffold. Other secret-backed jobs stay skipped (CI-024)
 3. Top-level default-deny `permissions:` and `persist-credentials: false` (CI-025)
 4. `docs/issues.yml` is the authored backlog — sync creates issues; no hand-created owned issues
 5. Guardrails stay canonical in `pirlruc/guardrails` — cite IDs; record deviations here only

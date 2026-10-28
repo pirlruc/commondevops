@@ -21,7 +21,7 @@ RUN git init \
  && git fetch --depth 1 origin 0fb3c502202139efcf4a20aa72014cf6eafab930 \
  && git checkout --detach FETCH_HEAD \
  && test "$(git rev-parse HEAD)" = "0fb3c502202139efcf4a20aa72014cf6eafab930" \
- && go get golang.org/x/crypto@v0.57.0 golang.org/x/mod@v0.41.0 golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 github.com/klauspost/compress@v1.18.7 github.com/containerd/containerd/v2@v2.3.4 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 \
+ && go get golang.org/x/crypto@v0.57.0 golang.org/x/mod@v0.41.0 golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 github.com/klauspost/compress@v1.18.7 github.com/containerd/containerd/v2@v2.3.4 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 github.com/go-jose/go-jose/v4@v4.1.6 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/grant ./cmd/grant
 
 FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:2ceb813d69b9c82501323484e0c0ae612efde281f5dffce2a3d83a79a9c87304 AS syft-build
@@ -31,7 +31,7 @@ RUN git init \
  && git fetch --depth 1 origin 16223e6dd7893fe578787658ceb876257483d404 \
  && git checkout --detach FETCH_HEAD \
  && test "$(git rev-parse HEAD)" = "16223e6dd7893fe578787658ceb876257483d404" \
- && go get golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 github.com/containerd/containerd/v2@v2.3.4 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 \
+ && go get golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 github.com/containerd/containerd/v2@v2.3.4 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 github.com/go-jose/go-jose/v4@v4.1.6 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/syft ./cmd/syft
 
 FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:2ceb813d69b9c82501323484e0c0ae612efde281f5dffce2a3d83a79a9c87304 AS grype-build
@@ -41,7 +41,7 @@ RUN git init \
  && git fetch --depth 1 origin afe2742527d98d822da06c9f32eed86fe3d193e0 \
  && git checkout --detach FETCH_HEAD \
  && test "$(git rev-parse HEAD)" = "afe2742527d98d822da06c9f32eed86fe3d193e0" \
- && go get golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 \
+ && go get golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 github.com/go-jose/go-jose/v4@v4.1.6 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/grype ./cmd/grype
 
 FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:2ceb813d69b9c82501323484e0c0ae612efde281f5dffce2a3d83a79a9c87304 AS trivy-build
@@ -51,6 +51,7 @@ RUN git init \
  && git fetch --depth 1 origin e713f67f7d54decdcd9b3132c9751833dcced698 \
  && git checkout --detach FETCH_HEAD \
  && test "$(git rev-parse HEAD)" = "e713f67f7d54decdcd9b3132c9751833dcced698" \
+ && go get github.com/go-jose/go-jose/v4@v4.1.6 \
  && CGO_ENABLED=0 GOEXPERIMENT=jsonv2 go build -trimpath -ldflags="-s -w" -o /out/trivy ./cmd/trivy
 
 # dhi.io/python:3.13-alpine3.24-dev — digest pinned (DOCKER-BUILD-003 / CI-026)

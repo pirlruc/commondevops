@@ -5,8 +5,9 @@
 # No HEALTHCHECK: short-lived CI toolchain (CLI job container), not a supervised
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 #
-# age and sops are rebuilt on Go 1.26.10. OpenTofu 1.13.2 requires Go 1.27.3,
-# so that stage sets GOTOOLCHAIN. tflint 0.65.0 stays the upstream release.
+# age, sops, tofu, and tflint are rebuilt on Go 1.27. OpenTofu 1.13.2
+# requires Go 1.27.3, so that stage sets GOTOOLCHAIN. tflint v0.65.0 is
+# rebuilt from 502b6a38 so go-jose/v4 is 4.1.6.
 
 FROM dhi.io/golang:1.27-debian13-dev@sha256:4bbc77c673289765ba1facc2cc56678cd8d613db25a123b7e2ecc1315a53620a AS age-build
 WORKDIR /src
@@ -25,7 +26,7 @@ RUN git init \
  && git fetch --depth 1 origin 26e2f4784ca61353082c32dbd987c25eda086dc9 \
  && git checkout --detach FETCH_HEAD \
  && test "$(git rev-parse HEAD)" = "26e2f4784ca61353082c32dbd987c25eda086dc9" \
- && go get golang.org/x/crypto@v0.57.0 golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 google.golang.org/grpc@v1.83.2 \
+ && go get golang.org/x/crypto@v0.57.0 golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 google.golang.org/grpc@v1.83.2 github.com/go-jose/go-jose/v4@v4.1.6 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/sops ./cmd/sops
 
 FROM dhi.io/golang:1.27-debian13-dev@sha256:4bbc77c673289765ba1facc2cc56678cd8d613db25a123b7e2ecc1315a53620a AS tofu-build
@@ -35,35 +36,20 @@ RUN git init \
  && git fetch --depth 1 origin 765062032c46cacab116b36d714db098b806dede \
  && git checkout --detach FETCH_HEAD \
  && test "$(git rev-parse HEAD)" = "765062032c46cacab116b36d714db098b806dede" \
- && GOTOOLCHAIN=go1.27.3 go get golang.org/x/crypto@v0.57.0 golang.org/x/mod@v0.41.0 golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 google.golang.org/grpc@v1.83.2 \
+ && GOTOOLCHAIN=go1.27.3 go get golang.org/x/crypto@v0.57.0 golang.org/x/mod@v0.41.0 golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 google.golang.org/grpc@v1.83.2 github.com/go-jose/go-jose/v4@v4.1.6 \
  && CGO_ENABLED=0 GOTOOLCHAIN=go1.27.3 go build -trimpath -ldflags="-s -w" -o /out/tofu ./cmd/tofu
 
-FROM dhi.io/python:3.13-debian13-dev@sha256:e06c1af7512805e1822259b7e9fe6ab27462a09c71c9520bc47b5c5388e3fce6 AS fetch
-USER root
-RUN python3 - <<'PY'
-import hashlib
-import urllib.request
-import zipfile
-from pathlib import Path
-
-out = Path("/out")
-out.mkdir(parents=True, exist_ok=True)
-dest = Path("/tmp/tflint.zip")
-urllib.request.urlretrieve(
-    "https://github.com/terraform-linters/tflint/releases/download/v0.65.0/tflint_linux_amd64.zip",
-    dest,
-)
-digest = hashlib.sha256(dest.read_bytes()).hexdigest()
-if digest != "d4c545ed2e29d6338604b586f34f544f380f70f243aa72f7b484713835eaec61":
-    raise SystemExit(f"checksum mismatch for tflint: {digest}")
-with zipfile.ZipFile(dest) as archive:
-    archive.extract("tflint", "/tmp/tflint-src")
-target = out / "tflint"
-target.write_bytes(Path("/tmp/tflint-src/tflint").read_bytes())
-target.chmod(0o755)
-PY
-
-USER 1000
+# tflint v0.65.0 rebuilt so go-jose/v4 is 4.1.6 (CVE-2026-116587). The
+# upstream zip still embeds v4.1.4. Latest release is still v0.65.0.
+FROM dhi.io/golang:1.27-debian13-dev@sha256:4bbc77c673289765ba1facc2cc56678cd8d613db25a123b7e2ecc1315a53620a AS tflint-build
+WORKDIR /src
+RUN git init \
+ && git remote add origin https://github.com/terraform-linters/tflint.git \
+ && git fetch --depth 1 origin 502b6a3849534fe5518177d105a8db616b09b74d \
+ && git checkout --detach FETCH_HEAD \
+ && test "$(git rev-parse HEAD)" = "502b6a3849534fe5518177d105a8db616b09b74d" \
+ && go get github.com/go-jose/go-jose/v4@v4.1.6 \
+ && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/tflint .
 
 FROM dhi.io/python:3.13-debian13-dev@sha256:e06c1af7512805e1822259b7e9fe6ab27462a09c71c9520bc47b5c5388e3fce6 AS pybuild
 COPY --from=ghcr.io/astral-sh/uv:0.12.0@sha256:606e70c71c852d03f611b1e56a195d08648507018a7057fab82c4974c4eae105 \
@@ -86,7 +72,7 @@ LABEL org.opencontainers.image.title="ci-iac" \
       org.opencontainers.image.licenses="MIT"
 
 COPY --from=tofu-build /out/tofu /usr/local/bin/tofu
-COPY --from=fetch /out/tflint /usr/local/bin/tflint
+COPY --from=tflint-build /out/tflint /usr/local/bin/tflint
 COPY --from=sops-build /out/sops /usr/local/bin/sops
 COPY --from=age-build /out/age /out/age-keygen /usr/local/bin/
 COPY --from=pybuild /usr/lib/python3.13/site-packages /usr/lib/python3.13/site-packages
