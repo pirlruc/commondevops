@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
-| **Branch** | `main`. GitHub Release **5.5.0** is `66f9b4a`. Annotated tags **5.5.1**–**5.5.3** have no Release. **5.5.3** is `c8ab717`. Reusable defaults stay on the pullable 5.3.3 digests. In-repo rescans use the 5.5.0 digests. `common-doc-verify` runs on Dependabot. Image Dockerfiles request go-jose/v4 4.1.6. Do not move `5.4.4`–`5.5.3`. Do not republish the 5.5.0 images from this change. |
+| **Branch** | `feature-jose-credentials`. GitHub Release **5.5.0** is `66f9b4a`. Annotated tags **5.5.1**–**5.5.3** stay put. Job-container login uses `github.token`. Image workflows pin containerdevops 6.3.5. The next image release republishes go-jose/v4 4.1.6. Do not move `5.4.4`–`5.5.3`. |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
@@ -53,7 +53,7 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | guardrails submodule | tag **1.13.1** → `1945211ac851c3c0f83694bd4ea53571fdced4ab` |
 | github-scaffold submodule | tag **1.10.0** → `1d9901f7e7e5785abb7cac6f5d46e0e8e2023ff8` |
 | methodologies (links only; not a submodule) | tag **1.9.1** |
-| containerdevops (image callers + security rescan) | tag **6.3.0** → `dd884203c9ffe30e4d4da838cc9e88a888a484a1` |
+| containerdevops (image callers + security rescan) | tag **6.3.5** → `c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 | `ghcr.io/pirlruc/ci-lint` (debian, unsuffixed) | `5.5.0` index `sha256:5551873fd68cc807611f3feddfdca79c5f73dc8cab87031c8e548cae29e6661a`. Actions amd64 `sha256:4d96a0235459c9e2cc724a724f42008dcdc3294940c57edb8b33b11e38efddba`. |
 | `ghcr.io/pirlruc/ci-lint` (alpine) | `5.3.3-alpine` `sha256:bdd9c2ea12ad700da6ebd8426845d883510156a188b741f32ffd9ceb3f43f830` |
@@ -163,6 +163,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
+- 2026-10-28: Job containers log in to GHCR with `github.token`. Image scans use separate SARIF categories. Image workflows pin containerdevops 6.3.5. The next GitHub Release republishes the go-jose 4.1.6 images.
 - 2026-10-28: `common-doc-verify` no longer skips Dependabot. Callers pass `DEPENDABOT_GITHUB_TOKEN` on those pulls and `COMMONDEVOPS_READ_TOKEN` on Actions runs. grant, syft, grype, trivy, sops, tofu, and tflint Docker builds request go-jose/v4 4.1.6. tflint v0.65.0 is rebuilt from `502b6a38`. No tag and no image republish, so the 5.5.0 rescan still scans the published binaries.
 - 2026-10-28: The 5.5.0 Debian posture SARIF for ci-lint and ci-supply-chain was uploaded to `refs/heads/main` at `2eac235`. Five of the 38 `trivy-posture-debian` alerts closed as fixed (138, 175, 176, 177, 257). The other 33 are still in the 5.5.0 ci-lint posture and stay open. Supply-chain adds 37 open alerts on the same commit. `trivy-ci-lint` and `trivy-ci-supply-chain` were last analyzed on 2026-10-26 at `4e6f3385` and did not close. Do not move `5.4.4`–`5.5.3`.
 - 2026-10-28: **5.5.3** on `c8ab717` puts reusable defaults back on the 5.3.3 digests. ci-lint and ci-supply-chain 5.5.0 are private, so other repos stay on commondevops `4a7c8c43`. Do not move `5.4.4`–`5.5.3`.

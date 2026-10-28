@@ -7,14 +7,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
-- `common-doc-verify` runs on Dependabot pull requests. Cross-repo callers
-  pass `DEPENDABOT_GITHUB_TOKEN` as `checkout_token`. Actions runs pass
-  `COMMONDEVOPS_READ_TOKEN`. Same-repo runs use `github.token`.
-- grant, syft, grype, trivy, sops, tofu, and tflint builds request
-  `github.com/go-jose/go-jose/v4@v4.1.6` (CVE-2026-116587). tflint v0.65.0
-  is rebuilt from `502b6a38` because the upstream zip embeds v4.1.4.
-  Tags `5.4.4` through `5.5.3` stay put. Images are not republished, so
-  the 5.5.0 rescans still see the published binaries.
+- Job-container registry login uses `github.token`. A fine-grained
+  `checkout_token` stays on the commondevops checkout and is not the
+  GHCR password.
+- ci-lint and ci-supply-chain image scans use distinct SARIF categories
+  so the two workflows do not share `trivy-posture-debian`.
+- Image workflows and Hub description pin containerdevops 6.3.5
+  (`c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e`).
+
+### Changed
+
+- This release republishes ci-lint, ci-supply-chain, and ci-iac so the
+  published binaries include go-jose/v4 4.1.6 (CVE-2026-116587). Tags
+  `5.4.4` through `5.5.3` stay put.
 
 ## [5.5.3] - 2026-10-28
 
