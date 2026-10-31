@@ -1622,3 +1622,37 @@ milestones:
             - .github/workflows/
           verification:
           - "rg -n 'container.credentials|packages: read' .github/workflows"
+
+      - id: CMN-REL-003
+        status: done
+        title: Attach a caller artifact and its checksums to a GitHub Release
+        overview:
+          problem: >-
+            common-release can attach an SBOM from a supply-chain job, but not
+            an APK or other file a caller built earlier in the same run.
+          goal: >-
+            Callers pass the artifact name and an optional file list. The
+            release attaches those files and a SHA-256 checksum for each one.
+        decision: >-
+          In the context of publishing a mobile build, facing a release
+          workflow that only attaches SBOMs, we decided to download a named
+          artifact from the same run, to achieve checksummed release assets,
+          accepting that the artifact must be uploaded before the release job.
+        acceptance_criteria:
+          - release_artifact empty keeps the previous behaviour
+          - Each attached file has a sibling .sha256 asset
+          - A release_files name missing from the artifact fails the job
+        guardrail_refs:
+          - REL-PUB-003
+        tasks:
+          - id: CMN-REL-003-T1
+            status: done
+            title: Add release_artifact and release_files to common-release
+            instructions:
+              files:
+                - .github/workflows/common-release.yml
+                - docs/workflows.md
+            verification:
+              - actionlint .github/workflows/common-release.yml
+            guardrail_refs:
+              - REL-PUB-003

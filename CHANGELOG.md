@@ -5,6 +5,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.7.0] - 2026-10-31
+
+### Added
+
+- `common-release` takes `release_artifact` and `release_files`. A caller
+  uploads the artifact in an earlier job of the same run. The release
+  attaches those files and a `.sha256` checksum for each one.
+
 ## [5.6.2] - 2026-10-28
 
 ### Changed

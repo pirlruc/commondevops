@@ -136,6 +136,10 @@ python3 .github/scaffold/scripts/issues-sync.py \
 - **Publish / release_token:** cut releases with a PAT (`GITHUB_TOKEN`-created
   releases do not trigger workflows). Pass `secrets.release_token` into
   `common-release.yml` when the release-event chain matters.
+  `release_artifact` downloads an artifact uploaded earlier in the **same**
+  run (`needs:` the build job). It is not a previous run. `release_files`
+  filters by path or basename. Checksums are regenerated; do not ship a
+  hand-written `.sha256` inside the artifact.
 - **Signing:** keep `sign: false` while private.
 - **DHI `status.d`:** after `apt-get purge` of `-dev` packages, also delete
   `/var/lib/dpkg/status.d/<pkg>` or Trivy reports phantom linux-libc-dev CVEs.
@@ -163,6 +167,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
+- 2026-10-31: **5.7.0** adds `release_artifact` and `release_files` to `common-release`. No image republish. Do not move `5.6.2`.
 - 2026-10-28: **5.6.1** published ci-lint, ci-supply-chain, and ci-iac with go-jose/v4 4.1.6. **5.6.0** died at startup and stays put. **5.6.2** pins the linux/amd64 manifests in the reusable defaults, the rescan, and the Hub/GHCR pages. No second publish.
 - 2026-10-28: Job containers log in to GHCR with `github.token`. Image scans use separate SARIF categories. Image workflows pin containerdevops 6.3.5. Lint callers grant `packages: read`. Scan callers grant `actions: read`.
 - 2026-10-28: `common-doc-verify` no longer skips Dependabot. Callers pass `DEPENDABOT_GITHUB_TOKEN` on those pulls and `COMMONDEVOPS_READ_TOKEN` on Actions runs. grant, syft, grype, trivy, sops, tofu, and tflint Docker builds request go-jose/v4 4.1.6. tflint v0.65.0 is rebuilt from `502b6a38`. No tag and no image republish, so the 5.5.0 rescan still scans the published binaries.
@@ -254,4 +259,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-28 (5.6.1 published the images; 5.6.2 records the linux/amd64 digests; tags 5.4.4–5.6.1 stay)*
+*Last updated: 2026-10-31 (5.7.0 release artifact inputs; 5.6.2 stays)*
