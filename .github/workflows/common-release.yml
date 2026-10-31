@@ -22,6 +22,22 @@ on:
         required: false
         type: string
         default: common-supply-chain-results
+      release_artifact:
+        description: >-
+          Name of an artifact uploaded earlier in this workflow run. Empty
+          skips the download. Each attached file also gets a .sha256 asset.
+        required: false
+        type: string
+        default: ""
+      release_files:
+        description: >-
+          Newline-separated paths or basenames inside release_artifact.
+          Empty attaches every file. A name that is missing fails the job.
+          Existing .sha256 files in the artifact are ignored; checksums are
+          regenerated.
+        required: false
+        type: string
+        default: ""
     secrets:
       release_token:
         description: >-
@@ -42,6 +58,12 @@ on:
       sbom_artifact:
         type: string
         default: common-supply-chain-results
+      release_artifact:
+        type: string
+        default: ""
+      release_files:
+        type: string
+        default: ""
 
 permissions: {}
 
@@ -93,12 +115,74 @@ jobs:
           name: ${{ inputs.sbom_artifact }}
           path: sbom-attach
 
+      - name: Download release artifact
+        if: inputs.release_artifact != ''
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ inputs.release_artifact }}
+          path: release-attach
+
+      - name: Select release files and write checksums
+        if: inputs.release_artifact != ''
+        env:
+          RELEASE_FILES: ${{ inputs.release_files }}
+        run: |
+          set -euo pipefail
+          mkdir -p release-out
+          declare -A wanted=()
+          if [[ -n "${RELEASE_FILES}" ]]; then
+            while IFS= read -r name || [[ -n "${name}" ]]; do
+              name="${name#"${name%%[![:space:]]*}"}"
+              name="${name%"${name##*[![:space:]]}"}"
+              [[ -z "${name}" || "${name}" == \#* ]] && continue
+              wanted["${name}"]=0
+            done <<< "${RELEASE_FILES}"
+          fi
+          while IFS= read -r -d '' src; do
+            rel="${src#release-attach/}"
+            base="$(basename "${src}")"
+            [[ "${base}" == *.sha256 ]] && continue
+            take=0
+            if [[ -z "${RELEASE_FILES}" ]]; then
+              take=1
+            elif [[ -v wanted["${rel}"] || -v wanted["${base}"] ]]; then
+              take=1
+              wanted["${rel}"]=1
+              wanted["${base}"]=1
+            fi
+            [[ "${take}" -eq 0 ]] && continue
+            if [[ -e "release-out/${base}" ]]; then
+              echo "::error::duplicate file name ${base} in the release artifact"
+              exit 1
+            fi
+            cp "${src}" "release-out/${base}"
+          done < <(find release-attach -type f -print0)
+          if [[ -n "${RELEASE_FILES}" ]]; then
+            for name in "${!wanted[@]}"; do
+              if [[ "${wanted[${name}]}" -eq 0 ]]; then
+                echo "::error::${name} is not in the release artifact"
+                exit 1
+              fi
+            done
+          fi
+          shopt -s nullglob
+          found=(release-out/*)
+          if ((${#found[@]} == 0)); then
+            echo "::error::release artifact produced no files"
+            exit 1
+          fi
+          for file in "${found[@]}"; do
+            base="$(basename "${file}")"
+            ( cd release-out && sha256sum "${base}" > "${base}.sha256" )
+          done
+
       - name: Create GitHub Release
         env:
           RELEASE_TOKEN: ${{ secrets.release_token }}
           GITHUB_TOKEN_FALLBACK: ${{ github.token }}
           TAG: ${{ inputs.tag }}
           ATTACH_SBOM: ${{ inputs.attach_sbom }}
+          RELEASE_ARTIFACT: ${{ inputs.release_artifact }}
         run: |
           if [[ -z "${RELEASE_TOKEN}" ]]; then
             echo "::warning::release_token secret not provided — creating the release with github.token. Releases created with GITHUB_TOKEN do not fire on: release workflows. Pass secrets.release_token (PAT with contents:write) when callers need the release event chain."
@@ -107,12 +191,20 @@ jobs:
             export GH_TOKEN="${RELEASE_TOKEN}"
           fi
           ARGS=(release create "${TAG}" --generate-notes)
+          shopt -s nullglob
           if [[ "${ATTACH_SBOM}" == "true" ]]; then
-            shopt -s nullglob
             files=(sbom-attach/*)
             if ((${#files[@]})); then
               ARGS+=("${files[@]}")
             fi
+          fi
+          if [[ -n "${RELEASE_ARTIFACT}" ]]; then
+            assets=(release-out/*)
+            if ((${#assets[@]} == 0)); then
+              echo "::error::release artifact produced no files"
+              exit 1
+            fi
+            ARGS+=("${assets[@]}")
           fi
           gh "${ARGS[@]}"
 

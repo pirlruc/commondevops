@@ -162,6 +162,8 @@ Private Free-plan repos stay advisory when `blocking` is false; without
 | `tag` | (required) | Must match `vMAJOR.MINOR.PATCH…` and exist |
 | `attach_sbom` | `false` | Downloads `sbom_artifact` when true |
 | `sign` | `false` | Emits cosign guidance; keyless needs public/GHEC |
+| `release_artifact` | empty | Artifact uploaded earlier in the same run. Each file is attached with a `.sha256` checksum (REL-PUB-003). |
+| `release_files` | empty | Newline-separated paths or basenames inside that artifact. Empty attaches every file. |
 
 | Secret | Required | Notes |
 |--------|----------|-------|
