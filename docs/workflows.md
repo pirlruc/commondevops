@@ -161,7 +161,8 @@ Private Free-plan repos stay advisory when `blocking` is false; without
 |-------|---------|-------|
 | `tag` | (required) | Must match `vMAJOR.MINOR.PATCH…` and exist |
 | `attach_sbom` | `false` | Downloads `sbom_artifact` when true |
-| `sign` | `false` | Emits cosign guidance; keyless needs public/GHEC |
+| `sign` | `false` | Keyless `cosign sign-blob` writes a `<file>.sigstore.json` bundle for each attached file, then `actions/attest-build-provenance` records SLSA provenance. Public repositories only. Private Free-plan callers leave this false. |
+| `environment` | empty | GitHub Environment for the release job. Empty runs with no environment. A tag-restricted environment holds the publish secrets (REL-PUB-004). |
 | `release_artifact` | empty | Artifact uploaded earlier in the same run. Each file is attached with a `.sha256` checksum (REL-PUB-003). |
 | `release_files` | empty | Newline-separated paths or basenames inside that artifact. Empty attaches every file. |
 
@@ -169,9 +170,9 @@ Private Free-plan repos stay advisory when `blocking` is false; without
 |--------|----------|-------|
 | `release_token` | Recommended | PAT with `contents:write`. Prefer over `github.token` so the published release fires `on: release` workflows (GITHUB_TOKEN-created releases do not). |
 
-Permissions: `contents: write`; `id-token: write` when signing is requested
-(job always requests `id-token` write so the expression stays static — unused when
-`sign: false`).
+Permissions: `contents: write`, `id-token: write`, and `attestations: write`.
+The token scopes stay requested when `sign` is false so the permission block
+stays static. Signing runs only when `sign` is true.
 
 ---
 

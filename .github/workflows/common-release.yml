@@ -13,10 +13,20 @@ on:
         type: boolean
         default: false
       sign:
-        description: Note/attempt keyless cosign (needs public repo or GHEC; private Free-plan may fail)
+        description: >-
+          Keyless cosign sign-blob plus a GitHub build-provenance attestation.
+          Needs a public repository. Private Free-plan callers leave this false.
         required: false
         type: boolean
         default: false
+      environment:
+        description: >-
+          GitHub Environment for this job. Empty runs with no environment.
+          Callers that publish from a tag put release secrets in an environment
+          limited to tag refs (REL-PUB-004).
+        required: false
+        type: string
+        default: ""
       sbom_artifact:
         description: Artifact name containing SBOM files when attach_sbom is true
         required: false
@@ -64,6 +74,9 @@ on:
       release_files:
         type: string
         default: ""
+      environment:
+        type: string
+        default: ""
 
 permissions: {}
 
@@ -81,10 +94,12 @@ jobs:
     if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    environment: ${{ inputs.environment }}
     permissions:
       contents: write
       # Requested when sign=true (keyless cosign / attest); unused otherwise.
       id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -176,6 +191,52 @@ jobs:
             ( cd release-out && sha256sum "${base}" > "${base}.sha256" )
           done
 
+      - name: Install cosign
+        if: inputs.sign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Sign release blobs
+        if: inputs.sign
+        env:
+          COSIGN_YES: "true"
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(release-out/* sbom-attach/*)
+          signed=0
+          for file in "${files[@]}"; do
+            [[ -f "${file}" ]] || continue
+            [[ "${file}" == *.sigstore.json ]] && continue
+            cosign sign-blob --yes --bundle "${file}.sigstore.json" "${file}"
+            signed=1
+          done
+          if [[ "${signed}" -eq 0 ]]; then
+            echo "::error::sign=true but the release has no files to sign"
+            exit 1
+          fi
+
+      - name: List attested subjects
+        id: subjects
+        if: inputs.sign
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          {
+            echo "paths<<EOF"
+            for file in release-out/* sbom-attach/*; do
+              [[ -f "${file}" ]] || continue
+              [[ "${file}" == *.sigstore.json ]] && continue
+              echo "${file}"
+            done
+            echo "EOF"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Attest build provenance
+        if: inputs.sign
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: ${{ steps.subjects.outputs.paths }}
+
       - name: Create GitHub Release
         env:
           RELEASE_TOKEN: ${{ secrets.release_token }}
@@ -207,13 +268,3 @@ jobs:
             ARGS+=("${assets[@]}")
           fi
           gh "${ARGS[@]}"
-
-      - name: Cosign note
-        if: inputs.sign
-        run: |
-          cat <<'EOF'
-          sign=true requested. Keyless cosign (SC-SIGN-001) requires a public repository
-          or GitHub Enterprise Cloud artifact attestations. Private Free-plan repos should
-          record a guardrail deviation and leave sign=false until the platform supports it.
-          Wire cosign sign / attest-build-provenance in the consuming release caller when ready.
-          EOF

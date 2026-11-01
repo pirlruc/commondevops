@@ -5,6 +5,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [5.8.0] - 2026-11-01
+
+### Added
+
+- `common-release` `sign: true` signs each attached file with keyless
+  `cosign sign-blob` (a `<file>.sigstore.json` bundle) and records SLSA
+  provenance with `actions/attest-build-provenance`. The default stays
+  `false`, so private Free-plan callers are unchanged.
+- `common-release` takes an `environment` input so a caller can run the
+  job in a tag-restricted GitHub Environment (REL-PUB-004).
+
 ## [5.7.0] - 2026-10-31
 
 ### Added
@@ -28,7 +39,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
   `sha256:7bbd542d5971594f6192da0ed0c49e29fc0c58328333d0920ab3143a2a0e04d3`.
   ci-iac
   `sha256:a42f9816c45cea97a5164835306abe5b4b535d2164cb177e32889d5175b09930`.
-  No image republish. Tags 5.6.0 and 5.6.1 stay put.
+  No image republish. Tags 5.6.0 and 5.6.1 are unchanged.
 
 ## [5.6.1] - 2026-10-28
 
@@ -36,7 +47,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 - Image callers grant `packages: read` to container-lint and `actions: read`
   to container-scan. Release 5.6.0 died at workflow startup, so it published
-  no images. This release publishes them. Tag 5.6.0 stays put.
+  no images. This release publishes them. Tag 5.6.0 is unchanged.
 
 ## [5.6.0] - 2026-10-28
 
