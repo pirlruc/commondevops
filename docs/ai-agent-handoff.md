@@ -167,8 +167,9 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
+- 2026-11-01: **5.8.0** makes `common-release` `sign: true` run keyless `cosign sign-blob` and `actions/attest-build-provenance`. New `environment` input. No image republish. Do not move `5.7.0` or `5.6.2`.
 - 2026-10-31: **5.7.0** adds `release_artifact` and `release_files` to `common-release`. No image republish. Do not move `5.6.2`.
-- 2026-10-28: **5.6.1** published ci-lint, ci-supply-chain, and ci-iac with go-jose/v4 4.1.6. **5.6.0** died at startup and stays put. **5.6.2** pins the linux/amd64 manifests in the reusable defaults, the rescan, and the Hub/GHCR pages. No second publish.
+- 2026-10-28: **5.6.1** published ci-lint, ci-supply-chain, and ci-iac with go-jose/v4 4.1.6. Tag **5.6.0** was not moved. **5.6.2** pins the linux/amd64 manifests in the reusable defaults, the rescan, and the Hub/GHCR pages. No second publish.
 - 2026-10-28: Job containers log in to GHCR with `github.token`. Image scans use separate SARIF categories. Image workflows pin containerdevops 6.3.5. Lint callers grant `packages: read`. Scan callers grant `actions: read`.
 - 2026-10-28: `common-doc-verify` no longer skips Dependabot. Callers pass `DEPENDABOT_GITHUB_TOKEN` on those pulls and `COMMONDEVOPS_READ_TOKEN` on Actions runs. grant, syft, grype, trivy, sops, tofu, and tflint Docker builds request go-jose/v4 4.1.6. tflint v0.65.0 is rebuilt from `502b6a38`. No tag and no image republish, so the 5.5.0 rescan still scans the published binaries.
 - 2026-10-28: The 5.5.0 Debian posture SARIF for ci-lint and ci-supply-chain was uploaded to `refs/heads/main` at `2eac235`. Five of the 38 `trivy-posture-debian` alerts closed as fixed (138, 175, 176, 177, 257). The other 33 are still in the 5.5.0 ci-lint posture and stay open. Supply-chain adds 37 open alerts on the same commit. `trivy-ci-lint` and `trivy-ci-supply-chain` were last analyzed on 2026-10-26 at `4e6f3385` and did not close. Do not move `5.4.4`–`5.5.3`.
@@ -259,4 +260,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-10-31 (5.7.0 release artifact inputs; 5.6.2 stays)*
+*Last updated: 2026-11-01 (5.8.0 signs release blobs and attests provenance).*
