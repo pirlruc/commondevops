@@ -1656,3 +1656,36 @@ milestones:
               - actionlint .github/workflows/common-release.yml
             guardrail_refs:
               - REL-PUB-003
+
+      - id: CMN-REL-004
+        status: open
+        title: Ignore a release that does not change an image
+        overview:
+          problem: >-
+            Publishing a workflow-only GitHub Release with a user token starts
+            the image workflows. Those workflows can move the latest tag when
+            the release did not change docker/.
+          goal: >-
+            Image workflows skip a release whose files do not touch docker/.
+            A workflow-only release can be published without cancelling runs.
+        decision: >-
+          In the context of a signed workflow release, facing image jobs that
+          start on every release, we decided to skip a release that does not
+          change docker/, to achieve a latest tag that stays put, accepting
+          that a real image change still publishes.
+        acceptance_criteria:
+          - A release that does not change docker/ does not run the image publish jobs
+          - A change under docker/ still publishes
+        guardrail_refs:
+          - REL-PUB-003
+        tasks:
+          - id: CMN-REL-004-T1
+            status: open
+            title: Path-filter the image workflows on release
+            instructions:
+              files:
+                - .github/workflows/
+            verification:
+              - A release with no docker/ change does not publish an image
+            guardrail_refs:
+              - REL-PUB-003
