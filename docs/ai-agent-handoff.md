@@ -260,4 +260,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-11-01 (5.8.0 signs release blobs and attests provenance).*
+*Last updated: 2026-11-02 (CMN-REL-004 asks image workflows to skip a release that does not change docker/).*
