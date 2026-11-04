@@ -20,7 +20,7 @@ on:
       guardrails_token:
         required: false
       containerdevops_token:
-        description: CONTAINERDEVOPS_READ_TOKEN when the caller has that secret
+        description: Optional. Public callers omit it. github.token reads this repo.
         required: false
       checkout_token:
         description: Token that can read pirlruc/commondevops when the caller is another repo

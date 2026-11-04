@@ -53,7 +53,6 @@ jobs:
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
     secrets:
       checkout_token: ${{ github.token }}
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   build:
     needs: lint
@@ -83,7 +82,6 @@ jobs:
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   scan:
     needs: build
@@ -105,8 +103,6 @@ jobs:
       pkg_types: library
       ignorefile: docker/ci-iac/.trivyignore.yaml
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
-    secrets:
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   scan-posture:
     needs: build
@@ -128,8 +124,6 @@ jobs:
       pkg_types: os,library
       ignorefile: none
       blocking: false
-    secrets:
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   publish:
     needs: [build, scan]
@@ -172,7 +166,6 @@ jobs:
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   # Inlined from container-handoff-cleanup. GitHub returns 400 when the
   # ci-run tag is the package's only version, which is true for the first

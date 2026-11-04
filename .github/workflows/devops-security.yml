@@ -64,7 +64,6 @@ jobs:
       scripts_ref: ${{ github.sha }}
     secrets:
       guardrails_token: ${{ secrets.GUARDRAILS_READ_TOKEN }}
-      checkout_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   published-ci-lint-rescan:
     if: github.event.pull_request.user.login != 'dependabot[bot]'
@@ -82,8 +81,6 @@ jobs:
       results_artifact: published-ci-lint-scan
       sarif_category: trivy-ci-lint
       blocking: true
-    secrets:
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   published-ci-supply-chain-rescan:
     if: github.event.pull_request.user.login != 'dependabot[bot]'
@@ -101,8 +98,6 @@ jobs:
       results_artifact: published-ci-supply-chain-scan
       sarif_category: trivy-ci-supply-chain
       blocking: true
-    secrets:
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   published-ci-iac-rescan:
     if: github.event.pull_request.user.login != 'dependabot[bot]'
@@ -120,5 +115,3 @@ jobs:
       results_artifact: published-ci-iac-scan
       sarif_category: trivy-ci-iac
       blocking: true
-    secrets:
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}

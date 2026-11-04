@@ -53,7 +53,6 @@ jobs:
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
     secrets:
       checkout_token: ${{ github.token }}
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   lint-alpine:
     if: >-
@@ -75,7 +74,6 @@ jobs:
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
     secrets:
       checkout_token: ${{ github.token }}
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   build:
     needs: [lint, lint-alpine]
@@ -106,7 +104,6 @@ jobs:
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   build-alpine:
     needs: [lint, lint-alpine]
@@ -137,7 +134,6 @@ jobs:
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   scan:
     needs: build
@@ -159,8 +155,6 @@ jobs:
       pkg_types: library
       ignorefile: docker/ci-supply-chain/.trivyignore.yaml
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
-    secrets:
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   scan-alpine:
     needs: build-alpine
@@ -182,8 +176,6 @@ jobs:
       pkg_types: library
       ignorefile: docker/ci-supply-chain/.trivyignore.yaml
       blocking: ${{ github.event_name == 'workflow_dispatch' && inputs.blocking || github.event_name != 'workflow_dispatch' }}
-    secrets:
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   # Advisory posture scan (os+library, ignorefile=none) — does not block publish.
   scan-posture:
@@ -206,8 +198,6 @@ jobs:
       pkg_types: os,library
       ignorefile: none
       blocking: false
-    secrets:
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   scan-posture-alpine:
     needs: build-alpine
@@ -229,8 +219,6 @@ jobs:
       pkg_types: os,library
       ignorefile: none
       blocking: false
-    secrets:
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   publish:
     needs: [build, scan]
@@ -274,7 +262,6 @@ jobs:
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   publish-alpine:
     needs: [build-alpine, scan-alpine]
@@ -318,7 +305,6 @@ jobs:
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   # PR-only: ci-run-* is not also a release tag. After publish retag, never delete.
   cleanup:

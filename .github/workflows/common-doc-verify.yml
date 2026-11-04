@@ -105,10 +105,8 @@ env:
 
 jobs:
   verify:
-    # Runs on Dependabot. The caller passes DEPENDABOT_GITHUB_TOKEN as
-    # checkout_token; Actions runs pass COMMONDEVOPS_READ_TOKEN. Same-repo
-    # runs fall back to github.token. CI-024 still skips secret-backed jobs
-    # that cannot use a Dependabot token.
+    # This repo is public. Callers omit checkout_token. github.token reads
+    # the scripts. Do not pass a Dependabot secret as checkout_token (CI-024).
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
