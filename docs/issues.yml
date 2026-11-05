@@ -1689,3 +1689,93 @@ milestones:
               - A release with no docker/ change does not publish an image
             guardrail_refs:
               - REL-PUB-003
+
+  - name: Documentation follow-up
+    epics:
+      - id: CMN-LINT-003
+        status: open
+        title: Default shfmt and markdownlint on in common-doc-verify
+        overview:
+          problem: >-
+            SHELL-LINT-002 and DOC-LINT-003 are required. common-doc-verify
+            leaves markdownlint off and has no shfmt input. An off default
+            does not meet the gate.
+          goal: >-
+            The reusable workflow runs both unless the caller turns them off.
+        decision: >-
+          In the context of doc verify, facing required gates that default
+          off, we decided to default them on, to achieve CI-035, accepting
+          that callers without a config will fail until they add one.
+        acceptance_criteria:
+          - markdownlint defaults on
+          - shfmt has an input and defaults on
+        tasks:
+          - id: CMN-LINT-003-T1
+            status: open
+            title: Flip the lint defaults
+            instructions:
+              files:
+                - .github/workflows/common-doc-verify.yml
+            verification:
+              - The workflow defaults both gates on
+            guardrail_refs:
+              - SHELL-LINT-002
+              - DOC-LINT-003
+              - CI-035
+      - id: CMN-RECON-002
+        status: open
+        title: Run done-versus-open reconciliation on the default branch only
+        overview:
+          problem: >-
+            A pull-request check that fails while issues are still open forces
+            the close before merge. An abandoned pull request then leaves
+            issues closed.
+          goal: >-
+            The check fails only on the default branch.
+        decision: >-
+          In the context of issue reconciliation, facing a pull-request gate
+          that closes issues early, we decided to run it on the default
+          branch, to achieve a sync that matches the merged manifest,
+          accepting that a pull request can be green while issues are still open.
+        acceptance_criteria:
+          - The reconciliation job does not fail a pull request for open issues
+          - It fails a default-branch run when the manifest says done and the issue is open
+        tasks:
+          - id: CMN-RECON-002-T1
+            status: open
+            title: Move the reconciliation check
+            instructions:
+              files:
+                - .github/workflows/
+            verification:
+              - The job condition is a default-branch push
+            guardrail_refs:
+              - CI-008
+      - id: CMN-TOK-001
+        status: open
+        title: Stop documenting a Dependabot secret as checkout_token
+        overview:
+          problem: >-
+            CI-024 says Dependabot secrets are not a substitute in CI jobs.
+            5.6.2 notes tell callers to pass DEPENDABOT_GITHUB_TOKEN as
+            checkout_token. The ops repos are public, so github.token is enough.
+          goal: >-
+            The docs and workflows do not pass that secret as checkout_token.
+        decision: >-
+          In the context of public ops repos, facing a note that weakens
+          CI-024, we decided to remove it, to achieve one token rule,
+          accepting that a private callee still needs a separate read token.
+        acceptance_criteria:
+          - No workflow or doc tells a caller to pass DEPENDABOT_GITHUB_TOKEN as checkout_token
+        tasks:
+          - id: CMN-TOK-001-T1
+            status: open
+            title: Remove the checkout_token guidance
+            instructions:
+              files:
+                - .github/workflows/
+                - docs/
+            verification:
+              - rg DEPENDABOT_GITHUB_TOKEN .github/workflows docs returns no checkout_token use
+            guardrail_refs:
+              - CI-024

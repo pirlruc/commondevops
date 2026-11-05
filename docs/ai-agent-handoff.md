@@ -261,3 +261,5 @@ python3 .github/scaffold/scripts/issues-sync.py \
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
 *Last updated: 2026-11-02 (CMN-REL-004 asks image workflows to skip a release that does not change docker/).*
+
+*Last updated: 2026-11-04 — filed documentation follow-up epics moved out of guardrails, methodologies, or github-scaffold. Not implemented here.*
