@@ -160,15 +160,13 @@ jobs:
             pack=.github/scaffold/scripts/check-guardrails-packs.py
           fi
           if [ ! -f "${pack}" ] || [ ! -d docs/guardrails/ci ]; then
-            home=$(mktemp -d)
             gr=$(git rev-parse "HEAD:docs/guardrails")
             sc=$(git rev-parse "HEAD:.github/scaffold")
-            HOME="${home}" GIT_CONFIG_NOSYSTEM=1 git clone --filter=blob:none --no-checkout https://github.com/pirlruc/github-scaffold.git /tmp/scaffold-packs
-            HOME="${home}" GIT_CONFIG_NOSYSTEM=1 git -C /tmp/scaffold-packs fetch --depth 1 origin "${sc}"
-            HOME="${home}" GIT_CONFIG_NOSYSTEM=1 git -C /tmp/scaffold-packs checkout --detach FETCH_HEAD
-            HOME="${home}" GIT_CONFIG_NOSYSTEM=1 git clone --filter=blob:none --no-checkout https://github.com/pirlruc/guardrails.git /tmp/guardrails-packs
-            HOME="${home}" GIT_CONFIG_NOSYSTEM=1 git -C /tmp/guardrails-packs fetch --depth 1 origin "${gr}"
-            HOME="${home}" GIT_CONFIG_NOSYSTEM=1 git -C /tmp/guardrails-packs checkout --detach FETCH_HEAD
+            curl -fsSL -o /tmp/scaffold-packs.tgz "https://codeload.github.com/pirlruc/github-scaffold/tar.gz/${sc}"
+            curl -fsSL -o /tmp/guardrails-packs.tgz "https://codeload.github.com/pirlruc/guardrails/tar.gz/${gr}"
+            mkdir -p /tmp/scaffold-packs /tmp/guardrails-packs
+            tar -xzf /tmp/scaffold-packs.tgz -C /tmp/scaffold-packs --strip-components=1
+            tar -xzf /tmp/guardrails-packs.tgz -C /tmp/guardrails-packs --strip-components=1
             if [ ! -f "${pack}" ]; then
               pack=/tmp/scaffold-packs/scripts/check-guardrails-packs.py
             fi

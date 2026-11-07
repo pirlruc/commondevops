@@ -272,7 +272,7 @@ jobs:
           fi
           npm ci --ignore-scripts --prefix _commondevops/scripts/markdownlint
           _commondevops/scripts/markdownlint/node_modules/.bin/markdownlint-cli2 \
-            "**/*.md" "#**/node_modules" "#**/.github/scaffold" "#**/_commondevops"
+            "**/*.md" "#**/node_modules" "#**/.github/scaffold" "#**/_commondevops" "#**/.ci-venv"
 
       - name: lychee
         id: lychee

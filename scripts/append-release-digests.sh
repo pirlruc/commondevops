@@ -19,13 +19,13 @@ fi
 	printf '%s\n' "| --- | --- | --- |"
 	for ref in "$@"; do
 		index=$(docker buildx imagetools inspect --format '{{json .Manifest.Digest}}' "${ref}" | tr -d '"')
-		docker buildx imagetools inspect --format '{{range .Manifest.Manifests}}{{.Platform.OS}}/{{.Platform.Architecture}} {{.Digest}}{{println}}{{end}}' "${ref}" \
-			| awk -v ref="${ref}" -v index="${index}" 'NF { printf "| `%s` | `%s` | %s `%s` |\n", ref, index, $1, $2 }'
+		docker buildx imagetools inspect --format '{{range .Manifest.Manifests}}{{.Platform.OS}}/{{.Platform.Architecture}} {{.Digest}}{{println}}{{end}}' "${ref}" |
+			awk -v ref="${ref}" -v index="${index}" 'NF { printf "| `%s` | `%s` | %s `%s` |\n", ref, index, $1, $2 }'
 	done
-} > release-digests.md
+} >release-digests.md
 
 body=$(gh release view "${TAG}" --repo "${REPO}" --json body --jq .body)
-printf '%s\n\n' "${body}" > release-body.md
-cat release-digests.md >> release-body.md
+printf '%s\n\n' "${body}" >release-body.md
+cat release-digests.md >>release-body.md
 gh release edit "${TAG}" --repo "${REPO}" --notes-file release-body.md
 echo "updated ${TAG}"
