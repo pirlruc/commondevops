@@ -266,3 +266,5 @@ python3 .github/scaffold/scripts/issues-sync.py \
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
 *Last updated: 2026-11-07 — 6.0.1. The pack check uses the scripts_ref checkout. Guardrails 1.15.0. Scaffold 1.12.0.*
+
+*Last updated: 2026-11-07 — Scorecard Code-Review, Fuzzing, CII-Best-Practices, and Maintained stay open. See docs/scorecard-open-checks.md.*
