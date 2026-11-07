@@ -5,6 +5,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [6.0.1] - 2026-11-07
+
+### Fixed
+
+- The missing-pack check runs the copy of the checker checked out with `scripts_ref`, so a caller does not need the script in its own tree.
+
 ## [6.0.0] - 2026-11-07
 
 ### Changed
