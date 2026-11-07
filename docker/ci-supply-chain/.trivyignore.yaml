@@ -7,28 +7,28 @@ vulnerabilities:
   - id: CVE-2026-54448
     paths:
       - "**/trivy"
-    expired_at: 2026-11-22
+    expired_at: 2026-12-06
     statement: >-
       Binary is built from trivy v0.76.1 (e713f67f). The main module version
       is a pseudo-version, so the scanner treats it as older than 0.71.0.
   - id: CVE-2026-55092
     paths:
       - "**/trivy"
-    expired_at: 2026-11-22
+    expired_at: 2026-12-06
     statement: >-
       Binary is built from trivy v0.76.1 (e713f67f), which is newer than the
       0.71.1 fix. The pseudo-version is what the scanner matches.
   - id: CVE-2026-41567
     paths:
       - "**/grype"
-    expired_at: 2026-11-22
+    expired_at: 2026-12-06
     statement: >-
       Embedded moby client in the grype 0.121.0 binary. Upstream has no fix.
-      Re-triaged 2026-10-27; clock stays inside vuln_ignore_max_days.
+      Re-triaged 2026-11-06; clock stays inside vuln_ignore_max_days.
   - id: CVE-2026-42306
     paths:
       - "**/grype"
-    expired_at: 2026-11-22
+    expired_at: 2026-12-06
     statement: >-
       Embedded moby client in the grype 0.121.0 binary. Upstream has no fix.
-      Re-triaged 2026-10-27; clock stays inside vuln_ignore_max_days.
+      Re-triaged 2026-11-06; clock stays inside vuln_ignore_max_days.

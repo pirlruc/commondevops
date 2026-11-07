@@ -5,6 +5,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+
+- `common-doc-verify` runs shfmt and markdownlint unless the caller turns them off. That default change is breaking.
+- Done-versus-open reconciliation runs on a default-branch push.
+- Docs no longer tell a caller to pass `DEPENDABOT_GITHUB_TOKEN` as `checkout_token`.
+- Image workflows skip a release that does not change `docker/`.
+- A release that publishes an image appends the index and platform digests to the Release body.
+- `common-release` fails when `attach_sbom` is set and the SBOM artifact is missing.
+- `common-scaffold-verify` runs the missing-pack check.
+- `docs/guardrails` is 1.15.0. `.github/scaffold` is 1.12.0.
+- Dependabot has a `gitsubmodule` entry outside the group.
+- CI image bases use the current DHI digests. markdownlint overrides re2js 2.8.7 and katex 0.18.2.
+- semgrep stays on 1.181.0 with mcp 1.29.0. semgrep 1.182.1 pulls mcp 2.x, which this image does not take.
+
 ## [5.8.0] - 2026-11-01
 
 ### Added

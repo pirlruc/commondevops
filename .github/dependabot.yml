@@ -110,3 +110,18 @@ updates:
     multi-ecosystem-group: all-dependencies
     cooldown:
       default-days: 7
+
+  # Outside the group so an untagged submodule tip does not block it (SC-DEP-004).
+  - package-ecosystem: gitsubmodule
+    directory: /
+    schedule:
+      interval: monthly
+      time: "06:00"
+      timezone: Europe/Lisbon
+    registries:
+      - github-private
+    commit-message:
+      prefix: build
+      include: scope
+    cooldown:
+      default-days: 7

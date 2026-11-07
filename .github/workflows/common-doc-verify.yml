@@ -2,9 +2,8 @@ name: Common Doc Verify (reusable)
 
 # Shellcheck, ruff, caller-vendored YAML parse, and markdown link lint.
 # Intended for documentation repos (guardrails, methodologies, github-scaffold).
-# Cross-repo callers pass checkout_token so scripts_ref can be checked out from
-# this private repo. Dependabot pull requests pass DEPENDABOT_GITHUB_TOKEN.
-# Actions runs pass COMMONDEVOPS_READ_TOKEN. A missing token is a caller gap.
+# Cross-repo callers of a private checkout pass checkout_token with contents:read.
+# A public checkout uses github.token. Do not pass DEPENDABOT_GITHUB_TOKEN here.
 
 on:
   workflow_call:
@@ -40,10 +39,15 @@ on:
         type: boolean
         default: false
       run_markdownlint:
-        description: Run markdownlint-cli2 (off by default; token-free npm ci)
+        description: Run markdownlint-cli2 (token-free npm ci). Default on (DOC-LINT-003).
         required: false
         type: boolean
-        default: false
+        default: true
+      run_shfmt:
+        description: Run shfmt --diff on shell_scripts, or on scripts/*.sh when that input is empty
+        required: false
+        type: boolean
+        default: true
       run_lychee:
         description: Run lychee on markdown links (off by default)
         required: false
@@ -81,7 +85,10 @@ on:
         default: false
       run_markdownlint:
         type: boolean
-        default: false
+        default: true
+      run_shfmt:
+        type: boolean
+        default: true
       run_lychee:
         type: boolean
         default: false
@@ -105,10 +112,9 @@ env:
 
 jobs:
   verify:
-    # Runs on Dependabot. The caller passes DEPENDABOT_GITHUB_TOKEN as
-    # checkout_token; Actions runs pass COMMONDEVOPS_READ_TOKEN. Same-repo
-    # runs fall back to github.token. CI-024 still skips secret-backed jobs
-    # that cannot use a Dependabot token.
+    # Runs on Dependabot. Same-repo and public checkouts use github.token.
+    # A private callee still needs a contents:read token that is not a
+    # Dependabot secret (CI-024).
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
@@ -151,6 +157,34 @@ jobs:
         env:
           INSTALL_ONLY: shellcheck
         run: bash _commondevops/scripts/install-common-tools.sh
+
+      - name: Install shfmt
+        if: inputs.run_shfmt
+        working-directory: ${{ github.workspace }}
+        env:
+          INSTALL_ONLY: shfmt
+        run: bash _commondevops/scripts/install-common-tools.sh
+
+      - name: shfmt
+        id: shfmt
+        if: inputs.run_shfmt
+        continue-on-error: true
+        env:
+          SHELL_SCRIPTS: ${{ inputs.shell_scripts }}
+        run: |
+          set -eu
+          if [ -n "${SHELL_SCRIPTS}" ]; then
+            # shellcheck disable=SC2086
+            shfmt --diff ${SHELL_SCRIPTS}
+          else
+            found=$(find scripts -name '*.sh' 2>/dev/null || true)
+            if [ -z "${found}" ]; then
+              echo "No shell scripts"
+              exit 0
+            fi
+            # shellcheck disable=SC2086
+            shfmt --diff ${found}
+          fi
 
       - name: shellcheck
         id: shellcheck
@@ -257,6 +291,7 @@ jobs:
         env:
           ADVISORY: ${{ env.ADVISORY }}
           SHELLCHECK: ${{ steps.shellcheck.outcome }}
+          SHFMT: ${{ steps.shfmt.outcome }}
           RUFF: ${{ steps.ruff.outcome }}
           YAML: ${{ steps.yaml.outcome }}
           LINKS: ${{ steps.links.outcome }}
@@ -265,6 +300,7 @@ jobs:
         run: |
           set --
           if [ "${SHELLCHECK}" != "skipped" ] && [ -n "${SHELLCHECK}" ]; then set -- "$@" "shellcheck=${SHELLCHECK}"; fi
+          if [ "${SHFMT}" != "skipped" ] && [ -n "${SHFMT}" ]; then set -- "$@" "shfmt=${SHFMT}"; fi
           if [ "${RUFF}" != "skipped" ] && [ -n "${RUFF}" ]; then set -- "$@" "ruff=${RUFF}"; fi
           if [ "${YAML}" != "skipped" ] && [ -n "${YAML}" ]; then set -- "$@" "yaml=${YAML}"; fi
           if [ "${LINKS}" != "skipped" ] && [ -n "${LINKS}" ]; then set -- "$@" "links=${LINKS}"; fi

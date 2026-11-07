@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | https://github.com/pirlruc/commondevops (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
-| **Branch** | `main`. GitHub Release **5.6.1** published the go-jose/v4 4.1.6 images. Tag **5.6.0** did not publish. Tag **5.6.2** records the linux/amd64 digests and does not republish. Job-container login uses `github.token`. Image workflows pin containerdevops 6.3.5. Do not move `5.4.4`–`5.6.1`. |
+| **Branch** | `feature-compliance-6-0`. Guardrails 1.15.0 and scaffold 1.12.0. Image workflows still pin containerdevops 6.3.5 until 6.4.0. Do not move `5.4.4`–`5.6.1`. |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
@@ -262,4 +262,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 *Last updated: 2026-11-02 (CMN-REL-004 asks image workflows to skip a release that does not change docker/).*
 
-*Last updated: 2026-11-04 — filed documentation follow-up epics moved out of guardrails, methodologies, or github-scaffold. Not implemented here.*
+*Last updated: 2026-11-06 — feature-compliance-6-0. Doc-verify lint defaults are on. Guardrails 1.15.0. Scaffold 1.12.0. semgrep stays on mcp 1.29.0.*

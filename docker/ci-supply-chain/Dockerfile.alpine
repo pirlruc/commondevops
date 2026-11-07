@@ -55,7 +55,7 @@ RUN git init \
  && CGO_ENABLED=0 GOEXPERIMENT=jsonv2 go build -trimpath -ldflags="-s -w" -o /out/trivy ./cmd/trivy
 
 # dhi.io/python:3.13-alpine3.24-dev — digest pinned (DOCKER-BUILD-003 / CI-026)
-FROM dhi.io/python:3.13-alpine3.24-dev@sha256:9be22b80fca9ab4c488cf55c026412074705ca3b7fc652ad9bb79cc863f49920
+FROM dhi.io/python:3.13-alpine3.24-dev@sha256:bcf6b1b0b533f0b7a465012f390e7c8ddb3a1df51ee99f6154bbdfdb1a20e997
 
 LABEL org.opencontainers.image.title="ci-supply-chain" \
       org.opencontainers.image.description="Short-lived CI toolchain image for SBOM generation and vulnerability/license gates: syft, grype, trivy, grant. Alpine 3.24 variant. Non-root 1000:1000, linux/amd64." \

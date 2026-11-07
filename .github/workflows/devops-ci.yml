@@ -118,6 +118,36 @@ jobs:
     secrets:
       repo_token: ${{ secrets.SCORECARD_TOKEN }}
 
+  security-aggregate:
+    # CI-044: this job always runs so a required check is not path-skipped.
+    if: always()
+    needs: [secrets-sast, supply-chain, scorecard]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Fail when a security job failed
+        env:
+          SECRETS: ${{ needs.secrets-sast.result }}
+          SUPPLY: ${{ needs.supply-chain.result }}
+          SCORE: ${{ needs.scorecard.result }}
+        run: |
+          set -eu
+          failed=""
+          for item in "secrets-sast=${SECRETS}" "supply-chain=${SUPPLY}" "scorecard=${SCORE}"; do
+            name=${item%%=*}
+            result=${item#*=}
+            if [ "${result}" != "success" ] && [ "${result}" != "skipped" ]; then
+              failed="${failed} ${name}(${result})"
+            fi
+          done
+          if [ -n "${failed}" ]; then
+            echo "::error::Security jobs failed:${failed}"
+            exit 1
+          fi
+          echo "Security aggregate passed."
+
   lint-dependabot:
     # Token-free merge signal (CI-024). No Actions secrets and no submodules.
     if: github.event.pull_request.user.login == 'dependabot[bot]'

@@ -138,7 +138,9 @@ jobs:
 
       - name: Done manifest ids are not still open
         id: recon
-        if: github.event.pull_request.user.login != 'dependabot[bot]'
+        if: >-
+          github.event_name == 'push' &&
+          github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -149,6 +151,23 @@ jobs:
           fi
           .ci-venv/bin/python _commondevops/scripts/check-done-open.py docs/issues.yml
 
+      - name: Language in use has a guardrails pack
+        id: packs
+        continue-on-error: true
+        run: |
+          pack=scripts/check-guardrails-packs.py
+          if [ ! -f "${pack}" ] || [ ! -d docs/guardrails/ci ]; then
+            git submodule update --init --depth 1 .github/scaffold docs/guardrails
+          fi
+          if [ ! -f "${pack}" ]; then
+            pack=.github/scaffold/scripts/check-guardrails-packs.py
+          fi
+          if [ ! -f "${pack}" ]; then
+            echo "error: check-guardrails-packs.py missing (GS-PACK-001)" >&2
+            exit 1
+          fi
+          python3 "${pack}"
+
       - name: Gate — scaffold
         if: always()
         env:
@@ -156,11 +175,13 @@ jobs:
           ISSUES: ${{ steps.issues.outcome }}
           SCAFFOLD: ${{ steps.scaffold_ref.outcome }}
           RECON: ${{ steps.recon.outcome }}
+          PACKS: ${{ steps.packs.outcome }}
         run: |
           failed=""
           [ "${ISSUES}" = "success" ] || [ "${ISSUES}" = "skipped" ] || failed="${failed} issues(${ISSUES})"
           [ "${SCAFFOLD}" = "success" ] || [ "${SCAFFOLD}" = "skipped" ] || failed="${failed} scaffold_ref(${SCAFFOLD})"
           [ "${RECON}" = "success" ] || [ "${RECON}" = "skipped" ] || [ -z "${RECON}" ] || failed="${failed} recon(${RECON})"
+          [ "${PACKS}" = "success" ] || [ "${PACKS}" = "skipped" ] || failed="${failed} packs(${PACKS})"
           if [ -z "${failed}" ]; then
             echo "All collected gates passed."
             exit 0
