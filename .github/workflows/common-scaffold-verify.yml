@@ -1,8 +1,8 @@
 name: Common Scaffold Verify (reusable)
 
-# github-scaffold-specific checks against the caller tree. Does not clone
-# pirlruc/guardrails and does not require GUARDRAILS_READ_TOKEN.
-# Skips each check when the corresponding caller script is absent.
+# github-scaffold-specific checks against the caller tree.
+# Pack presence checks out the caller's guardrails and scaffold gitlinks
+# with github.token. Public pins need no checkout_token (CI-024).
 
 on:
   workflow_call:
@@ -151,29 +151,38 @@ jobs:
           fi
           .ci-venv/bin/python _commondevops/scripts/check-done-open.py docs/issues.yml
 
+      - name: Guardrails and scaffold gitlinks
+        id: packs_refs
+        run: |
+          echo "guardrails=$(git rev-parse 'HEAD:docs/guardrails')" >> "${GITHUB_OUTPUT}"
+          echo "scaffold=$(git rev-parse 'HEAD:.github/scaffold')" >> "${GITHUB_OUTPUT}"
+
+      - name: Clear pinned submodule directories
+        run: rm -rf docs/guardrails .github/scaffold
+
+      - name: Checkout guardrails at the gitlink
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pirlruc/guardrails
+          ref: ${{ steps.packs_refs.outputs.guardrails }}
+          token: ${{ github.token }}
+          persist-credentials: false
+          path: docs/guardrails
+
+      - name: Checkout scaffold at the gitlink
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pirlruc/github-scaffold
+          ref: ${{ steps.packs_refs.outputs.scaffold }}
+          token: ${{ github.token }}
+          persist-credentials: false
+          path: .github/scaffold
+
       - name: Language in use has a guardrails pack
         id: packs
         continue-on-error: true
         run: |
-          pack=scripts/check-guardrails-packs.py
-          if [ ! -f "${pack}" ]; then
-            pack=.github/scaffold/scripts/check-guardrails-packs.py
-          fi
-          if [ ! -f "${pack}" ] || [ ! -d docs/guardrails/ci ]; then
-            gr=$(git rev-parse "HEAD:docs/guardrails")
-            sc=$(git rev-parse "HEAD:.github/scaffold")
-            curl -fsSL -o /tmp/scaffold-packs.tgz "https://codeload.github.com/pirlruc/github-scaffold/tar.gz/${sc}"
-            curl -fsSL -o /tmp/guardrails-packs.tgz "https://codeload.github.com/pirlruc/guardrails/tar.gz/${gr}"
-            mkdir -p /tmp/scaffold-packs /tmp/guardrails-packs
-            tar -xzf /tmp/scaffold-packs.tgz -C /tmp/scaffold-packs --strip-components=1
-            tar -xzf /tmp/guardrails-packs.tgz -C /tmp/guardrails-packs --strip-components=1
-            if [ ! -f "${pack}" ]; then
-              pack=/tmp/scaffold-packs/scripts/check-guardrails-packs.py
-            fi
-            rm -rf docs/guardrails
-            mkdir -p docs/guardrails
-            cp -a /tmp/guardrails-packs/. docs/guardrails/
-          fi
+          pack=.github/scaffold/scripts/check-guardrails-packs.py
           if [ ! -f "${pack}" ]; then
             echo "error: check-guardrails-packs.py missing (GS-PACK-001)" >&2
             exit 1

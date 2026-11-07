@@ -342,5 +342,3 @@ Checks out the caller, then checks out `pirlruc/guardrails` at the
 Pass `checkout_token` when that submodule is private
 (`GUARDRAILS_READ_TOKEN`). Dependabot pull requests skip this job because
 they cannot read Actions secrets.
-
-

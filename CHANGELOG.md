@@ -13,7 +13,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - Image workflows skip a release that does not change `docker/`.
 - A release that publishes an image appends the index and platform digests to the Release body.
 - `common-release` fails when `attach_sbom` is set and the SBOM artifact is missing.
-- `common-scaffold-verify` runs the missing-pack check.
+- `common-scaffold-verify` runs the missing-pack check by checking out the guardrails and scaffold gitlinks.
 - `docs/guardrails` is 1.15.0. `.github/scaffold` is 1.12.0.
 - Dependabot has a `gitsubmodule` entry outside the group.
 - CI image bases use the current DHI digests. markdownlint overrides re2js 2.8.7 and katex 0.18.2.
@@ -315,7 +315,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
   `check-ci-docker.sh`. Tag only. No GitHub Release, so the images are not
   republished.
 
-
 ## [5.2.2] - 2026-09-30
 
 ### Changed
@@ -331,7 +330,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - Write 5.2.0 alpine and debian digests into rescan, Hub/Packages pages, and
   `check-ci-docker.sh`. Tag only. No GitHub Release, so the images are not
   republished.
-
 
 ## [5.2.0] - 2026-09-30
 

@@ -3,7 +3,7 @@
 `ghcr.io/pirlruc/ci-iac` is the Debian CI image for OpenTofu, tflint, sops,
 age, and ansible-lint. The same digest is published to Docker Hub as
 `pirlruc/ci-iac`. The Hub overview is
-https://github.com/pirlruc/commondevops/blob/main/docs/docker-hub-ci-iac.md.
+<https://github.com/pirlruc/commondevops/blob/main/docs/docker-hub-ci-iac.md>.
 
 Pull with a token that has `read:packages` on this private package:
 
@@ -38,4 +38,4 @@ docker run --rm -v "$PWD:/workspace" -w /workspace \
 ```
 
 Visibility is set in the GitHub UI. The steps are in
-https://github.com/pirlruc/commondevops/blob/main/.github/workflows/ghcr-package-visibility.yml.
+<https://github.com/pirlruc/commondevops/blob/main/.github/workflows/ghcr-package-visibility.yml>.

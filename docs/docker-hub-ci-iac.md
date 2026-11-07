@@ -52,4 +52,4 @@ docker run --rm -v "$PWD:/workspace" -w /workspace \
 The Age private key does not belong in this image or in CI. `sops` here
 checks that a file is encrypted. It does not decrypt.
 
-Source: https://github.com/pirlruc/commondevops
+Source: <https://github.com/pirlruc/commondevops>

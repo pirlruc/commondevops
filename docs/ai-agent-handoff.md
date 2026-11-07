@@ -5,7 +5,7 @@
 | Field | Value |
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
-| **Remote** | https://github.com/pirlruc/commondevops (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
+| **Remote** | <https://github.com/pirlruc/commondevops> (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
 | **Branch** | `feature-compliance-6-0`. Guardrails 1.15.0 and scaffold 1.12.0. Image workflows still pin containerdevops 6.3.5 until 6.4.0. Do not move `5.4.4`–`5.6.1`. |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
