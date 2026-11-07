@@ -2,21 +2,21 @@
 # syft, grype, trivy, and grant are rebuilt on Go 1.27. Unfixed module
 # findings stay until upstream ships a release (SC-TRIAGE-001). grype 0.121.0
 # still embeds an unfixed moby client. The trivy entries are the scanner
-# matching a pseudo-version of source that is tag v0.76.1.
+# matching a pseudo-version of source that is tag v0.76.2.
 vulnerabilities:
   - id: CVE-2026-54448
     paths:
       - "**/trivy"
     expired_at: 2026-12-06
     statement: >-
-      Binary is built from trivy v0.76.1 (e713f67f). The main module version
+      Binary is built from trivy v0.76.2 (3f6334d2). The main module version
       is a pseudo-version, so the scanner treats it as older than 0.71.0.
   - id: CVE-2026-55092
     paths:
       - "**/trivy"
     expired_at: 2026-12-06
     statement: >-
-      Binary is built from trivy v0.76.1 (e713f67f), which is newer than the
+      Binary is built from trivy v0.76.2 (3f6334d2), which is newer than the
       0.71.1 fix. The pseudo-version is what the scanner matches.
   - id: CVE-2026-41567
     paths:

@@ -26,7 +26,7 @@ RUN git init \
  && git fetch --depth 1 origin 26e2f4784ca61353082c32dbd987c25eda086dc9 \
  && git checkout --detach FETCH_HEAD \
  && test "$(git rev-parse HEAD)" = "26e2f4784ca61353082c32dbd987c25eda086dc9" \
- && go get golang.org/x/crypto@v0.57.0 golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 google.golang.org/grpc@v1.83.2 github.com/go-jose/go-jose/v4@v4.1.6 \
+ && go get golang.org/x/crypto@v0.58.0 golang.org/x/net@v0.62.0 golang.org/x/text@v0.43.0 google.golang.org/grpc@v1.83.2 github.com/go-jose/go-jose/v4@v4.1.6 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/sops ./cmd/sops
 
 FROM dhi.io/golang:1.27-debian13-dev@sha256:d1414d5b1e917e944391bbdd0c720c7a934873f3308730312de47f060a9f11d1 AS tofu-build
@@ -36,7 +36,7 @@ RUN git init \
  && git fetch --depth 1 origin 765062032c46cacab116b36d714db098b806dede \
  && git checkout --detach FETCH_HEAD \
  && test "$(git rev-parse HEAD)" = "765062032c46cacab116b36d714db098b806dede" \
- && GOTOOLCHAIN=go1.27.3 go get golang.org/x/crypto@v0.57.0 golang.org/x/mod@v0.41.0 golang.org/x/net@v0.60.0 golang.org/x/text@v0.42.0 google.golang.org/grpc@v1.83.2 github.com/go-jose/go-jose/v4@v4.1.6 \
+ && GOTOOLCHAIN=go1.27.3 go get golang.org/x/crypto@v0.58.0 golang.org/x/mod@v0.41.0 golang.org/x/net@v0.62.0 golang.org/x/text@v0.43.0 google.golang.org/grpc@v1.83.2 github.com/go-jose/go-jose/v4@v4.1.6 \
  && CGO_ENABLED=0 GOTOOLCHAIN=go1.27.3 go build -trimpath -ldflags="-s -w" -o /out/tofu ./cmd/tofu
 
 # tflint v0.65.0 rebuilt so go-jose/v4 is 4.1.6 (CVE-2026-116587). The
@@ -48,7 +48,7 @@ RUN git init \
  && git fetch --depth 1 origin 502b6a3849534fe5518177d105a8db616b09b74d \
  && git checkout --detach FETCH_HEAD \
  && test "$(git rev-parse HEAD)" = "502b6a3849534fe5518177d105a8db616b09b74d" \
- && go get github.com/go-jose/go-jose/v4@v4.1.6 \
+ && go get golang.org/x/net@v0.62.0 github.com/go-jose/go-jose/v4@v4.1.6 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/tflint .
 
 FROM dhi.io/python:3.13-debian13-dev@sha256:1303a6c6e9b856cfe9e1b25eaf44b4a165c28a8402140ef3b5151d9a60e4033a AS pybuild
