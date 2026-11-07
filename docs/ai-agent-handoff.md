@@ -95,6 +95,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Known pitfalls
 
+- **Release digest append:** `scripts/append-release-digests.sh` logs in to GHCR when `GH_TOKEN` is set. Anonymous `imagetools inspect` of `ci-lint` returns 401. Do not pass the index digest to awk as `-v index=`; gawk reserves `index`. 6.0.1 did not republish, so the 6.0.0 Release carries the 6.0.0 `ci-lint` digests. `ci-supply-chain` and `ci-iac` 6.0.0 scans failed, so those tags were not published.
 - **Size class:** CI toolchain images pass `size_class: ci_toolchain` so
   container-build reads `ci_image_max_size_mb` (2000, DOCKER-PERF-002). Do not
   re-record DOCKER-PERF-001 deviations for ci-lint / ci-supply-chain.
@@ -268,3 +269,5 @@ python3 .github/scaffold/scripts/issues-sync.py \
 *Last updated: 2026-11-07 — 6.0.1. The pack check uses the scripts_ref checkout. Guardrails 1.15.0. Scaffold 1.12.0.*
 
 *Last updated: 2026-11-07 — Scorecard Code-Review, Fuzzing, CII-Best-Practices, and Maintained stay open. See docs/scorecard-open-checks.md.*
+
+*Last updated: 2026-11-07 — REL-PUB-005 append logs in to GHCR. The 6.0.0 Release lists the published ci-lint digests.*
