@@ -1779,3 +1779,45 @@ milestones:
               - rg DEPENDABOT_GITHUB_TOKEN .github/workflows docs returns no checkout_token use
             guardrail_refs:
               - CI-024
+      - id: CMN-ENV-001
+        status: done
+        title: Pass a release environment and a SARIF switch
+        overview:
+          problem: >-
+            Image publish cannot set environment on a caller job, and
+            common-supply-chain always uploads SARIF and grants
+            security-events at workflow level.
+          goal: >-
+            Publish uses the release environment only on a release event,
+            and a caller can skip the SARIF upload.
+        decision: >-
+          In the context of image publish and private callers, facing
+          REL-PUB-004 and a top-level write, we decided to pass an
+          environment input only on release and to add upload_sarif, to
+          achieve the tag-limited environment, accepting that schedule
+          publishes stay on repository secrets and that the caller still
+          grants security-events because the upload job declares it.
+        acceptance_criteria:
+          - Image workflows pin containerdevops 6.5.0 and pass environment only on release
+          - common-supply-chain has upload_sarif defaulting to true
+          - The workflow-level permissions do not include security-events write
+          - CI-032 and REL-PUB-004 are retired
+        guardrail_refs:
+          - REL-PUB-004
+          - CI-032
+          - CI-042
+        tasks:
+          - id: CMN-ENV-001-T1
+            status: done
+            title: Wire the environment and the SARIF input
+            instructions:
+              files:
+                - .github/workflows/common-supply-chain.yml
+                - .github/workflows/ci-lint-image.yml
+                - docs/guardrail-deviations.yml
+            verification:
+              - rg -n "inputs.upload_sarif" .github/workflows/common-supply-chain.yml
+              - rg -n "event_name == 'release'" .github/workflows/ci-lint-image.yml
+            guardrail_refs:
+              - REL-PUB-004
+              - CI-042

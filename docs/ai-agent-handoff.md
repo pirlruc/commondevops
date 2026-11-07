@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | <https://github.com/pirlruc/commondevops> (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
-| **Branch** | `main`. **6.0.1** is the pack-check patch on **6.0.0**. Guardrails 1.15.0 and scaffold 1.12.0. Image workflows still pin containerdevops 6.3.5 until 6.4.0. Do not move `5.4.4`–`5.6.1`. |
+| **Branch** | `main`. **6.1.0** pins containerdevops 6.5.0 and retires CI-032 and REL-PUB-004. Guardrails 1.15.0 and scaffold 1.12.0. Do not move `5.4.4`–`6.0.1`. |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
@@ -49,6 +49,7 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | CMN-RECON-002 — done-vs-open on the default branch | Done (`6.0.0`) |
 | CMN-TOK-001 — no Dependabot secret as checkout_token | Done (`6.0.0`) |
 | CMN-REL-004 — skip an image release with no `docker/` diff | Done (`6.0.0`) |
+| CMN-ENV-001 — publish environment and SARIF switch | Done (`6.1.0`) |
 
 ## Pins
 
@@ -57,7 +58,7 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | guardrails submodule | tag **1.15.0** → `2d4bb70e95449f6922781716857adeb22badf676` |
 | github-scaffold submodule | tag **1.12.0** → `9c443ea978851768f451b1df2020dd86dfb1a967` |
 | methodologies (links only; not a submodule) | tag **1.9.1** |
-| containerdevops (image callers + security rescan) | tag **6.3.5** → `c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e` |
+| containerdevops (image callers + security rescan) | tag **6.5.0** → `b8c0746603eefdc89571b17c62d1e965b28ff31f` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 | `ghcr.io/pirlruc/ci-lint` (debian, unsuffixed) | `5.6.1` index `sha256:8f1c48449167ba92fd2f922a249e65fcc9e58fc81582430cf7ce2d0c49aa24fa`. Actions amd64 `sha256:f9001c4c8726f72107545094237d4fc0592baca023cfa299a532634666d88111`. |
 | `ghcr.io/pirlruc/ci-lint` (alpine) | `5.6.1-alpine` index `sha256:a9aac8fa6dd5c9d8c2ab6c0b4f50a58fe42d0b50c13ebf284ef226462dbb79ab`. Actions amd64 `sha256:207ab77b5ced7d067cb03f7ad6a135a30cf60dfc4a0ed417f61589a7f3d48fc0`. |
@@ -265,6 +266,8 @@ python3 .github/scaffold/scripts/issues-sync.py \
 - 2026-08-12: CMN-012 — re-pin containerdevops, image metadata, Hub/GHCR docs;
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
+
+*Last updated: 2026-11-07 — 6.1.0. containerdevops 6.5.0. CI-032 and REL-PUB-004 retired. upload_sarif defaults on. mcp stays 1.29.0 because semgrep 1.184.0 requires it. Images rebuild on current DHI digests.*
 
 *Last updated: 2026-11-07 — 6.0.1. The pack check uses the scripts_ref checkout. Guardrails 1.15.0. Scaffold 1.12.0.*
 

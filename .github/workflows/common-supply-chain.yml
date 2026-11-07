@@ -48,6 +48,14 @@ on:
         required: false
         type: boolean
         default: true
+      upload_sarif:
+        description: >-
+          Upload the Trivy SARIF. A private repository without code scanning
+          sets this false. The caller still grants security-events: write,
+          because the upload job declares it.
+        required: false
+        type: boolean
+        default: true
     secrets:
       checkout_token:
         required: false
@@ -71,14 +79,16 @@ on:
       mount_runner_git:
         type: boolean
         default: true
+      upload_sarif:
+        type: boolean
+        default: true
 
 # CI-025 / CI-042: the scan job does not upload SARIF. The upload job is
-# the only one with security-events: write.
+# the only one with security-events: write. Top-level stays read-only.
 permissions:
   contents: read
   actions: read
   packages: read
-  security-events: write
 
 concurrency:
   group: >-
@@ -296,7 +306,10 @@ jobs:
 
   upload-sarif:
     needs: supply-chain
-    if: always() && needs.supply-chain.result != 'skipped' && needs.supply-chain.result != 'cancelled'
+    if: >-
+      always() && inputs.upload_sarif &&
+      needs.supply-chain.result != 'skipped' &&
+      needs.supply-chain.result != 'cancelled'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:

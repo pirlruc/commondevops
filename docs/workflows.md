@@ -223,8 +223,8 @@ reusables against this repository (`scripts_ref: ${{ github.sha }}`).
 
 Weekly secrets/SAST, supply-chain, Scorecard, and registry rescans of the
 published linux/amd64 images through containerdevops
-`container-published-rescan.yml` at 6.3.5
-(`c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e`). The rescan targets move
+`container-published-rescan.yml` at 6.5.0
+(`b8c0746603eefdc89571b17c62d1e965b28ff31f`). The rescan targets move
 with each image release. Image CI calls `container-scan.yml` at that
 same commit.
 
