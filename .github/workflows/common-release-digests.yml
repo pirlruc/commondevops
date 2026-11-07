@@ -31,6 +31,7 @@ jobs:
           REPO: ${{ github.repository }}
           IMAGES: ${{ inputs.images }}
           GH_TOKEN: ${{ github.token }}
+          GHCR_USER: ${{ github.actor }}
         run: |
           set -eu
           # shellcheck disable=SC2086
