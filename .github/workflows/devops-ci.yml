@@ -57,7 +57,7 @@ jobs:
     with:
       blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
       shell_scripts: scripts/*.sh
-      ruff_paths: scripts/lint-doc-links.py scripts/validate-yaml.py scripts/license_gate.py scripts/generate_grant_config.py
+      ruff_paths: scripts/lint-doc-links.py scripts/validate-yaml.py scripts/license_gate.py scripts/generate_grant_config.py scripts/check-guardrails-packs.py
       yaml_files: docs/issues.yml docs/guardrail-deviations.yml .github/dependabot.yml
       yaml_globs: .github/workflows/*.yml
       run_link_lint: true
