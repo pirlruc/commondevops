@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | <https://github.com/pirlruc/commondevops> (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
-| **Branch** | `main`. **6.0.0** is the compliance release. Guardrails 1.15.0 and scaffold 1.12.0. Image workflows still pin containerdevops 6.3.5 until 6.4.0. Do not move `5.4.4`–`5.6.1`. |
+| **Branch** | `main`. **6.0.1** is the pack-check patch on **6.0.0**. Guardrails 1.15.0 and scaffold 1.12.0. Image workflows still pin containerdevops 6.3.5 until 6.4.0. Do not move `5.4.4`–`5.6.1`. |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
@@ -171,7 +171,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
-- 2026-11-07: **6.0.0** turns doc-verify shfmt and markdownlint on by default, reconciles done issues only on the default branch, and appends image digests to the Release body. Guardrails 1.15.0, scaffold 1.12.0. semgrep stays on mcp 1.29.0. Image workflows still call containerdevops 6.3.5.
+- 2026-11-07: **6.0.1** runs the missing-pack check from the `scripts_ref` checkout. **6.0.0** turns doc-verify shfmt and markdownlint on by default. Guardrails 1.15.0, scaffold 1.12.0. semgrep stays on mcp 1.29.0. Image workflows still call containerdevops 6.3.5.
 - 2026-11-01: **5.8.0** makes `common-release` `sign: true` run keyless `cosign sign-blob` and `actions/attest-build-provenance`. New `environment` input. No image republish. Do not move `5.7.0` or `5.6.2`.
 - 2026-10-31: **5.7.0** adds `release_artifact` and `release_files` to `common-release`. No image republish. Do not move `5.6.2`.
 - 2026-10-28: **5.6.1** published ci-lint, ci-supply-chain, and ci-iac with go-jose/v4 4.1.6. Tag **5.6.0** was not moved. **5.6.2** pins the linux/amd64 manifests in the reusable defaults, the rescan, and the Hub/GHCR pages. No second publish.
@@ -265,4 +265,4 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-11-07 — 6.0.0. Doc-verify lint defaults are on. Guardrails 1.15.0. Scaffold 1.12.0. semgrep stays on mcp 1.29.0.*
+*Last updated: 2026-11-07 — 6.0.1. The pack check uses the scripts_ref checkout. Guardrails 1.15.0. Scaffold 1.12.0.*
