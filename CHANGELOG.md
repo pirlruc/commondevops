@@ -5,6 +5,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [6.0.0] - 2026-11-07
+
 ### Changed
 
 - `common-doc-verify` runs shfmt and markdownlint unless the caller turns them off. That default change is breaking.
