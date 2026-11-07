@@ -156,11 +156,25 @@ jobs:
         continue-on-error: true
         run: |
           pack=scripts/check-guardrails-packs.py
-          if [ ! -f "${pack}" ] || [ ! -d docs/guardrails/ci ]; then
-            git submodule update --init --depth 1 .github/scaffold docs/guardrails
-          fi
           if [ ! -f "${pack}" ]; then
             pack=.github/scaffold/scripts/check-guardrails-packs.py
+          fi
+          if [ ! -f "${pack}" ] || [ ! -d docs/guardrails/ci ]; then
+            home=$(mktemp -d)
+            gr=$(git rev-parse "HEAD:docs/guardrails")
+            sc=$(git rev-parse "HEAD:.github/scaffold")
+            HOME="${home}" GIT_CONFIG_NOSYSTEM=1 git clone --filter=blob:none --no-checkout https://github.com/pirlruc/github-scaffold.git /tmp/scaffold-packs
+            HOME="${home}" GIT_CONFIG_NOSYSTEM=1 git -C /tmp/scaffold-packs fetch --depth 1 origin "${sc}"
+            HOME="${home}" GIT_CONFIG_NOSYSTEM=1 git -C /tmp/scaffold-packs checkout --detach FETCH_HEAD
+            HOME="${home}" GIT_CONFIG_NOSYSTEM=1 git clone --filter=blob:none --no-checkout https://github.com/pirlruc/guardrails.git /tmp/guardrails-packs
+            HOME="${home}" GIT_CONFIG_NOSYSTEM=1 git -C /tmp/guardrails-packs fetch --depth 1 origin "${gr}"
+            HOME="${home}" GIT_CONFIG_NOSYSTEM=1 git -C /tmp/guardrails-packs checkout --detach FETCH_HEAD
+            if [ ! -f "${pack}" ]; then
+              pack=/tmp/scaffold-packs/scripts/check-guardrails-packs.py
+            fi
+            rm -rf docs/guardrails
+            mkdir -p docs/guardrails
+            cp -a /tmp/guardrails-packs/. docs/guardrails/
           fi
           if [ ! -f "${pack}" ]; then
             echo "error: check-guardrails-packs.py missing (GS-PACK-001)" >&2

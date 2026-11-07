@@ -8,3 +8,6 @@ rules:
     ignore:
       - devops-ci.yml
       - devops-security.yml
+      - ci-lint-image.yml
+      - ci-supply-chain-image.yml
+      - ci-iac-image.yml

@@ -50,7 +50,7 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 
 | Component | Ref |
 |-----------|-----|
-| guardrails submodule | tag **1.13.1** → `1945211ac851c3c0f83694bd4ea53571fdced4ab` |
+| guardrails submodule | tag **1.15.0** → `2d4bb70e95449f6922781716857adeb22badf676` |
 | github-scaffold submodule | tag **1.10.0** → `1d9901f7e7e5785abb7cac6f5d46e0e8e2023ff8` |
 | methodologies (links only; not a submodule) | tag **1.9.1** |
 | containerdevops (image callers + security rescan) | tag **6.3.5** → `c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e` |
