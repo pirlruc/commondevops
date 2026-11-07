@@ -80,7 +80,7 @@ jobs:
       contents: read
       packages: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
+    uses: pirlruc/containerdevops/.github/workflows/container-lint.yml@b419c24cbaf09f39d73fa0146a71155f1a4fbd54
     with:
       dockerfile: docker/ci-iac/Dockerfile
       working_directory: .
@@ -103,7 +103,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
+    uses: pirlruc/containerdevops/.github/workflows/container-build.yml@b419c24cbaf09f39d73fa0146a71155f1a4fbd54
     with:
       context: docker/ci-iac
       dockerfile: docker/ci-iac/Dockerfile
@@ -136,7 +136,7 @@ jobs:
       actions: read
       packages: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@b419c24cbaf09f39d73fa0146a71155f1a4fbd54
     with:
       image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build.outputs.handoff_package, needs.build.outputs.digest) }}
       results_artifact: container-scan-results-ci-iac
@@ -160,7 +160,7 @@ jobs:
       actions: read
       packages: read
       security-events: write
-    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
+    uses: pirlruc/containerdevops/.github/workflows/container-scan.yml@b419c24cbaf09f39d73fa0146a71155f1a4fbd54
     with:
       image: ${{ format('ghcr.io/{0}/{1}@{2}', github.repository_owner, needs.build.outputs.handoff_package, needs.build.outputs.digest) }}
       results_artifact: container-scan-posture-ci-iac
@@ -185,7 +185,7 @@ jobs:
       packages: write
       id-token: write
       attestations: write
-    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
+    uses: pirlruc/containerdevops/.github/workflows/container-publish.yml@b419c24cbaf09f39d73fa0146a71155f1a4fbd54
     with:
       context: docker/ci-iac
       dockerfile: docker/ci-iac/Dockerfile
