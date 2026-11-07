@@ -5,6 +5,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [6.1.0] - 2026-11-07
+
+### Added
+
+- `common-supply-chain` takes `upload_sarif` (default true). A private repository without code scanning sets it false. The caller still grants `security-events: write`.
+
+### Changed
+
+- Image workflows pin containerdevops 6.5.0 (`b8c0746603eefdc89571b17c62d1e965b28ff31f`) and pass `environment: release` only on a release event.
+- CI-032 and REL-PUB-004 are retired.
+- `common-supply-chain` no longer sets `security-events: write` at workflow level.
+- ci-lint, ci-supply-chain, and ci-iac rebuild on the current Go 1.27 and Python 3.13 DHI digests. shellcheck moves to the current `0-debian13` digest.
+- mcp stays 1.29.0 and opentelemetry-api stays 1.37.0. semgrep 1.184.0 still requires those exact pins.
+
 ## [6.0.1] - 2026-11-07
 
 ### Fixed

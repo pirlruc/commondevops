@@ -16,7 +16,7 @@
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
 # actionlint v1.7.12 rebuilt with Go 1.26.10. Stdlib fixes only (CMN-CVE-001).
-FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:2ceb813d69b9c82501323484e0c0ae612efde281f5dffce2a3d83a79a9c87304 AS actionlint-build
+FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:bc66efe51594cd50a6cf42d36f8521c6d643bd9be206acf606753ed15b23f0e1 AS actionlint-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/rhysd/actionlint.git \
@@ -26,7 +26,7 @@ RUN git init \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/actionlint ./cmd/actionlint
 
 # gitleaks v8.30.1 rebuilt with Go 1.26.10. Static binary, so it runs on musl.
-FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:2ceb813d69b9c82501323484e0c0ae612efde281f5dffce2a3d83a79a9c87304 AS gitleaks-build
+FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:bc66efe51594cd50a6cf42d36f8521c6d643bd9be206acf606753ed15b23f0e1 AS gitleaks-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/gitleaks/gitleaks.git \
@@ -39,7 +39,7 @@ RUN git init \
 # ---------------------------------------------------------------------------
 # pybuild — install Python CLIs; uv stays out of the final image (~53 MB).
 # ---------------------------------------------------------------------------
-FROM dhi.io/python:3.13-alpine3.24-dev@sha256:bcf6b1b0b533f0b7a465012f390e7c8ddb3a1df51ee99f6154bbdfdb1a20e997 AS pybuild
+FROM dhi.io/python:3.13-alpine3.24-dev@sha256:53ff6252b0cc680790b3e3b0ff6571753a8c34737aaf7f69e5ea17b676e1bfee AS pybuild
 COPY --from=ghcr.io/astral-sh/uv:0.12.0@sha256:606e70c71c852d03f611b1e56a195d08648507018a7057fab82c4974c4eae105 \
   /uv /usr/local/bin/uv
 ENV UV_SYSTEM_PYTHON=1 \
@@ -54,7 +54,7 @@ RUN uv pip install --system --no-cache --require-hashes -r /tmp/requirements.txt
 # ---------------------------------------------------------------------------
 # Final image
 # ---------------------------------------------------------------------------
-FROM dhi.io/python:3.13-alpine3.24-dev@sha256:bcf6b1b0b533f0b7a465012f390e7c8ddb3a1df51ee99f6154bbdfdb1a20e997
+FROM dhi.io/python:3.13-alpine3.24-dev@sha256:53ff6252b0cc680790b3e3b0ff6571753a8c34737aaf7f69e5ea17b676e1bfee
 
 LABEL org.opencontainers.image.title="ci-lint" \
       org.opencontainers.image.description="Short-lived CI toolchain image for lint and secrets/SAST: actionlint, hadolint, shellcheck, zizmor, yamllint, gitleaks. Alpine 3.24 variant. semgrep is Debian-only. Non-root 1000:1000, linux/amd64." \
@@ -65,7 +65,7 @@ LABEL org.opencontainers.image.title="ci-lint" \
       org.opencontainers.image.licenses="MIT"
 
 # Debian DHI donors: statically linked; no alpine3.24 DHI tag exists for these tools.
-COPY --from=dhi.io/shellcheck:0-debian13@sha256:ca40d44757047a41c7faf9203919a4b0836e0e680284f71a8729d60da0780c2a \
+COPY --from=dhi.io/shellcheck:0-debian13@sha256:110d64e356edb8923d4cb26f4cb1bf942ecfffdabc9387f5a183f9a2c039b71e \
   /usr/local/bin/shellcheck /usr/local/bin/shellcheck
 COPY --from=gitleaks-build /out/gitleaks /usr/local/bin/gitleaks
 COPY --from=hadolint/hadolint:v2.15.1-alpine@sha256:a1d49ae1a4e83c1dbad26b8c1ad7588c8bd1e04f4866b34ad3cac50335198552 \
