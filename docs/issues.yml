@@ -1658,7 +1658,7 @@ milestones:
               - REL-PUB-003
 
       - id: CMN-REL-004
-        status: open
+        status: done
         title: Ignore a release that does not change an image
         overview:
           problem: >-
@@ -1680,7 +1680,7 @@ milestones:
           - REL-PUB-003
         tasks:
           - id: CMN-REL-004-T1
-            status: open
+            status: done
             title: Path-filter the image workflows on release
             instructions:
               files:
@@ -1693,7 +1693,7 @@ milestones:
   - name: Documentation follow-up
     epics:
       - id: CMN-LINT-003
-        status: open
+        status: done
         title: Default shfmt and markdownlint on in common-doc-verify
         overview:
           problem: >-
@@ -1711,7 +1711,7 @@ milestones:
           - shfmt has an input and defaults on
         tasks:
           - id: CMN-LINT-003-T1
-            status: open
+            status: done
             title: Flip the lint defaults
             instructions:
               files:
@@ -1723,7 +1723,7 @@ milestones:
               - DOC-LINT-003
               - CI-035
       - id: CMN-RECON-002
-        status: open
+        status: done
         title: Run done-versus-open reconciliation on the default branch only
         overview:
           problem: >-
@@ -1742,7 +1742,7 @@ milestones:
           - It fails a default-branch run when the manifest says done and the issue is open
         tasks:
           - id: CMN-RECON-002-T1
-            status: open
+            status: done
             title: Move the reconciliation check
             instructions:
               files:
@@ -1752,7 +1752,7 @@ milestones:
             guardrail_refs:
               - CI-008
       - id: CMN-TOK-001
-        status: open
+        status: done
         title: Stop documenting a Dependabot secret as checkout_token
         overview:
           problem: >-
@@ -1769,7 +1769,7 @@ milestones:
           - No workflow or doc tells a caller to pass DEPENDABOT_GITHUB_TOKEN as checkout_token
         tasks:
           - id: CMN-TOK-001-T1
-            status: open
+            status: done
             title: Remove the checkout_token guidance
             instructions:
               files:

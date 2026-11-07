@@ -33,8 +33,46 @@ permissions:
   contents: read
 
 jobs:
+  release-scope:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      run: ${{ steps.diff.outputs.run }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: github.event_name == 'release'
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.release.tag_name }}
+      - id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -eu
+          if [ "${EVENT}" != "release" ]; then
+            echo "run=true" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          prev=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || true)
+          if [ -z "${prev}" ]; then
+            echo "run=true" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          if git diff --name-only "${prev}" "${TAG}" | grep -q '^docker/'; then
+            echo "run=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "docker/ unchanged since ${prev}; skip image jobs"
+            echo "run=false" >> "${GITHUB_OUTPUT}"
+          fi
+
   lint:
+    needs: [release-scope]
     if: >-
+      needs.release-scope.outputs.run == 'true' &&
       github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
@@ -56,7 +94,9 @@ jobs:
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   lint-alpine:
+    needs: [release-scope]
     if: >-
+      needs.release-scope.outputs.run == 'true' &&
       github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
@@ -78,8 +118,9 @@ jobs:
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   build:
-    needs: [lint, lint-alpine]
+    needs: [release-scope, lint, lint-alpine]
     if: >-
+      needs.release-scope.outputs.run == 'true' &&
       github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
@@ -109,8 +150,9 @@ jobs:
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   build-alpine:
-    needs: [lint, lint-alpine]
+    needs: [release-scope, lint, lint-alpine]
     if: >-
+      needs.release-scope.outputs.run == 'true' &&
       github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
@@ -140,8 +182,9 @@ jobs:
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   scan:
-    needs: build
+    needs: [release-scope, build]
     if: >-
+      needs.release-scope.outputs.run == 'true' &&
       github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
@@ -163,8 +206,9 @@ jobs:
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   scan-alpine:
-    needs: build-alpine
+    needs: [release-scope, build-alpine]
     if: >-
+      needs.release-scope.outputs.run == 'true' &&
       github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
@@ -187,8 +231,9 @@ jobs:
 
   # Advisory posture scan (os+library, ignorefile=none) — does not block publish.
   scan-posture:
-    needs: build
+    needs: [release-scope, build]
     if: >-
+      needs.release-scope.outputs.run == 'true' &&
       github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
@@ -210,8 +255,9 @@ jobs:
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   scan-posture-alpine:
-    needs: build-alpine
+    needs: [release-scope, build-alpine]
     if: >-
+      needs.release-scope.outputs.run == 'true' &&
       github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name != 'pull_request' ||
        github.event.pull_request.head.repo.full_name == github.repository)
@@ -233,8 +279,9 @@ jobs:
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   publish:
-    needs: [build, scan]
+    needs: [release-scope, build, scan]
     if: >-
+      needs.release-scope.outputs.run == 'true' &&
       github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name == 'release' ||
        github.event_name == 'schedule' ||
@@ -277,8 +324,9 @@ jobs:
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
 
   publish-alpine:
-    needs: [build-alpine, scan-alpine]
+    needs: [release-scope, build-alpine, scan-alpine]
     if: >-
+      needs.release-scope.outputs.run == 'true' &&
       github.event.pull_request.user.login != 'dependabot[bot]' &&
       (github.event_name == 'release' ||
        github.event_name == 'schedule' ||
@@ -322,8 +370,8 @@ jobs:
 
   # PR-only: ci-run-* is not also a release tag. After publish retag, never delete.
   cleanup:
-    needs: [build, scan]
-    if: always() && github.event_name == 'pull_request' && needs.build.outputs.handoff_tag != ''
+    needs: [release-scope, build, scan]
+    if: always() && needs.release-scope.outputs.run == 'true' && github.event_name == 'pull_request' && needs.build.outputs.handoff_tag != ''
     permissions:
       packages: write
     uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
@@ -332,11 +380,27 @@ jobs:
       tag: ${{ needs.build.outputs.handoff_tag }}
 
   cleanup-alpine:
-    needs: [build-alpine, scan-alpine]
-    if: always() && github.event_name == 'pull_request' && needs.build-alpine.outputs.handoff_tag != ''
+    needs: [release-scope, build-alpine, scan-alpine]
+    if: always() && needs.release-scope.outputs.run == 'true' && github.event_name == 'pull_request' && needs.build-alpine.outputs.handoff_tag != ''
     permissions:
       packages: write
     uses: pirlruc/containerdevops/.github/workflows/container-handoff-cleanup.yml@c92c83bd4ccb9f0040f11ca9e99bc1b4f50b652e
     with:
       package: ${{ needs.build-alpine.outputs.handoff_package }}
       tag: ${{ needs.build-alpine.outputs.handoff_tag }}
+
+  release-digests:
+    needs: [release-scope, publish, publish-alpine]
+    if: >-
+      github.event_name == 'release' &&
+      needs.release-scope.outputs.run == 'true' &&
+      needs.publish.result == 'success' &&
+      needs.publish-alpine.result == 'success'
+    permissions:
+      contents: write
+      packages: read
+    uses: ./.github/workflows/common-release-digests.yml
+    with:
+      images: >-
+        ghcr.io/${{ github.repository_owner }}/ci-supply-chain:${{ github.event.release.tag_name }}
+        ghcr.io/${{ github.repository_owner }}/ci-supply-chain:${{ github.event.release.tag_name }}-alpine

@@ -306,9 +306,9 @@ for the YAML and link checkers, and fails closed when neither copy exists.
 
 `common-infra-lint` passes `--severity` from `shellcheck_failure_threshold` and
 `--failure-threshold` from `hadolint_failure_threshold`. A missing key fails
-closed. `run_shfmt: true` runs `shfmt --diff` (off by default).
-`common-doc-verify` can run `markdownlint-cli2` and `lychee` when those inputs
-are true. `common-ansible-verify` runs yamllint, ansible-lint, the caller's
+closed. `run_shfmt: true` runs `shfmt --diff` (off by default on infra lint).
+`common-doc-verify` runs `shfmt` and `markdownlint-cli2` unless the caller
+turns them off, and runs `lychee` when that input is true. `common-ansible-verify` runs yamllint, ansible-lint, the caller's
 guardrail script, and Molecule. `results_retention_days` on
 `common-supply-chain` defaults to 1.
 
@@ -342,5 +342,3 @@ Checks out the caller, then checks out `pirlruc/guardrails` at the
 Pass `checkout_token` when that submodule is private
 (`GUARDRAILS_READ_TOKEN`). Dependabot pull requests skip this job because
 they cannot read Actions secrets.
-
-

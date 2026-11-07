@@ -7,9 +7,9 @@ Scorecard, OpenTofu, and SOPS.
 
 | | |
 |---|---|
-| **Remote** | https://github.com/pirlruc/commondevops |
+| **Remote** | <https://github.com/pirlruc/commondevops> |
 | **Role** | Cross-language CI infrastructure (pairs with [containerdevops](https://github.com/pirlruc/containerdevops) and [pydevops](https://github.com/pirlruc/pydevops)) |
-| **Guardrails** | Pinned at `docs/guardrails/` ([pirlruc/guardrails](https://github.com/pirlruc/guardrails) tag `1.13.1`) |
+| **Guardrails** | Pinned at `docs/guardrails/` ([pirlruc/guardrails](https://github.com/pirlruc/guardrails) tag `1.15.0`) |
 | **Changelog** | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Reusable workflows
@@ -86,8 +86,8 @@ unsuffixed `ci-supply-chain` tags. `ci-iac` is Debian only.
 
 | Path | Remote | Pin |
 |------|--------|-----|
-| `docs/guardrails` | https://github.com/pirlruc/guardrails.git | tag `1.13.1` |
-| `.github/scaffold` | https://github.com/pirlruc/github-scaffold.git | tag `1.10.2` |
+| `docs/guardrails` | <https://github.com/pirlruc/guardrails.git> | tag `1.15.0` |
+| `.github/scaffold` | <https://github.com/pirlruc/github-scaffold.git> | tag `1.12.0` |
 
 ```bash
 git submodule update --init --recursive

@@ -39,7 +39,7 @@ RUN git init \
 # ---------------------------------------------------------------------------
 # pybuild — install Python CLIs; uv stays out of the final image (~53 MB).
 # ---------------------------------------------------------------------------
-FROM dhi.io/python:3.13-alpine3.24-dev@sha256:9be22b80fca9ab4c488cf55c026412074705ca3b7fc652ad9bb79cc863f49920 AS pybuild
+FROM dhi.io/python:3.13-alpine3.24-dev@sha256:bcf6b1b0b533f0b7a465012f390e7c8ddb3a1df51ee99f6154bbdfdb1a20e997 AS pybuild
 COPY --from=ghcr.io/astral-sh/uv:0.12.0@sha256:606e70c71c852d03f611b1e56a195d08648507018a7057fab82c4974c4eae105 \
   /uv /usr/local/bin/uv
 ENV UV_SYSTEM_PYTHON=1 \
@@ -54,7 +54,7 @@ RUN uv pip install --system --no-cache --require-hashes -r /tmp/requirements.txt
 # ---------------------------------------------------------------------------
 # Final image
 # ---------------------------------------------------------------------------
-FROM dhi.io/python:3.13-alpine3.24-dev@sha256:9be22b80fca9ab4c488cf55c026412074705ca3b7fc652ad9bb79cc863f49920
+FROM dhi.io/python:3.13-alpine3.24-dev@sha256:bcf6b1b0b533f0b7a465012f390e7c8ddb3a1df51ee99f6154bbdfdb1a20e997
 
 LABEL org.opencontainers.image.title="ci-lint" \
       org.opencontainers.image.description="Short-lived CI toolchain image for lint and secrets/SAST: actionlint, hadolint, shellcheck, zizmor, yamllint, gitleaks. Alpine 3.24 variant. semgrep is Debian-only. Non-root 1000:1000, linux/amd64." \

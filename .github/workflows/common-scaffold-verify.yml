@@ -1,8 +1,8 @@
 name: Common Scaffold Verify (reusable)
 
-# github-scaffold-specific checks against the caller tree. Does not clone
-# pirlruc/guardrails and does not require GUARDRAILS_READ_TOKEN.
-# Skips each check when the corresponding caller script is absent.
+# github-scaffold-specific checks against the caller tree.
+# Pack presence checks out the caller's guardrails and scaffold gitlinks
+# with github.token. Public pins need no checkout_token (CI-024).
 
 on:
   workflow_call:
@@ -20,6 +20,9 @@ on:
     secrets:
       checkout_token:
         description: Token to read this repo when the done-vs-open script is checked out cross-repo
+        required: false
+      packs_token:
+        description: Token that can read the private guardrails pin
         required: false
   workflow_dispatch:
     inputs:
@@ -138,7 +141,9 @@ jobs:
 
       - name: Done manifest ids are not still open
         id: recon
-        if: github.event.pull_request.user.login != 'dependabot[bot]'
+        if: >-
+          github.event_name == 'push' &&
+          github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -149,6 +154,40 @@ jobs:
           fi
           .ci-venv/bin/python _commondevops/scripts/check-done-open.py docs/issues.yml
 
+      - name: Guardrails gitlink
+        id: packs_refs
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
+        run: echo "guardrails=$(git rev-parse 'HEAD:docs/guardrails')" >> "${GITHUB_OUTPUT}"
+
+      - name: Clear the guardrails gitlink directory
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
+        run: rm -rf docs/guardrails
+
+      - name: Checkout guardrails at the gitlink
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: pirlruc/guardrails
+          ref: ${{ steps.packs_refs.outputs.guardrails }}
+          token: ${{ secrets.packs_token }}
+          persist-credentials: false
+          path: docs/guardrails
+
+      - name: Language in use has a guardrails pack
+        id: packs
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
+        continue-on-error: true
+        run: |
+          pack=scripts/check-guardrails-packs.py
+          if [ ! -f "${pack}" ]; then
+            pack=.github/scaffold/scripts/check-guardrails-packs.py
+          fi
+          if [ ! -f "${pack}" ]; then
+            echo "error: check-guardrails-packs.py missing (GS-PACK-001)" >&2
+            exit 1
+          fi
+          python3 "${pack}"
+
       - name: Gate — scaffold
         if: always()
         env:
@@ -156,11 +195,13 @@ jobs:
           ISSUES: ${{ steps.issues.outcome }}
           SCAFFOLD: ${{ steps.scaffold_ref.outcome }}
           RECON: ${{ steps.recon.outcome }}
+          PACKS: ${{ steps.packs.outcome }}
         run: |
           failed=""
           [ "${ISSUES}" = "success" ] || [ "${ISSUES}" = "skipped" ] || failed="${failed} issues(${ISSUES})"
           [ "${SCAFFOLD}" = "success" ] || [ "${SCAFFOLD}" = "skipped" ] || failed="${failed} scaffold_ref(${SCAFFOLD})"
           [ "${RECON}" = "success" ] || [ "${RECON}" = "skipped" ] || [ -z "${RECON}" ] || failed="${failed} recon(${RECON})"
+          [ "${PACKS}" = "success" ] || [ "${PACKS}" = "skipped" ] || failed="${failed} packs(${PACKS})"
           if [ -z "${failed}" ]; then
             echo "All collected gates passed."
             exit 0

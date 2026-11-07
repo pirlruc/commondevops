@@ -1,0 +1,37 @@
+name: Common Release Digests (reusable)
+
+# REL-PUB-005. Called after an image publish on release: published.
+
+on:
+  workflow_call:
+    inputs:
+      images:
+        description: Space-separated image refs to inspect
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  digests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      packages: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts/append-release-digests.sh
+          sparse-checkout-cone-mode: false
+      - name: Append digest table
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          REPO: ${{ github.repository }}
+          IMAGES: ${{ inputs.images }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          # shellcheck disable=SC2086
+          sh scripts/append-release-digests.sh ${IMAGES}
