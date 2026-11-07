@@ -21,6 +21,9 @@ on:
       checkout_token:
         description: Token to read this repo when the done-vs-open script is checked out cross-repo
         required: false
+      packs_token:
+        description: Token that can read the private guardrails and scaffold pins
+        required: false
   workflow_dispatch:
     inputs:
       blocking:
@@ -153,33 +156,38 @@ jobs:
 
       - name: Guardrails and scaffold gitlinks
         id: packs_refs
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
         run: |
           echo "guardrails=$(git rev-parse 'HEAD:docs/guardrails')" >> "${GITHUB_OUTPUT}"
           echo "scaffold=$(git rev-parse 'HEAD:.github/scaffold')" >> "${GITHUB_OUTPUT}"
 
       - name: Clear pinned submodule directories
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
         run: rm -rf docs/guardrails .github/scaffold
 
       - name: Checkout guardrails at the gitlink
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: pirlruc/guardrails
           ref: ${{ steps.packs_refs.outputs.guardrails }}
-          token: ${{ github.token }}
+          token: ${{ secrets.packs_token }}
           persist-credentials: false
           path: docs/guardrails
 
       - name: Checkout scaffold at the gitlink
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: pirlruc/github-scaffold
           ref: ${{ steps.packs_refs.outputs.scaffold }}
-          token: ${{ github.token }}
+          token: ${{ secrets.packs_token }}
           persist-credentials: false
           path: .github/scaffold
 
       - name: Language in use has a guardrails pack
         id: packs
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
         continue-on-error: true
         run: |
           pack=.github/scaffold/scripts/check-guardrails-packs.py

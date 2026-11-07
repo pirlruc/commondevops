@@ -47,6 +47,8 @@ jobs:
     with:
       blocking: ${{ github.event_name != 'workflow_dispatch' || inputs.blocking }}
       scripts_ref: ${{ github.sha }}
+    secrets:
+      packs_token: ${{ secrets.GUARDRAILS_READ_TOKEN }}
 
   docs:
     permissions:
