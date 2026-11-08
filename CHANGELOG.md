@@ -5,6 +5,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [6.1.1] - 2026-11-08
+
+### Added
+
+- `common-infra-lint`, `common-secrets-sast`, and `common-supply-chain` take `container_username` and `container_token`. A caller whose repository cannot be added to a personal-account package passes a `read:packages` token and the package owner's login. An empty token still uses `github.token`.
+
 ## [6.1.0] - 2026-11-07
 
 ### Added
