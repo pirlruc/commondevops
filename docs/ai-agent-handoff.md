@@ -267,7 +267,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-11-07 — 6.1.0. containerdevops 6.5.0. CI-032 and REL-PUB-004 retired. upload_sarif defaults on. mcp stays 1.29.0 because semgrep 1.184.0 requires it. Images rebuild on current DHI digests.*
+*Last updated: 2026-11-08 — 6.1.1. Image jobs accept container_token and container_username so another account's repository can pull a personal-account package.*
 
 *Last updated: 2026-11-07 — 6.0.1. The pack check uses the scripts_ref checkout. Guardrails 1.15.0. Scaffold 1.12.0.*
 
