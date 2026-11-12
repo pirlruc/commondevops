@@ -5,6 +5,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [6.2.0] - 2026-11-12
+
 ### Added
 
 - `common-dependency-review.yml` runs pull-request dependency review (CI-046).
