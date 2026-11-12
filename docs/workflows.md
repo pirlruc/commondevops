@@ -32,6 +32,7 @@ or the reusable job fails at startup with no useful callee message.
 | `common-token-audit.yml` | none (the job sets no token scopes) |
 | `common-tofu-verify.yml` | `contents: read`, `packages: read` |
 | `common-sops-verify.yml` | `contents: read`, `packages: read` |
+| `common-dependency-review.yml` | `contents: read`, `pull-requests: read` |
 | `common-pins-verify.yml` | `contents: read` |
 | `common-threshold-drift.yml` | `contents: read` |
 | `common-supply-chain.yml` | `contents: read`, `actions: read`, `security-events: write` |
@@ -327,6 +328,12 @@ Runs `scripts/check-sops-ciphertext.sh` inside the same image. A `*.sops.*`
 file must contain `sops:` metadata, and `.sops.yaml` must name a real Age
 recipient. The workflow requests no Age private key and does not decrypt.
 `blocking` defaults to true. A repository with no SOPS files succeeds.
+
+## `common-dependency-review.yml`
+
+Runs `actions/dependency-review-action` on a pull request. `fail_on_severity`
+defaults to `high`. `deny_licenses` and `allow_licenses` are optional SPDX
+lists. The job is skipped when the caller event is not a pull request.
 
 ## `common-pins-verify.yml`
 

@@ -5,6 +5,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- `common-dependency-review.yml` runs pull-request dependency review (CI-046).
+- `license_gate.py` skips package names listed in `LICENSE_GATE_EXCLUDE`.
+
 ## [6.1.1] - 2026-11-08
 
 ### Added

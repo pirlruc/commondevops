@@ -75,6 +75,13 @@ def _resolve_deny_list() -> list[str]:
     return _deny_from_thresholds(thr)
 
 
+def _is_excluded(name: str) -> bool:
+    """Return true when LICENSE_GATE_EXCLUDE names this package exactly."""
+    raw = os.environ.get('LICENSE_GATE_EXCLUDE', '')
+    names = {part.strip() for part in raw.split(',') if part.strip()}
+    return name in names
+
+
 def _find_license_hits(packages: list[Any], deny_l: list[str]) -> list[str]:
     """Collect human-readable hit strings for packages matching any deny pattern."""
     hits: list[str] = []
@@ -86,10 +93,13 @@ def _find_license_hits(packages: list[Any], deny_l: list[str]) -> list[str]:
         if not lic or lic == 'NOASSERTION':
             continue
 
+        name = str(pkg.get('name', '?'))
+        if _is_excluded(name):
+            continue
+
         lics = str(lic).lower()
         matched = [d for d in deny_l if d and d in lics]
         if matched:
-            name = pkg.get('name', '?')
             pat = ', '.join(f"'{m}'" for m in matched)
             hits.append(f'{name}: {lic} (matched deny pattern(s) {pat})')
 

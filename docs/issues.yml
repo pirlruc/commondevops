@@ -1821,3 +1821,37 @@ milestones:
             guardrail_refs:
               - REL-PUB-004
               - CI-042
+      - id: CMN-DEP-001
+        status: done
+        title: Review dependency changes from one reusable workflow
+        overview:
+          problem: >-
+            Callers copy actions/dependency-review-action. CI-046 requires
+            the review, and a copied pin drifts.
+          goal: >-
+            One workflow runs the review on pull requests.
+        decision: >-
+          In the context of pull-request dependency review, facing copied
+          action pins, we decided to publish common-dependency-review, to
+          achieve one pin, accepting that the job skips when the event is
+          not a pull request.
+        acceptance_criteria:
+          - common-dependency-review.yml pins the review action by SHA
+          - The job runs on ubuntu-24.04 and requests contents and pull-requests read
+          - license_gate.py can skip a named root package
+        guardrail_refs:
+          - CI-046
+          - SC-LIC-001
+        tasks:
+          - id: CMN-DEP-001-T1
+            status: done
+            title: Add the workflow and the license exclude
+            instructions:
+              files:
+                - .github/workflows/common-dependency-review.yml
+                - scripts/license_gate.py
+            verification:
+              - actionlint .github/workflows/common-dependency-review.yml
+            guardrail_refs:
+              - CI-046
+              - SC-LIC-001
