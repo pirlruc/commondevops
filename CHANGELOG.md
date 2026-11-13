@@ -5,6 +5,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [6.3.0] - 2026-11-13
+
+### Added
+
+- `common-buf.yml` runs `buf lint` and `buf breaking` (PROTO-LINT-001, PROTO-API-001).
+
 ## [6.2.0] - 2026-11-12
 
 ### Added

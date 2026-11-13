@@ -34,6 +34,7 @@ or the reusable job fails at startup with no useful callee message.
 | `common-sops-verify.yml` | `contents: read`, `packages: read` |
 | `common-dependency-review.yml` | `contents: read`, `pull-requests: read` |
 | `common-pins-verify.yml` | `contents: read` |
+| `common-buf.yml` | `contents: read` |
 | `common-threshold-drift.yml` | `contents: read` |
 | `common-supply-chain.yml` | `contents: read`, `actions: read`, `security-events: write` |
 | `common-scorecard.yml` | `contents: read`, `security-events: write`, `id-token: write` |
@@ -334,6 +335,14 @@ recipient. The workflow requests no Age private key and does not decrypt.
 Runs `actions/dependency-review-action` on a pull request. `fail_on_severity`
 defaults to `high`. `deny_licenses` and `allow_licenses` are optional SPDX
 lists. The job is skipped when the caller event is not a pull request.
+
+## `common-buf.yml`
+
+Runs `buf lint`, then `buf breaking` against the pull-request base ref, or
+against `HEAD~1` on a push. The image is `bufbuild/buf` 1.61.0 by digest.
+A tree with no `.proto` files succeeds. `blocking` defaults to true.
+Cross-repo callers pass `scripts_ref` equal to the `uses:` pin. The runner
+needs Docker, which `ubuntu-24.04` provides.
 
 ## `common-pins-verify.yml`
 

@@ -1855,3 +1855,61 @@ milestones:
             guardrail_refs:
               - CI-046
               - SC-LIC-001
+      - id: CMN-BUF-001
+        status: done
+        title: Lint protobuf from one reusable workflow
+        overview:
+          problem: >-
+            PROTO-LINT-001 and PROTO-API-001 require buf lint and buf
+            breaking. Callers that vendor protobuf have no shared job.
+          goal: >-
+            One workflow runs both gates from a digest-pinned buf image.
+        decision: >-
+          In the context of protobuf in a service repository, facing copied
+          buf installs, we decided to publish common-buf, to achieve one
+          pin, accepting that a tree with no proto files skips the gate.
+        acceptance_criteria:
+          - common-buf.yml runs buf lint and buf breaking
+          - The buf image is pinned by digest
+          - A repository with no proto files succeeds
+        guardrail_refs:
+          - PROTO-LINT-001
+          - PROTO-API-001
+        tasks:
+          - id: CMN-BUF-001-T1
+            status: done
+            title: Add the buf workflow
+            instructions:
+              files:
+                - .github/workflows/common-buf.yml
+                - docs/workflows.md
+            verification:
+              - actionlint .github/workflows/common-buf.yml
+            guardrail_refs:
+              - PROTO-LINT-001
+              - PROTO-API-001
+      - id: CMN-SWIFT-001
+        status: open
+        title: Decide where Swift package CI lives
+        overview:
+          problem: >-
+            A Swift package needs a build and test gate. No reusable
+            workflow covers it, and the C++ mobile matrix does not compile
+            Swift.
+          goal: >-
+            One decision records whether the workflow lives here or in a
+            language pack, before any caller copies a macOS job.
+        decision: >-
+          In the context of a Swift package in a multi-language repository,
+          facing a missing reusable job, we decided to record the home of
+          that job before writing it, to achieve one implementation,
+          accepting that callers keep a Linux swift container until then.
+        acceptance_criteria:
+          - The epic names the repository that will own the workflow
+          - The workflow is not copied into this release
+        tasks:
+          - id: CMN-SWIFT-001-T1
+            status: open
+            title: Choose the owning repository
+            verification:
+              - The epic body names one repository
