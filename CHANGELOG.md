@@ -5,6 +5,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [6.4.1] - 2026-11-13
+
+### Fixed
+
+- `semgrep_config` accepts space-separated registry packs. Each pack is one `--config`.
+
 ## [6.4.0] - 2026-11-13
 
 ### Added
