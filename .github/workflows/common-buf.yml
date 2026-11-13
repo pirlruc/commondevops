@@ -1,0 +1,91 @@
+name: Common Buf (reusable)
+
+# PROTO-LINT-001 and PROTO-API-001. buf lint, then buf breaking against the
+# pull-request base, or against HEAD~1 on a push. A tree with no .proto files
+# succeeds so callers can keep the job on every repository.
+
+on:
+  workflow_call:
+    inputs:
+      working_directory:
+        description: Directory that contains buf.yaml, or the proto root
+        required: false
+        type: string
+        default: .
+      scripts_ref:
+        description: Must equal the caller's uses pin (CI-034). Not checked out.
+        required: false
+        type: string
+        default: ""
+      blocking:
+        description: Fail the job when buf fails
+        required: false
+        type: boolean
+        default: true
+  workflow_dispatch:
+    inputs:
+      working_directory:
+        type: string
+        default: .
+      scripts_ref:
+        type: string
+        default: ""
+      blocking:
+        type: boolean
+        default: true
+
+permissions: {}
+
+concurrency:
+  group: >-
+    ${{ github.event_name == 'workflow_dispatch' && github.workflow == 'Common Buf (reusable)'
+        && format('dispatch-{0}-{1}', github.workflow, github.ref)
+        || format('call-buf-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' && github.workflow == 'Common Buf (reusable)' }}
+
+jobs:
+  buf:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    continue-on-error: ${{ !inputs.blocking }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Require scripts_ref for cross-repo callers (CI-034)
+        env:
+          SCRIPTS_REF: ${{ inputs.scripts_ref }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -eu
+          if [ "${REPO}" != "pirlruc/commondevops" ] && [ -z "${SCRIPTS_REF}" ]; then
+            echo "CI-034: cross-repo callers must pass scripts_ref matching the uses: pin" >&2
+            exit 1
+          fi
+
+      - name: buf lint and breaking
+        env:
+          WORKDIR: ${{ inputs.working_directory }}
+          BASE_REF: ${{ github.base_ref }}
+          BUF_IMAGE: bufbuild/buf@sha256:3b7fb27f8ff153037b3f781924c6aa1327352f14ee547cf45fd75f6d994fe0eb
+        run: |
+          set -eu
+          cd "${WORKDIR}"
+          if ! find . -name '*.proto' -print -quit | grep -q .; then
+            echo "no .proto files; buf gate skipped"
+            exit 0
+          fi
+          docker run --rm -v "${PWD}:/workspace" -w /workspace "${BUF_IMAGE}" lint
+          if [ -n "${BASE_REF}" ]; then
+            against=".git#branch=origin/${BASE_REF}"
+          elif git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+            against=".git#branch=HEAD~1"
+          else
+            echo "no base ref; buf breaking skipped"
+            exit 0
+          fi
+          docker run --rm -v "${PWD}:/workspace" -w /workspace "${BUF_IMAGE}" breaking --against "${against}"

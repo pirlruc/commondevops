@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | <https://github.com/pirlruc/commondevops> (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
-| **Branch** | `main`. **6.1.0** pins containerdevops 6.5.0 and retires CI-032 and REL-PUB-004. Guardrails 1.15.0 and scaffold 1.12.0. Do not move `5.4.4`–`6.0.1`. |
+| **Branch** | `main`. **6.3.0** adds `common-buf.yml`. **6.2.0** adds dependency review. Guardrails 1.15.0 and scaffold 1.12.0. Do not move `5.4.4`–`6.2.0`. |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
@@ -50,6 +50,9 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | CMN-TOK-001 — no Dependabot secret as checkout_token | Done (`6.0.0`) |
 | CMN-REL-004 — skip an image release with no `docker/` diff | Done (`6.0.0`) |
 | CMN-ENV-001 — publish environment and SARIF switch | Done (`6.1.0`) |
+| CMN-DEP-001 — dependency review workflow | Done (`6.2.0`) |
+| CMN-BUF-001 — buf lint and breaking | Done (`6.3.0`) |
+| CMN-SWIFT-001 — Swift package CI home | Open |
 
 ## Pins
 
@@ -267,7 +270,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-11-12 — v6.2.0. common-dependency-review runs CI-046. license_gate.py honors LICENSE_GATE_EXCLUDE.*
+*Last updated: 2026-11-13 — v6.3.0. common-buf runs buf lint and buf breaking. CMN-SWIFT-001 stays open.*
 
 *Last updated: 2026-11-08 — 6.1.1. Image jobs accept container_token and container_username so another account's repository can pull a personal-account package.*
 
