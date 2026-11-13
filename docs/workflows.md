@@ -35,6 +35,7 @@ or the reusable job fails at startup with no useful callee message.
 | `common-dependency-review.yml` | `contents: read`, `pull-requests: read` |
 | `common-pins-verify.yml` | `contents: read` |
 | `common-buf.yml` | `contents: read` |
+| `common-swift.yml` | `contents: read` |
 | `common-threshold-drift.yml` | `contents: read` |
 | `common-supply-chain.yml` | `contents: read`, `actions: read`, `security-events: write` |
 | `common-scorecard.yml` | `contents: read`, `security-events: write`, `id-token: write` |
@@ -339,10 +340,19 @@ lists. The job is skipped when the caller event is not a pull request.
 ## `common-buf.yml`
 
 Runs `buf lint`, then `buf breaking` against the pull-request base ref, or
-against `HEAD~1` on a push. The image is `bufbuild/buf` 1.61.0 by digest.
-A tree with no `.proto` files succeeds. `blocking` defaults to true.
+against the previous commit SHA on a push (`.git#ref=`, not `branch=`).
+The image is `bufbuild/buf` 1.61.0 by digest.
+A tree with no `.proto` files succeeds. The first commit skips breaking.
+`blocking` defaults to true.
 Cross-repo callers pass `scripts_ref` equal to the `uses:` pin. The runner
 needs Docker, which `ubuntu-24.04` provides.
+
+## `common-swift.yml`
+
+Runs `swift test` in digest-pinned `swift:6.1` on `ubuntu-24.04`.
+`macos: true` adds a `macos-15` job. The default is false.
+A tree with no `Package.swift` succeeds. `blocking` defaults to true.
+Cross-repo callers pass `scripts_ref` equal to the `uses:` pin.
 
 ## `common-pins-verify.yml`
 

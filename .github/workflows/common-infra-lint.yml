@@ -117,10 +117,10 @@ jobs:
     container:
       image: ${{ inputs.container_image }} # zizmor: ignore[unpinned-images]
       credentials:
-        username: ${{ inputs.install_runner_packages == false && (inputs.container_username || github.actor) || '' }}
-        # container_token pulls a package owned by another account. A public
-        # image skips registry login. checkout_token is contents:read only.
-        password: ${{ inputs.install_runner_packages == false && (secrets.container_token || github.token) || '' }}
+        # install_runner_packages only installs apt packages. An empty
+        # username still attempts a registry login and fails a public GHCR pull.
+        username: ${{ inputs.container_username || github.actor }}
+        password: ${{ secrets.container_token || github.token }}
       # The published image has no git. Mount the runner git and the
       # libcurl-gnutls closure git-remote-https needs. Leave libc and libssl
       # on the image copies.

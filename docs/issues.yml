@@ -1889,27 +1889,104 @@ milestones:
               - PROTO-LINT-001
               - PROTO-API-001
       - id: CMN-SWIFT-001
-        status: open
-        title: Decide where Swift package CI lives
+        status: done
+        title: Run Swift package tests from one reusable workflow
         overview:
           problem: >-
             A Swift package needs a build and test gate. No reusable
             workflow covers it, and the C++ mobile matrix does not compile
             Swift.
           goal: >-
-            One decision records whether the workflow lives here or in a
-            language pack, before any caller copies a macOS job.
+            commondevops owns the Linux swift:6.1 job, with macOS opt-in.
         decision: >-
           In the context of a Swift package in a multi-language repository,
-          facing a missing reusable job, we decided to record the home of
-          that job before writing it, to achieve one implementation,
-          accepting that callers keep a Linux swift container until then.
+          facing a missing reusable job, we decided that commondevops owns
+          common-swift, to achieve one pin, accepting that macOS stays
+          opt-in so pull requests do not spend macOS minutes.
         acceptance_criteria:
-          - The epic names the repository that will own the workflow
-          - The workflow is not copied into this release
+          - common-swift.yml runs swift test in a digest-pinned swift:6.1 image
+          - macos defaults to false
+          - A repository with no Package.swift succeeds
+        guardrail_refs:
+          - CI-043
         tasks:
           - id: CMN-SWIFT-001-T1
-            status: open
+            status: done
             title: Choose the owning repository
             verification:
-              - The epic body names one repository
+              - The epic body names commondevops
+          - id: CMN-SWIFT-001-T2
+            status: done
+            title: Add the Swift workflow
+            instructions:
+              files:
+                - .github/workflows/common-swift.yml
+                - docs/workflows.md
+            verification:
+              - actionlint .github/workflows/common-swift.yml
+            guardrail_refs:
+              - CI-043
+      - id: CMN-BUF-002
+        status: done
+        title: Compare buf breaking against a commit on push
+        overview:
+          problem: >-
+            common-buf passes branch=HEAD~1 on a push. HEAD~1 is not a
+            branch, so buf breaking fails every push to main.
+          goal: >-
+            A push compares against the previous commit SHA.
+        decision: >-
+          In the context of buf breaking on a push, facing a ref that is
+          not a branch, we decided to pass ref= with the previous commit
+          SHA, to achieve a comparison on every trigger, accepting that
+          the first commit skips breaking.
+        acceptance_criteria:
+          - A push uses .git#ref= and a full SHA
+          - A pull request still uses the base branch
+          - The first commit skips breaking with a notice
+        guardrail_refs:
+          - PROTO-API-001
+        tasks:
+          - id: CMN-BUF-002-T1
+            status: done
+            title: Resolve the push base to a SHA
+            instructions:
+              files:
+                - .github/workflows/common-buf.yml
+            verification:
+              - actionlint .github/workflows/common-buf.yml
+            guardrail_refs:
+              - PROTO-API-001
+      - id: CMN-CRED-001
+        status: done
+        title: Keep GHCR credentials when installing runner packages
+        overview:
+          problem: >-
+            install_runner_packages true expands the container username
+            and password to empty strings. GitHub Actions still attempts
+            a registry login, so a public GHCR pull fails.
+          goal: >-
+            The flag only controls apt. Registry credentials stay set.
+        decision: >-
+          In the context of a caller that cannot pull the private CI
+          image, facing an empty container username, we decided to keep
+          github.actor and github.token, to achieve a public GHCR pull,
+          accepting that install_runner_packages no longer disables login.
+        acceptance_criteria:
+          - common-infra-lint, common-secrets-sast, and common-supply-chain never set an empty username
+          - install_runner_packages still installs Python and curl
+        guardrail_refs:
+          - CI-028
+        tasks:
+          - id: CMN-CRED-001-T1
+            status: done
+            title: Stop clearing container credentials
+            instructions:
+              files:
+                - .github/workflows/common-infra-lint.yml
+                - .github/workflows/common-secrets-sast.yml
+                - .github/workflows/common-supply-chain.yml
+            verification:
+              - rg -n "install_runner_packages == false" .github/workflows/common-infra-lint.yml .github/workflows/common-secrets-sast.yml .github/workflows/common-supply-chain.yml; test $? -eq 1
+            guardrail_refs:
+              - CI-028

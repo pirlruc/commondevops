@@ -36,6 +36,7 @@ private `ghcr.io/pirlruc` image with `container.credentials`.
 | [`common-sops-verify.yml`](.github/workflows/common-sops-verify.yml) | SOPS ciphertext check from `ci-iac`. No Age private key |
 | [`common-pins-verify.yml`](.github/workflows/common-pins-verify.yml) | Caller submodule gitlink assert |
 | [`common-buf.yml`](.github/workflows/common-buf.yml) | `buf lint` and `buf breaking` |
+| [`common-swift.yml`](.github/workflows/common-swift.yml) | `swift test` in `swift:6.1`. macOS is opt-in |
 | [`common-threshold-drift.yml`](.github/workflows/common-threshold-drift.yml) | Vendored threshold keys against the guardrails pin |
 
 See [docs/workflows.md](docs/workflows.md) for inputs, secrets, the caller-permission
