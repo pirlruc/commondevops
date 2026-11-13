@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | <https://github.com/pirlruc/commondevops> (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
-| **Branch** | `main`. **6.3.0** adds `common-buf.yml`. **6.2.0** adds dependency review. Guardrails 1.15.0 and scaffold 1.12.0. Do not move `5.4.4`–`6.2.0`. |
+| **Branch** | `main`. **6.4.0** fixes buf on push, keeps GHCR credentials, and adds `common-swift.yml`. **6.3.0** adds `common-buf.yml`. Guardrails 1.15.0 and scaffold 1.12.0. Do not move `5.4.4`–`6.3.0`. |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
@@ -52,7 +52,9 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | CMN-ENV-001 — publish environment and SARIF switch | Done (`6.1.0`) |
 | CMN-DEP-001 — dependency review workflow | Done (`6.2.0`) |
 | CMN-BUF-001 — buf lint and breaking | Done (`6.3.0`) |
-| CMN-SWIFT-001 — Swift package CI home | Open |
+| CMN-BUF-002 — push compares against a SHA | Done (`6.4.0`) |
+| CMN-CRED-001 — keep GHCR credentials | Done (`6.4.0`) |
+| CMN-SWIFT-001 — Swift package CI | Done (`6.4.0`) |
 
 ## Pins
 
@@ -270,7 +272,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-11-13 — v6.3.0. common-buf runs buf lint and buf breaking. CMN-SWIFT-001 stays open.*
+*Last updated: 2026-11-13 — v6.4.0. buf breaking uses a commit SHA on push. install_runner_packages no longer clears GHCR credentials. common-swift runs swift test. semgrep 1.185.0 still pins mcp 1.29.0.*
 
 *Last updated: 2026-11-08 — 6.1.1. Image jobs accept container_token and container_username so another account's repository can pull a personal-account package.*
 

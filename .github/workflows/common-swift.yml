@@ -1,0 +1,121 @@
+name: Common Swift (reusable)
+
+# Swift package build and test. Linux uses a digest-pinned swift:6.1 image.
+# macos is opt-in for a platform gate. A tree with no Package.swift succeeds
+# so callers can keep the job on every repository.
+
+on:
+  workflow_call:
+    inputs:
+      working_directory:
+        description: Directory that contains Package.swift
+        required: false
+        type: string
+        default: .
+      scripts_ref:
+        description: Must equal the caller's uses pin (CI-034). Not checked out.
+        required: false
+        type: string
+        default: ""
+      blocking:
+        description: Fail the job when swift test fails
+        required: false
+        type: boolean
+        default: true
+      macos:
+        description: Also run swift test on macos-15
+        required: false
+        type: boolean
+        default: false
+      swift_image:
+        description: Linux Swift image, pinned by digest
+        required: false
+        type: string
+        default: swift:6.1@sha256:42b58c8cff07f45e6f083ade65743b5b147d0c01d4370d602fcf3c7b37dc1cac
+  workflow_dispatch:
+    inputs:
+      working_directory:
+        type: string
+        default: .
+      scripts_ref:
+        type: string
+        default: ""
+      blocking:
+        type: boolean
+        default: true
+      macos:
+        type: boolean
+        default: false
+      swift_image:
+        type: string
+        default: swift:6.1@sha256:42b58c8cff07f45e6f083ade65743b5b147d0c01d4370d602fcf3c7b37dc1cac
+
+permissions: {}
+
+concurrency:
+  group: >-
+    ${{ github.event_name == 'workflow_dispatch' && github.workflow == 'Common Swift (reusable)'
+        && format('dispatch-{0}-{1}', github.workflow, github.ref)
+        || format('call-swift-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' && github.workflow == 'Common Swift (reusable)' }}
+
+jobs:
+  swift-linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    continue-on-error: ${{ !inputs.blocking }}
+    container:
+      image: ${{ inputs.swift_image }} # zizmor: ignore[unpinned-images]
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Require scripts_ref for cross-repo callers (CI-034)
+        env:
+          SCRIPTS_REF: ${{ inputs.scripts_ref }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -eu
+          if [ "${REPO}" != "pirlruc/commondevops" ] && [ -z "${SCRIPTS_REF}" ]; then
+            echo "CI-034: cross-repo callers must pass scripts_ref matching the uses: pin" >&2
+            exit 1
+          fi
+
+      - name: swift test
+        env:
+          WORKDIR: ${{ inputs.working_directory }}
+        run: |
+          set -eu
+          cd "${WORKDIR}"
+          if ! find . -name Package.swift -print -quit | grep -q .; then
+            echo "no Package.swift; swift gate skipped"
+            exit 0
+          fi
+          swift test
+
+  swift-macos:
+    if: inputs.macos
+    runs-on: macos-15
+    timeout-minutes: 30
+    continue-on-error: ${{ !inputs.blocking }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: swift test
+        env:
+          WORKDIR: ${{ inputs.working_directory }}
+        run: |
+          set -eu
+          cd "${WORKDIR}"
+          if ! find . -name Package.swift -print -quit | grep -q .; then
+            echo "no Package.swift; swift gate skipped"
+            exit 0
+          fi
+          swift test

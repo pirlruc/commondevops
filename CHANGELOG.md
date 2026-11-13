@@ -5,6 +5,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [6.4.0] - 2026-11-13
+
+### Added
+
+- `common-swift.yml` runs `swift test` in digest-pinned `swift:6.1`. `macos` defaults to false.
+
+### Fixed
+
+- `common-buf` compares a push against the previous commit SHA (`.git#ref=`). `branch=HEAD~1` is not a branch, so every push failed.
+- `install_runner_packages` no longer clears the container username and password. An empty credential still attempts a GHCR login.
+
+### Changed
+
+- semgrep 1.185.0 still requires `mcp==1.29.0` and `opentelemetry-api~=1.37.0`. The ci-lint image is not rebuilt. See `docs/scanner-exceptions.md`. actionlint v1.7.12, gitleaks v8.30.1, and trivy v0.76.2 are already current.
+
 ## [6.3.0] - 2026-11-13
 
 ### Added

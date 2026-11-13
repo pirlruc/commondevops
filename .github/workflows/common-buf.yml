@@ -1,8 +1,8 @@
 name: Common Buf (reusable)
 
 # PROTO-LINT-001 and PROTO-API-001. buf lint, then buf breaking against the
-# pull-request base, or against HEAD~1 on a push. A tree with no .proto files
-# succeeds so callers can keep the job on every repository.
+# pull-request base, or against the previous commit on a push. A tree with no
+# .proto files succeeds so callers can keep the job on every repository.
 
 on:
   workflow_call:
@@ -71,6 +71,7 @@ jobs:
         env:
           WORKDIR: ${{ inputs.working_directory }}
           BASE_REF: ${{ github.base_ref }}
+          BEFORE_SHA: ${{ github.event.before }}
           BUF_IMAGE: bufbuild/buf@sha256:3b7fb27f8ff153037b3f781924c6aa1327352f14ee547cf45fd75f6d994fe0eb
         run: |
           set -eu
@@ -80,12 +81,21 @@ jobs:
             exit 0
           fi
           docker run --rm -v "${PWD}:/workspace" -w /workspace "${BUF_IMAGE}" lint
+          # buf treats branch= as a branch name. HEAD~1 is not one, so a push
+          # compares against the previous commit SHA via ref=.
           if [ -n "${BASE_REF}" ]; then
             against=".git#branch=origin/${BASE_REF}"
-          elif git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
-            against=".git#branch=HEAD~1"
           else
-            echo "no base ref; buf breaking skipped"
-            exit 0
+            before="${BEFORE_SHA}"
+            case "${before}" in
+              ""|0000000000000000000000000000000000000000)
+                before="$(git rev-parse --verify HEAD~1 2>/dev/null || true)"
+                ;;
+            esac
+            if [ -z "${before}" ]; then
+              echo "no base ref; buf breaking skipped"
+              exit 0
+            fi
+            against=".git#ref=${before}"
           fi
           docker run --rm -v "${PWD}:/workspace" -w /workspace "${BUF_IMAGE}" breaking --against "${against}"
