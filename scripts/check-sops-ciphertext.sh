@@ -10,12 +10,7 @@ if [ -n "${SOPS_AGE_KEY:-}${AGE_SECRET_KEY:-}${SOPS_AGE_KEY_FILE:-}" ]; then
 	exit 1
 fi
 
-files="$(
-	find . \
-		\( -path './vendor' -o -path './docs/guardrails' -o -path './.github/scaffold' -o -path './.git' \) -prune \
-		-o -type f -name '*.sops.*' ! -name '.sops.yaml' ! -name '.sops.yml' -print \
-		|| true
-)"
+files="$(find . -type f -name '*.sops.*' ! -name '.sops.yaml' ! -name '.sops.yml' ! -path './vendor/*' ! -path './docs/guardrails/*' ! -path './.github/scaffold/*' ! -path '*/.git/*' || true)"
 config=""
 if [ -f .sops.yaml ]; then
 	config=".sops.yaml"
