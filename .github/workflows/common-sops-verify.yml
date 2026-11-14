@@ -10,9 +10,10 @@ on:
   workflow_call:
     inputs:
       image:
-        description: ghcr.io/pirlruc/ci-iac digest reference
-        required: true
+        description: ghcr.io/pirlruc/ci-iac digest reference. Unused when host_mode is true.
+        required: false
         type: string
+        default: ""
       blocking:
         description: When false, failures are advisory only
         required: false
@@ -28,8 +29,20 @@ on:
         required: false
         type: string
         default: ""
+      container_username:
+        description: Registry username for container_token. Empty uses github.actor.
+        required: false
+        type: string
+        default: ""
+      host_mode:
+        description: Run the ciphertext check on the runner. Skips the image pull.
+        required: false
+        type: boolean
+        default: false
     secrets:
       checkout_token:
+        required: false
+      container_token:
         required: false
   workflow_dispatch:
     inputs:
@@ -46,6 +59,12 @@ on:
       scripts_ref:
         type: string
         default: ""
+      container_username:
+        type: string
+        default: ""
+      host_mode:
+        type: boolean
+        default: false
 
 permissions: {}
 
@@ -93,9 +112,10 @@ jobs:
           fi
 
       - name: Log in to GHCR
+        if: inputs.host_mode != true
         env:
-          GHCR_TOKEN: ${{ github.token }}
-          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.container_token || github.token }}
+          GHCR_USER: ${{ inputs.container_username || github.actor }}
         run: printf '%s' "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
 
       - name: SOPS ciphertext
@@ -104,7 +124,18 @@ jobs:
         env:
           IMAGE: ${{ inputs.image }}
           WORKDIR: ${{ inputs.working_directory }}
-        run: sh "${GITHUB_WORKSPACE}/_commondevops/scripts/run-in-ci-iac.sh" "${IMAGE}" sh /workspace/_commondevops/scripts/check-sops-ciphertext.sh "/workspace/${WORKDIR}"
+          HOST_MODE: ${{ inputs.host_mode }}
+        run: |
+          set -eu
+          if [ "${HOST_MODE}" = "true" ]; then
+            sh "${GITHUB_WORKSPACE}/_commondevops/scripts/check-sops-ciphertext.sh" "${GITHUB_WORKSPACE}/${WORKDIR}"
+          else
+            if [ -z "${IMAGE}" ]; then
+              echo "image is required when host_mode is false" >&2
+              exit 1
+            fi
+            sh "${GITHUB_WORKSPACE}/_commondevops/scripts/run-in-ci-iac.sh" "${IMAGE}" sh /workspace/_commondevops/scripts/check-sops-ciphertext.sh "/workspace/${WORKDIR}"
+          fi
 
       - name: Gate — SOPS
         if: always()

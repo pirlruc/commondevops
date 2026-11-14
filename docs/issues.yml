@@ -1990,3 +1990,60 @@ milestones:
               - rg -n "install_runner_packages == false" .github/workflows/common-infra-lint.yml .github/workflows/common-secrets-sast.yml .github/workflows/common-supply-chain.yml; test $? -eq 1
             guardrail_refs:
               - CI-028
+
+  - name: Cross-org callers
+    epics:
+      - id: CMN-CALL-001
+        status: done
+        title: Let another organization pull the CI image and keep SOPS checks token-free
+        overview:
+          problem: >-
+            common-tofu-verify and common-sops-verify log in to GHCR with
+            github.token, which cannot pull a private image from another
+            organization. The ciphertext check also accepts a sops file that
+            has metadata and no ciphertext.
+          goal: >-
+            Callers pass container credentials, can run the ciphertext check
+            on the runner, and can upload redacted SAST reports.
+        decision: >-
+          In the context of a caller outside the image owner organization,
+          facing a GHCR login that only has github.token, we decided to add
+          container_username and container_token and a host mode for the
+          ciphertext check, to achieve a cross-org pull and a token-free
+          SOPS job, accepting that host mode does not run tofu.
+        acceptance_criteria:
+          - common-tofu-verify and common-sops-verify accept container_username and container_token
+          - common-sops-verify can run check-sops-ciphertext.sh without docker login
+          - A sops file must contain AES256_GCM ciphertext and no private key block
+          - common-secrets-sast uploads redacted gitleaks and semgrep JSON
+          - common-ansible-verify can syntax-check playbooks and init named public submodules
+          - common-tofu-verify can run tofu test in one directory
+        guardrail_refs:
+          - CI-034
+          - CI-039
+          - SOPS-SEC-001
+          - SOPS-LINT-001
+        tasks:
+          - id: CMN-CALL-001-T1
+            status: done
+            title: Add cross-org credentials and the host ciphertext check
+            instructions:
+              files:
+                - .github/workflows/common-tofu-verify.yml
+                - .github/workflows/common-sops-verify.yml
+                - scripts/check-sops-ciphertext.sh
+            verification:
+              - sh scripts/check-sops-ciphertext.sh .
+            guardrail_refs:
+              - SOPS-SEC-001
+          - id: CMN-CALL-001-T2
+            status: done
+            title: Upload redacted SAST reports and accept Ansible caller inputs
+            instructions:
+              files:
+                - .github/workflows/common-secrets-sast.yml
+                - .github/workflows/common-ansible-verify.yml
+            verification:
+              - actionlint .github/workflows/common-secrets-sast.yml .github/workflows/common-ansible-verify.yml
+            guardrail_refs:
+              - CI-034

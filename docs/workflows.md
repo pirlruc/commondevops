@@ -312,24 +312,34 @@ for the YAML and link checkers, and fails closed when neither copy exists.
 closed. `run_shfmt: true` runs `shfmt --diff` (off by default on infra lint).
 `common-doc-verify` runs `shfmt` and `markdownlint-cli2` unless the caller
 turns them off, and runs `lychee` when that input is true. `common-ansible-verify` runs yamllint, ansible-lint, the caller's
-guardrail script, and Molecule. `results_retention_days` on
-`common-supply-chain` defaults to 1.
+guardrail script, and Molecule. `playbooks` syntax-checks each named
+playbook. `public_submodules` inits those paths before the lint. `results_retention_days` on
+`common-supply-chain` defaults to 1. `common-secrets-sast` uploads redacted
+gitleaks and semgrep JSON when `upload_results` is true, kept for
+`results_retention_days` (default 7).
 
 ## `common-tofu-verify.yml`
 
 Runs `scripts/check-tofu.sh` inside the caller-supplied `ci-iac` image:
 `tofu fmt -check -recursive`, `tflint --recursive`, and `tofu init
 -backend=false` plus `tofu validate` in every directory that commits a
-`.terraform.lock.hcl`. The job does not plan or apply. Pass `image` as a
-digest. `blocking` defaults to true. A repository with no `.tf` files
-succeeds.
+`.terraform.lock.hcl`. `test_directory` also runs `tofu test` there. The
+job does not plan or apply. Pass `image` as a digest. `container_username`
+and `container_token` log in to GHCR; empty values use `github.actor` and
+`github.token`. `blocking` defaults to true. A repository with no `.tf`
+files succeeds.
 
 ## `common-sops-verify.yml`
 
-Runs `scripts/check-sops-ciphertext.sh` inside the same image. A `*.sops.*`
-file must contain `sops:` metadata, and `.sops.yaml` must name a real Age
-recipient. The workflow requests no Age private key and does not decrypt.
-`blocking` defaults to true. A repository with no SOPS files succeeds.
+Runs `scripts/check-sops-ciphertext.sh`. A `*.sops.*` file must contain
+`sops:` metadata and `ENC[AES256_GCM` ciphertext, and must not contain a
+private key block. `.sops.yaml` must name a real Age recipient. Paths under
+`vendor/`, `docs/guardrails/`, and `.github/scaffold/` are skipped.
+`host_mode: true` runs the script on the runner and does not pull an image.
+Otherwise the job uses the `ci-iac` image. `container_username` and
+`container_token` log in to GHCR. The workflow requests no Age private key
+and does not decrypt. `blocking` defaults to true. A repository with no
+SOPS files succeeds.
 
 ## `common-dependency-review.yml`
 

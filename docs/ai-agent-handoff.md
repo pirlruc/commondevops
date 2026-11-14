@@ -178,6 +178,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
+- 2026-11-14: common-tofu-verify and common-sops-verify accept container_username and container_token. common-sops-verify host_mode runs the ciphertext check without an image pull. Ciphertext must be AES256_GCM and must not contain a private key block. common-secrets-sast uploads redacted JSON. common-ansible-verify accepts playbooks and public_submodules. common-tofu-verify accepts test_directory. Not tagged yet.
 - 2026-11-07: **6.0.1** runs the missing-pack check from the `scripts_ref` checkout. **6.0.0** turns doc-verify shfmt and markdownlint on by default. Guardrails 1.15.0, scaffold 1.12.0. semgrep stays on mcp 1.29.0. Image workflows still call containerdevops 6.3.5.
 - 2026-11-01: **5.8.0** makes `common-release` `sign: true` run keyless `cosign sign-blob` and `actions/attest-build-provenance`. New `environment` input. No image republish. Do not move `5.7.0` or `5.6.2`.
 - 2026-10-31: **5.7.0** adds `release_artifact` and `release_files` to `common-release`. No image republish. Do not move `5.6.2`.
@@ -272,7 +273,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-11-13 — v6.4.0. buf breaking uses a commit SHA on push. install_runner_packages no longer clears GHCR credentials. common-swift runs swift test. semgrep 1.185.0 still pins mcp 1.29.0.*
+*Last updated: 2026-11-14 — cross-org GHCR login on tofu and sops verify, host-mode ciphertext check, redacted SAST artifacts. Not tagged.*
 
 *Last updated: 2026-11-08 — 6.1.1. Image jobs accept container_token and container_username so another account's repository can pull a personal-account package.*
 
