@@ -10,7 +10,12 @@ if [ -n "${SOPS_AGE_KEY:-}${AGE_SECRET_KEY:-}${SOPS_AGE_KEY_FILE:-}" ]; then
 	exit 1
 fi
 
-files="$(find . -type f -name '*.sops.*' ! -name '.sops.yaml' ! -name '.sops.yml' -not -path '*/.git/*' || true)"
+files="$(
+	find . \
+		\( -path './vendor' -o -path './docs/guardrails' -o -path './.github/scaffold' -o -path './.git' \) -prune \
+		-o -type f -name '*.sops.*' ! -name '.sops.yaml' ! -name '.sops.yml' -print \
+		|| true
+)"
 config=""
 if [ -f .sops.yaml ]; then
 	config=".sops.yaml"
@@ -41,6 +46,14 @@ while IFS= read -r file; do
 	[ -n "${file}" ] || continue
 	if ! grep -E -q '^sops:' "${file}"; then
 		echo "SOPS-SEC-001: ${file} has no sops metadata" >&2
+		exit 1
+	fi
+	if ! grep -q 'ENC\[AES256_GCM' "${file}"; then
+		echo "SOPS-SEC-001: ${file} has no AES256_GCM ciphertext" >&2
+		exit 1
+	fi
+	if grep -E -q 'BEGIN .*PRIVATE KEY' "${file}"; then
+		echo "SOPS-SEC-003: ${file} contains a private key block" >&2
 		exit 1
 	fi
 done <<EOF

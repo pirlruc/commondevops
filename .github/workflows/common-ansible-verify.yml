@@ -35,6 +35,16 @@ on:
         required: false
         type: string
         default: ""
+      playbooks:
+        description: Newline-separated playbooks for ansible-playbook --syntax-check. Empty skips the check.
+        required: false
+        type: string
+        default: ""
+      public_submodules:
+        description: Newline-separated public submodule paths to init. Empty skips the checkout.
+        required: false
+        type: string
+        default: ""
   workflow_dispatch:
     inputs:
       scenarios:
@@ -53,6 +63,12 @@ on:
         type: boolean
         default: false
       scripts_ref:
+        type: string
+        default: ""
+      playbooks:
+        type: string
+        default: ""
+      public_submodules:
         type: string
         default: ""
 
@@ -95,6 +111,20 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Init public submodules
+        id: submodules
+        if: inputs.public_submodules != ''
+        continue-on-error: true
+        env:
+          PUBLIC_SUBMODULES: ${{ inputs.public_submodules }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r path; do
+            path="${path#"${path%%[![:space:]]*}"}"
+            [[ -z "${path}" || "${path}" == \#* ]] && continue
+            git submodule update --init "${path}"
+          done <<< "${PUBLIC_SUBMODULES}"
+
       - name: Install Ansible toolchain
         env:
           REQUIREMENTS_TXT: ${{ inputs.requirements_txt }}
@@ -134,6 +164,21 @@ jobs:
           fi
           python3 "${CHECK_SCRIPT}"
 
+      - name: Playbook syntax
+        id: syntax
+        if: inputs.playbooks != ''
+        continue-on-error: true
+        env:
+          PLAYBOOKS: ${{ inputs.playbooks }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r playbook; do
+            playbook="${playbook#"${playbook%%[![:space:]]*}"}"
+            [[ -z "${playbook}" || "${playbook}" == \#* ]] && continue
+            echo "ansible-playbook --syntax-check ${playbook}"
+            ansible-playbook --syntax-check "${playbook}"
+          done <<< "${PLAYBOOKS}"
+
       - name: yamllint
         id: yamllint
         continue-on-error: true
@@ -167,13 +212,15 @@ jobs:
         env:
           ADVISORY: ${{ env.ADVISORY }}
           CHECK: ${{ steps.check.outcome }}
+          SUBMODULES: ${{ steps.submodules.outcome }}
+          SYNTAX: ${{ steps.syntax.outcome }}
           YAMLLINT: ${{ steps.yamllint.outcome }}
           ANSIBLE: ${{ steps.ansible_lint.outcome }}
           MOLECULE: ${{ steps.molecule.outcome }}
         run: |
           set -euo pipefail
           failed=()
-          for pair in "check=${CHECK}" "yamllint=${YAMLLINT}" "ansible_lint=${ANSIBLE}" "molecule=${MOLECULE}"; do
+          for pair in "submodules=${SUBMODULES}" "syntax=${SYNTAX}" "check=${CHECK}" "yamllint=${YAMLLINT}" "ansible_lint=${ANSIBLE}" "molecule=${MOLECULE}"; do
             name="${pair%%=*}"
             outcome="${pair#*=}"
             if [[ "${outcome}" == "skipped" || -z "${outcome}" ]]; then

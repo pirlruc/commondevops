@@ -27,8 +27,20 @@ on:
         required: false
         type: string
         default: ""
+      container_username:
+        description: Registry username for container_token. Empty uses github.actor.
+        required: false
+        type: string
+        default: ""
+      test_directory:
+        description: Directory for tofu init -backend=false and tofu test. Empty skips the test.
+        required: false
+        type: string
+        default: ""
     secrets:
       checkout_token:
+        required: false
+      container_token:
         required: false
   workflow_dispatch:
     inputs:
@@ -43,6 +55,12 @@ on:
         type: string
         default: .
       scripts_ref:
+        type: string
+        default: ""
+      container_username:
+        type: string
+        default: ""
+      test_directory:
         type: string
         default: ""
 
@@ -93,8 +111,8 @@ jobs:
 
       - name: Log in to GHCR
         env:
-          GHCR_TOKEN: ${{ github.token }}
-          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.container_token || github.token }}
+          GHCR_USER: ${{ inputs.container_username || github.actor }}
         run: printf '%s' "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
 
       - name: OpenTofu
@@ -105,21 +123,38 @@ jobs:
           WORKDIR: ${{ inputs.working_directory }}
         run: sh "${GITHUB_WORKSPACE}/_commondevops/scripts/run-in-ci-iac.sh" "${IMAGE}" sh /workspace/_commondevops/scripts/check-tofu.sh "/workspace/${WORKDIR}"
 
+      - name: OpenTofu test
+        id: tofu_test
+        if: inputs.test_directory != ''
+        continue-on-error: true
+        env:
+          IMAGE: ${{ inputs.image }}
+          TEST_DIR: ${{ inputs.test_directory }}
+        run: sh "${GITHUB_WORKSPACE}/_commondevops/scripts/run-in-ci-iac.sh" "${IMAGE}" sh -c "cd \"/workspace/${TEST_DIR}\" && tofu init -backend=false -input=false && tofu test"
+
       - name: Gate — OpenTofu
         if: always()
         env:
           ADVISORY: ${{ inputs.blocking == false }}
           OUTCOME: ${{ steps.tofu.outcome }}
+          TEST_OUTCOME: ${{ steps.tofu_test.outcome }}
         run: |
           set -eu
-          if [ "${OUTCOME}" = "success" ]; then
+          failed=""
+          if [ "${OUTCOME}" != "success" ]; then
+            failed="verify:${OUTCOME}"
+          fi
+          if [ -n "${TEST_OUTCOME}" ] && [ "${TEST_OUTCOME}" != "success" ] && [ "${TEST_OUTCOME}" != "skipped" ]; then
+            failed="${failed} test:${TEST_OUTCOME}"
+          fi
+          if [ -z "${failed}" ]; then
             echo "OpenTofu gates passed."
             exit 0
           fi
-          echo "OpenTofu gate outcome: ${OUTCOME}"
+          echo "OpenTofu gate outcome:${failed}"
           if [ "${ADVISORY}" = "true" ]; then
             echo "advisory — not failing the job (pass blocking=true to enforce findings)."
             exit 0
           fi
-          echo "::error::OpenTofu gates failed (${OUTCOME})"
+          echo "::error::OpenTofu gates failed (${failed})"
           exit 1
