@@ -125,3 +125,5 @@ updates:
       include: scope
     cooldown:
       default-days: 7
+
+# last-manual-retrigger: 2026-11-14T15:10Z
