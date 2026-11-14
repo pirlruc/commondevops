@@ -9,7 +9,7 @@
 # requires Go 1.27.3, so that stage sets GOTOOLCHAIN. tflint v0.65.0 is
 # rebuilt from 502b6a38 so go-jose/v4 is 4.1.6.
 
-FROM dhi.io/golang:1.27-debian13-dev@sha256:d1414d5b1e917e944391bbdd0c720c7a934873f3308730312de47f060a9f11d1 AS age-build
+FROM dhi.io/golang:1.27-debian13-dev@sha256:7232cdcda200dbf56d8bad246d8a90fc4960fa5695a56a799f15837be1f1ce08 AS age-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/FiloSottile/age.git \
@@ -19,7 +19,7 @@ RUN git init \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/age ./cmd/age \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/age-keygen ./cmd/age-keygen
 
-FROM dhi.io/golang:1.27-debian13-dev@sha256:d1414d5b1e917e944391bbdd0c720c7a934873f3308730312de47f060a9f11d1 AS sops-build
+FROM dhi.io/golang:1.27-debian13-dev@sha256:7232cdcda200dbf56d8bad246d8a90fc4960fa5695a56a799f15837be1f1ce08 AS sops-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/getsops/sops.git \
@@ -29,7 +29,7 @@ RUN git init \
  && go get golang.org/x/crypto@v0.58.0 golang.org/x/net@v0.62.0 golang.org/x/text@v0.43.0 google.golang.org/grpc@v1.83.2 github.com/go-jose/go-jose/v4@v4.1.6 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/sops ./cmd/sops
 
-FROM dhi.io/golang:1.27-debian13-dev@sha256:d1414d5b1e917e944391bbdd0c720c7a934873f3308730312de47f060a9f11d1 AS tofu-build
+FROM dhi.io/golang:1.27-debian13-dev@sha256:7232cdcda200dbf56d8bad246d8a90fc4960fa5695a56a799f15837be1f1ce08 AS tofu-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/opentofu/opentofu.git \
@@ -41,7 +41,7 @@ RUN git init \
 
 # tflint v0.65.0 rebuilt so go-jose/v4 is 4.1.6 (CVE-2026-116587). The
 # upstream zip still embeds v4.1.4. Latest release is still v0.65.0.
-FROM dhi.io/golang:1.27-debian13-dev@sha256:d1414d5b1e917e944391bbdd0c720c7a934873f3308730312de47f060a9f11d1 AS tflint-build
+FROM dhi.io/golang:1.27-debian13-dev@sha256:7232cdcda200dbf56d8bad246d8a90fc4960fa5695a56a799f15837be1f1ce08 AS tflint-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/terraform-linters/tflint.git \
@@ -51,7 +51,7 @@ RUN git init \
  && go get golang.org/x/net@v0.62.0 github.com/go-jose/go-jose/v4@v4.1.6 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/tflint .
 
-FROM dhi.io/python:3.13-debian13-dev@sha256:1303a6c6e9b856cfe9e1b25eaf44b4a165c28a8402140ef3b5151d9a60e4033a AS pybuild
+FROM dhi.io/python:3.13-debian13-dev@sha256:dbe603d026e33548f420346eb3963d3dd385a06148c1913bb5af32218829d4e2 AS pybuild
 COPY --from=ghcr.io/astral-sh/uv:0.12.0@sha256:606e70c71c852d03f611b1e56a195d08648507018a7057fab82c4974c4eae105 \
   /uv /usr/local/bin/uv
 ENV UV_SYSTEM_PYTHON=1 \
@@ -61,7 +61,7 @@ COPY requirements.txt /tmp/requirements.txt
 RUN uv pip install --system --no-cache --require-hashes -r /tmp/requirements.txt \
  && rm -f /tmp/requirements.txt
 
-FROM dhi.io/python:3.13-debian13-dev@sha256:1303a6c6e9b856cfe9e1b25eaf44b4a165c28a8402140ef3b5151d9a60e4033a
+FROM dhi.io/python:3.13-debian13-dev@sha256:dbe603d026e33548f420346eb3963d3dd385a06148c1913bb5af32218829d4e2
 
 LABEL org.opencontainers.image.title="ci-iac" \
       org.opencontainers.image.description="Short-lived CI image for OpenTofu, tflint, sops, age, and ansible-lint. Non-root 1000:1000, linux/amd64." \
