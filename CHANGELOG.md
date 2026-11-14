@@ -5,6 +5,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [6.5.0] - 2026-11-14
+
+### Added
+
+- `common-tofu-verify` and `common-sops-verify` accept `container_username` and `container_token` for a GHCR login from another organization.
+- `common-sops-verify` `host_mode` runs the ciphertext check on the runner and does not pull an image.
+- `common-tofu-verify` `test_directory` runs `tofu test` in that directory.
+- `common-secrets-sast` uploads redacted gitleaks and semgrep JSON. `results_retention_days` defaults to 7.
+- `common-ansible-verify` accepts `playbooks` for `ansible-playbook --syntax-check` and `public_submodules` for `git submodule update --init`.
+
+### Fixed
+
+- `check-sops-ciphertext.sh` requires `ENC[AES256_GCM` ciphertext, rejects a private key block, and skips `vendor/`, `docs/guardrails/`, and `.github/scaffold/`.
+
 ## [6.4.1] - 2026-11-13
 
 ### Fixed
