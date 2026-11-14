@@ -14,7 +14,7 @@
 
 # actionlint v1.7.12 rebuilt with Go 1.26.10. Stdlib fixes only; modules stay
 # at the upstream go.sum (CMN-CVE-001).
-FROM dhi.io/golang:1.27-debian13-dev@sha256:d1414d5b1e917e944391bbdd0c720c7a934873f3308730312de47f060a9f11d1 AS actionlint-build
+FROM dhi.io/golang:1.27-debian13-dev@sha256:7232cdcda200dbf56d8bad246d8a90fc4960fa5695a56a799f15837be1f1ce08 AS actionlint-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/rhysd/actionlint.git \
@@ -24,7 +24,7 @@ RUN git init \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/actionlint ./cmd/actionlint
 
 # gitleaks v8.30.1 rebuilt with Go 1.26.10. The DHI donor is still Go 1.26.9.
-FROM dhi.io/golang:1.27-debian13-dev@sha256:d1414d5b1e917e944391bbdd0c720c7a934873f3308730312de47f060a9f11d1 AS gitleaks-build
+FROM dhi.io/golang:1.27-debian13-dev@sha256:7232cdcda200dbf56d8bad246d8a90fc4960fa5695a56a799f15837be1f1ce08 AS gitleaks-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/gitleaks/gitleaks.git \
@@ -37,7 +37,7 @@ RUN git init \
 # ---------------------------------------------------------------------------
 # pybuild — install Python CLIs; uv stays out of the final image (~53 MB).
 # ---------------------------------------------------------------------------
-FROM dhi.io/python:3.13-debian13-dev@sha256:1303a6c6e9b856cfe9e1b25eaf44b4a165c28a8402140ef3b5151d9a60e4033a AS pybuild
+FROM dhi.io/python:3.13-debian13-dev@sha256:dbe603d026e33548f420346eb3963d3dd385a06148c1913bb5af32218829d4e2 AS pybuild
 COPY --from=ghcr.io/astral-sh/uv:0.12.0@sha256:606e70c71c852d03f611b1e56a195d08648507018a7057fab82c4974c4eae105 \
   /uv /usr/local/bin/uv
 ENV UV_SYSTEM_PYTHON=1 \
@@ -51,7 +51,7 @@ RUN uv pip install --system --no-cache --require-hashes -r /tmp/requirements.txt
 # ---------------------------------------------------------------------------
 # Final image
 # ---------------------------------------------------------------------------
-FROM dhi.io/python:3.13-debian13-dev@sha256:1303a6c6e9b856cfe9e1b25eaf44b4a165c28a8402140ef3b5151d9a60e4033a
+FROM dhi.io/python:3.13-debian13-dev@sha256:dbe603d026e33548f420346eb3963d3dd385a06148c1913bb5af32218829d4e2
 
 LABEL org.opencontainers.image.title="ci-lint" \
       org.opencontainers.image.description="Short-lived CI toolchain image for lint and secrets/SAST: actionlint, hadolint, shellcheck, zizmor, yamllint, gitleaks, semgrep. Non-root 1000:1000, linux/amd64." \
