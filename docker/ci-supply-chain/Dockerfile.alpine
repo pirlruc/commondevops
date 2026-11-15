@@ -14,7 +14,7 @@
 # service (DOCKER-RUN-002 / DOCKER-RUN-006).
 
 # grant v0.6.8 rebuilt on Go 1.27 with x/crypto and x/mod overrides.
-FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:bc66efe51594cd50a6cf42d36f8521c6d643bd9be206acf606753ed15b23f0e1 AS grant-build
+FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:72cac473a0b802b521e23a2aed591ad166645729533d6d3db4ce96ae22c697ff AS grant-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/anchore/grant.git \
@@ -24,7 +24,7 @@ RUN git init \
  && go get golang.org/x/crypto@v0.58.0 golang.org/x/mod@v0.41.0 golang.org/x/net@v0.62.0 golang.org/x/text@v0.43.0 github.com/klauspost/compress@v1.18.7 github.com/containerd/containerd/v2@v2.3.4 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 github.com/go-jose/go-jose/v4@v4.1.6 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/grant ./cmd/grant
 
-FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:bc66efe51594cd50a6cf42d36f8521c6d643bd9be206acf606753ed15b23f0e1 AS syft-build
+FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:72cac473a0b802b521e23a2aed591ad166645729533d6d3db4ce96ae22c697ff AS syft-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/anchore/syft.git \
@@ -34,7 +34,7 @@ RUN git init \
  && go get golang.org/x/net@v0.62.0 golang.org/x/text@v0.43.0 github.com/containerd/containerd/v2@v2.3.4 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 github.com/go-jose/go-jose/v4@v4.1.6 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/syft ./cmd/syft
 
-FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:bc66efe51594cd50a6cf42d36f8521c6d643bd9be206acf606753ed15b23f0e1 AS grype-build
+FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:72cac473a0b802b521e23a2aed591ad166645729533d6d3db4ce96ae22c697ff AS grype-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/anchore/grype.git \
@@ -44,7 +44,7 @@ RUN git init \
  && go get golang.org/x/net@v0.62.0 golang.org/x/text@v0.43.0 github.com/go-git/go-git/v5@v5.19.2 google.golang.org/grpc@v1.83.2 github.com/go-jose/go-jose/v4@v4.1.6 \
  && CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/grype ./cmd/grype
 
-FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:bc66efe51594cd50a6cf42d36f8521c6d643bd9be206acf606753ed15b23f0e1 AS trivy-build
+FROM dhi.io/golang:1.27-alpine3.24-dev@sha256:72cac473a0b802b521e23a2aed591ad166645729533d6d3db4ce96ae22c697ff AS trivy-build
 WORKDIR /src
 RUN git init \
  && git remote add origin https://github.com/aquasecurity/trivy.git \
@@ -55,7 +55,7 @@ RUN git init \
  && CGO_ENABLED=0 GOEXPERIMENT=jsonv2 go build -trimpath -ldflags="-s -w" -o /out/trivy ./cmd/trivy
 
 # dhi.io/python:3.13-alpine3.24-dev — digest pinned (DOCKER-BUILD-003 / CI-026)
-FROM dhi.io/python:3.13-alpine3.24-dev@sha256:53ff6252b0cc680790b3e3b0ff6571753a8c34737aaf7f69e5ea17b676e1bfee
+FROM dhi.io/python:3.13-alpine3.24-dev@sha256:17c498055ee6e005d5b8e7331d40ef0fcf4a16ec5251dd98dc97daf176c89158
 
 LABEL org.opencontainers.image.title="ci-supply-chain" \
       org.opencontainers.image.description="Short-lived CI toolchain image for SBOM generation and vulnerability/license gates: syft, grype, trivy, grant. Alpine 3.24 variant. Non-root 1000:1000, linux/amd64." \
