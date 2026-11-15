@@ -17,6 +17,14 @@ on:
         required: false
         type: string
         default: ""
+      runs_on:
+        description: >-
+          JSON value for runs-on. The default is the GitHub-hosted
+          ubuntu-24.04 label. A caller passes a JSON array of labels
+          to select a self-hosted runner.
+        required: false
+        type: string
+        default: '"ubuntu-24.04"'
     secrets:
       checkout_token:
         description: Token to read this repo when the done-vs-open script is checked out cross-repo
@@ -33,6 +41,10 @@ on:
         type: string
         default: ""
 
+      runs_on:
+        description: JSON value for runs-on. Default is the hosted ubuntu-24.04 label.
+        type: string
+        default: '"ubuntu-24.04"'
 # CI-025: default-deny; jobs grant the minimum they need.
 permissions: {}
 
@@ -51,7 +63,7 @@ jobs:
   verify:
     # Token-free checks run on Dependabot PRs (CMN-RECON-001 / CI-024).
     # The done-vs-open lookup is a later step and stays skipped for Dependabot.
-    runs-on: ubuntu-24.04
+    runs-on: ${{ fromJSON(inputs.runs_on) }}
     timeout-minutes: 15
     permissions:
       contents: read

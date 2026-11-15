@@ -133,7 +133,7 @@ Provenance after human merge+sync uses these prefixes and the PR description; do
 
 | Area | Intent |
 |------|--------|
-| `.github/workflows/` | Reusable `common-*` workflows + self CI + ci-lint / ci-supply-chain / ci-iac callers |
+| `.github/workflows/` | Reusable `common-*` workflows + self CI + ci-lint / ci-supply-chain / ci-iac callers. Consumers pass `runs_on` as JSON; the default is a versioned hosted label. Unsigned release callers use `common-release.yml` and grant `contents: write` only. |
 | `docker/ci-lint/` / `docker/ci-supply-chain/` / `docker/ci-iac/` | CI images. ci-iac is OpenTofu, tflint, sops, age, and ansible-lint, and is not part of ci-lint. Which variant owns unsuffixed tags is in the image workflow and registry docs; derive it from the checkout |
 | `scripts/` | Install, local/docker parity, license gate, DHI pin refresh |
 | `docs/` | Handoff, workflows reference, Docker Hub and GitHub Packages pages, this prompt, `issues.yml`, deviations |
