@@ -62,6 +62,14 @@ on:
         required: false
         type: string
         default: ""
+      runs_on:
+        description: >-
+          JSON value for runs-on. The default is the GitHub-hosted
+          ubuntu-24.04 label. A caller passes a JSON array of labels
+          to select a self-hosted runner.
+        required: false
+        type: string
+        default: '"ubuntu-24.04"'
     secrets:
       checkout_token:
         required: false
@@ -91,6 +99,10 @@ on:
         type: boolean
         default: true
 
+      runs_on:
+        description: JSON value for runs-on. Default is the hosted ubuntu-24.04 label.
+        type: string
+        default: '"ubuntu-24.04"'
 # CI-025 / CI-042: the scan job does not upload SARIF. The upload job is
 # the only one with security-events: write. Top-level stays read-only.
 permissions:
@@ -113,7 +125,7 @@ jobs:
   supply-chain:
     # CI-024
     if: github.event.pull_request.user.login != 'dependabot[bot]'
-    runs-on: ubuntu-24.04
+    runs-on: ${{ fromJSON(inputs.runs_on) }}
     # Private package. Debian ci-supply-chain 5.3.3 (CI-028). The SARIF job stays on the runner.
     container:
       image: ${{ inputs.container_image }} # zizmor: ignore[unpinned-images]
@@ -318,7 +330,7 @@ jobs:
       always() && inputs.upload_sarif &&
       needs.supply-chain.result != 'skipped' &&
       needs.supply-chain.result != 'cancelled'
-    runs-on: ubuntu-24.04
+    runs-on: ${{ fromJSON(inputs.runs_on) }}
     timeout-minutes: 10
     permissions:
       actions: read

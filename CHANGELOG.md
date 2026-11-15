@@ -9,6 +9,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- The reusable workflows a homelab caller uses accept `runs_on`, a JSON value for `runs-on`. The default stays `ubuntu-24.04`.
+- `common-release-sign.yml` publishes with keyless signing and provenance. `common-release.yml` no longer requests `id-token` or `attestations`.
 - `common-tofu-verify` and `common-sops-verify` accept `container_username` and `container_token` for a GHCR login from another organization.
 - `common-sops-verify` `host_mode` runs the ciphertext check on the runner and does not pull an image.
 - `common-tofu-verify` `test_directory` runs `tofu test` in that directory.

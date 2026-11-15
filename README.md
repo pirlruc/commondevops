@@ -28,7 +28,8 @@ private `ghcr.io/pirlruc` image with `container.credentials`.
 | [`common-secrets-sast.yml`](.github/workflows/common-secrets-sast.yml) | gitleaks + semgrep |
 | [`common-supply-chain.yml`](.github/workflows/common-supply-chain.yml) | Syft SBOM, Grype, Trivy fs, license gate |
 | [`common-scorecard.yml`](.github/workflows/common-scorecard.yml) | OpenSSF Scorecard |
-| [`common-release.yml`](.github/workflows/common-release.yml) | Tag validation and GitHub Release. Optional artifact, checksums, keyless signature, and provenance |
+| [`common-release.yml`](.github/workflows/common-release.yml) | Tag validation and GitHub Release. Optional artifact and checksums. `runs_on` selects the runner. |
+| [`common-release-sign.yml`](.github/workflows/common-release-sign.yml) | The same release, plus keyless signature and provenance. Callers grant `id-token` and `attestations`. |
 | [`artifact-sweep.yml`](.github/workflows/artifact-sweep.yml) | Scheduled delete of leftover `container-image*` artifacts |
 | [`common-ansible-verify.yml`](.github/workflows/common-ansible-verify.yml) | yamllint, ansible-lint, the caller guardrail script, and Molecule |
 | [`common-token-audit.yml`](.github/workflows/common-token-audit.yml) | Expiry check for the PATs the caller passes |

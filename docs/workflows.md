@@ -15,6 +15,7 @@ Shared inputs:
 | `blocking` | bool | `false` | `false` → `continue-on-error` (advisory) |
 | `working_directory` | string | `.` | Where applicable |
 | `scripts_ref` | string | `""` | Must match caller `uses:` SHA; falls back to `github.sha` |
+| `runs_on` | string | `"ubuntu-24.04"` | JSON value for `runs-on`. A JSON array selects a self-hosted runner. The hosted default stays a versioned label (CI-043). |
 | `checkout_token` (secret) | string | — | PAT with `contents:read` on `pirlruc/commondevops` for private cross-repo callers |
 
 ## Caller permission matrix
@@ -39,7 +40,8 @@ or the reusable job fails at startup with no useful callee message.
 | `common-threshold-drift.yml` | `contents: read` |
 | `common-supply-chain.yml` | `contents: read`, `actions: read`, `security-events: write` |
 | `common-scorecard.yml` | `contents: read`, `security-events: write`, `id-token: write` |
-| `common-release.yml` | `contents: write`, `id-token: write` |
+| `common-release.yml` | `contents: write` |
+| `common-release-sign.yml` | `contents: write`, `id-token: write`, `attestations: write` |
 | `ci-lint-image.yml` / `ci-supply-chain-image.yml` / `ci-iac-image.yml` | `contents: read`; `packages: write` on build; `packages: read` on scan; `packages: write` on publish |
 
 GHCR visibility and Actions package access cannot be set via API. The dispatch-only helper
@@ -164,7 +166,8 @@ Private Free-plan repos stay advisory when `blocking` is false; without
 |-------|---------|-------|
 | `tag` | (required) | Must match `vMAJOR.MINOR.PATCH…` and exist |
 | `attach_sbom` | `false` | Downloads `sbom_artifact` when true |
-| `sign` | `false` | Keyless `cosign sign-blob` writes a `<file>.sigstore.json` bundle for each attached file, then `actions/attest-build-provenance` records SLSA provenance. Public repositories only. Private Free-plan callers leave this false. |
+| `sign` | `false` | Must stay false. Signing is `common-release-sign.yml`. A true value fails the job. |
+| `runs_on` | `"ubuntu-24.04"` | JSON value for `runs-on`. |
 | `environment` | empty | GitHub Environment for the release job. Empty runs with no environment. A tag-restricted environment holds the publish secrets (REL-PUB-004). |
 | `release_artifact` | empty | Artifact uploaded earlier in the same run. Each file is attached with a `.sha256` checksum (REL-PUB-003). |
 | `release_files` | empty | Newline-separated paths or basenames inside that artifact. Empty attaches every file. |
@@ -173,9 +176,19 @@ Private Free-plan repos stay advisory when `blocking` is false; without
 |--------|----------|-------|
 | `release_token` | Recommended | PAT with `contents:write`. Prefer over `github.token` so the published release fires `on: release` workflows (GITHUB_TOKEN-created releases do not). |
 
-Permissions: `contents: write`, `id-token: write`, and `attestations: write`.
-The token scopes stay requested when `sign` is false so the permission block
-stays static. Signing runs only when `sign` is true.
+Permissions: `contents: write` only. GitHub checks every job permission at
+startup, including a job that `if:` would skip, so signing is a separate
+workflow. Callers that sign use
+[`common-release-sign.yml`](../.github/workflows/common-release-sign.yml) and
+grant `contents: write`, `id-token: write`, and `attestations: write`. That
+workflow runs the same release steps, then keyless `cosign sign-blob` and
+`actions/attest-build-provenance`. It needs a public repository.
+
+## `common-release-sign.yml`
+
+Same inputs as `common-release.yml`. `sign` defaults to true. `runs_on` is the
+same JSON runner input. Caller job permissions are `contents: write`,
+`id-token: write`, and `attestations: write`.
 
 ---
 

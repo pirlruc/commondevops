@@ -39,6 +39,14 @@ on:
         required: false
         type: boolean
         default: false
+      runs_on:
+        description: >-
+          JSON value for runs-on. The default is the GitHub-hosted
+          ubuntu-24.04 label. A caller passes a JSON array of labels
+          to select a self-hosted runner.
+        required: false
+        type: string
+        default: '"ubuntu-24.04"'
     secrets:
       checkout_token:
         required: false
@@ -66,6 +74,10 @@ on:
         type: boolean
         default: false
 
+      runs_on:
+        description: JSON value for runs-on. Default is the hosted ubuntu-24.04 label.
+        type: string
+        default: '"ubuntu-24.04"'
 permissions: {}
 
 concurrency:
@@ -78,7 +90,7 @@ concurrency:
 jobs:
   verify:
     if: github.event.pull_request.user.login != 'dependabot[bot]'
-    runs-on: ubuntu-24.04
+    runs-on: ${{ fromJSON(inputs.runs_on) }}
     timeout-minutes: 15
     permissions:
       contents: read
