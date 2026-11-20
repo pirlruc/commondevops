@@ -1,0 +1,4 @@
+# semgrep 1.186.0 still requires mcp==1.29.0, so CVE-2026-115563 cannot be
+# cleared by a pin bump. Review when semgrep allows mcp>=1.30.0.
+# Review: 2027-02-20
+CVE-2026-115563
