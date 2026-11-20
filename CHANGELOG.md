@@ -5,6 +5,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [6.5.1] - 2026-11-20
+
+### Fixed
+
+- Tool downloads retry a transport failure and stop on a checksum mismatch. A truncated hadolint download was reported as a checksum error and was not retried.
+- `.trivyignore` records CVE-2026-115563. semgrep 1.186.0 still requires mcp 1.29.0.
+
 ## [6.5.0] - 2026-11-14
 
 ### Added

@@ -274,6 +274,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
+*Last updated: 2026-11-20 — 6.5.1. Tool downloads retry a transport failure and do not retry a checksum mismatch.*
 *Last updated: 2026-11-15 — `runs_on` on the homelab-facing reusables. `common-release-sign.yml` holds id-token and attestations. Not tagged.*
 *Last updated: 2026-11-18 — 6.4.0 is `f7658926` and 6.4.1 is `8934d843`. 6.4.1 only splits the semgrep config list. The ci-lint image was not rebuilt. Do not move `5.4.4` through `6.5.0` or `v6.5.0`.*
 
