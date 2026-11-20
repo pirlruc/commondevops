@@ -9,6 +9,13 @@ on:
         description: Space-separated image refs to inspect
         required: true
         type: string
+      scripts_ref:
+        description: >-
+          commondevops revision that contains scripts/append-release-digests.sh.
+          A cross-repo caller must set this to the same SHA as uses (CI-034).
+        required: false
+        type: string
+        default: ""
 
 permissions: {}
 
@@ -20,8 +27,15 @@ jobs:
       contents: write
       packages: read
     steps:
+      - name: Require scripts_ref from another repository
+        if: github.repository != 'pirlruc/commondevops' && inputs.scripts_ref == ''
+        run: |
+          echo "a cross-repo caller must pass scripts_ref equal to the uses pin (CI-034)" >&2
+          exit 1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          repository: pirlruc/commondevops
+          ref: ${{ inputs.scripts_ref != '' && inputs.scripts_ref || github.sha }}
           persist-credentials: false
           sparse-checkout: scripts/append-release-digests.sh
           sparse-checkout-cone-mode: false
