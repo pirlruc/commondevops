@@ -101,7 +101,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Known pitfalls
 
-- **Release digest append:** `scripts/append-release-digests.sh` logs in to GHCR when `GH_TOKEN` is set. Anonymous `imagetools inspect` of `ci-lint` returns 401. Do not pass the index digest to awk as `-v index=`; gawk reserves `index`. `common-release-digests` checks out `pirlruc/commondevops` at `scripts_ref` (CI-034). `github.workflow_sha` is the caller, so it is not a checkout ref. A tag `v6.7.0` is inspected as `6.7.0` because the publish tags drop the leading `v`. 6.0.1 did not republish, so the 6.0.0 Release carries the 6.0.0 `ci-lint` digests. `ci-supply-chain` and `ci-iac` 6.0.0 scans failed, so those tags were not published.
+- **Release digest append:** `scripts/append-release-digests.sh` logs in to GHCR when `GH_TOKEN` is set. Anonymous `imagetools inspect` of `ci-lint` returns 401. Do not pass the index digest to awk as `-v index=`; gawk reserves `index`. `common-release-digests` checks out `pirlruc/commondevops` at `scripts_ref` (CI-034). `github.workflow_sha` is the caller, so it is not a checkout ref. A tag `v6.7.0` is inspected as `6.7.0` because the publish tags drop the leading `v`. `.grype.yaml` ignores GHSA-qx49-fqc8-xw99, the same mcp 1.29.0 CVE already in `.trivyignore`. 6.0.1 did not republish, so the 6.0.0 Release carries the 6.0.0 `ci-lint` digests. `ci-supply-chain` and `ci-iac` 6.0.0 scans failed, so those tags were not published.
 - **Size class:** CI toolchain images pass `size_class: ci_toolchain` so
   container-build reads `ci_image_max_size_mb` (2000, DOCKER-PERF-002). Do not
   re-record DOCKER-PERF-001 deviations for ci-lint / ci-supply-chain.
