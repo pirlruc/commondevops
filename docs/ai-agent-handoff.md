@@ -101,7 +101,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Known pitfalls
 
-- **Release digest append:** `scripts/append-release-digests.sh` logs in to GHCR when `GH_TOKEN` is set. Anonymous `imagetools inspect` of `ci-lint` returns 401. Do not pass the index digest to awk as `-v index=`; gawk reserves `index`. 6.0.1 did not republish, so the 6.0.0 Release carries the 6.0.0 `ci-lint` digests. `ci-supply-chain` and `ci-iac` 6.0.0 scans failed, so those tags were not published.
+- **Release digest append:** `scripts/append-release-digests.sh` logs in to GHCR when `GH_TOKEN` is set. Anonymous `imagetools inspect` of `ci-lint` returns 401. Do not pass the index digest to awk as `-v index=`; gawk reserves `index`. `common-release-digests` checks out `pirlruc/commondevops` at `scripts_ref` (CI-034). `github.workflow_sha` is the caller, so it is not a checkout ref. A tag `v6.7.0` is inspected as `6.7.0` because the publish tags drop the leading `v`. `.grype.yaml` ignores GHSA-qx49-fqc8-xw99, the same mcp 1.29.0 CVE already in `.trivyignore`. 6.0.1 did not republish, so the 6.0.0 Release carries the 6.0.0 `ci-lint` digests. `ci-supply-chain` and `ci-iac` 6.0.0 scans failed, so those tags were not published.
 - **Size class:** CI toolchain images pass `size_class: ci_toolchain` so
   container-build reads `ci_image_max_size_mb` (2000, DOCKER-PERF-002). Do not
   re-record DOCKER-PERF-001 deviations for ci-lint / ci-supply-chain.
@@ -274,7 +274,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-11-20 — 6.5.1. Tool downloads retry a transport failure and do not retry a checksum mismatch.*
+*Last updated: 2026-11-20 — digest job checks out commondevops at scripts_ref and strips a leading v from image tags.*
 *Last updated: 2026-11-15 — `runs_on` on the homelab-facing reusables. `common-release-sign.yml` holds id-token and attestations. Not tagged.*
 *Last updated: 2026-11-18 — 6.4.0 is `f7658926` and 6.4.1 is `8934d843`. 6.4.1 only splits the semgrep config list. The ci-lint image was not rebuilt. Do not move `5.4.4` through `6.5.0` or `v6.5.0`.*
 

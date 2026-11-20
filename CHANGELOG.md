@@ -5,6 +5,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+
+- `common-release-digests` checks out `pirlruc/commondevops` at `scripts_ref`. A reusable call otherwise checks out the caller, which does not contain `scripts/append-release-digests.sh`. A cross-repo caller that omits `scripts_ref` fails. Image refs whose tag starts with `v` plus a digit are looked up without that prefix.
+- `.grype.yaml` ignores GHSA-qx49-fqc8-xw99. That is CVE-2026-115563, already ignored by Trivy, because semgrep 1.186.0 still requires mcp 1.29.0.
+
 ## [6.5.1] - 2026-11-20
 
 ### Fixed
