@@ -5,6 +5,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- `common-doc-verify` accepts `scripts_dir` and `python_requirements`. A caller can point YAML and link lint at `common/scripts/` and install ruff from its own hash-locked requirements (GR-LINTCFG-001, CI-039).
+
 ### Fixed
 
 - `common-release-digests` checks out `pirlruc/commondevops` at `scripts_ref`. A reusable call otherwise checks out the caller, which does not contain `scripts/append-release-digests.sh`. A cross-repo caller that omits `scripts_ref` fails. Image refs whose tag starts with `v` plus a digit are looked up without that prefix.

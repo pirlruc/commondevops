@@ -73,8 +73,11 @@ YAML parse and link lint use **caller-vendored** scripts
 (`scripts/validate-yaml.py`, `scripts/lint-doc-links.py`). Missing scripts are
 skipped with a note — this workflow does not clone sibling repos.
 
-Ruff is installed in a job-local venv at `ruff==0.14.10` (guardrails ci-python pin).
-Empty path inputs skip that tool.
+Ruff is installed in a job-local venv from `python_requirements` when that input
+is set, otherwise from this repo's hash-locked `scripts/requirements.txt`.
+Empty path inputs skip that tool. `scripts_dir` is the caller directory that
+holds `validate-yaml.py` and `lint-doc-links.py`. Empty keeps the `scripts/`
+then `.github/scaffold/scripts/` search.
 
 | Input | Default | Notes |
 |-------|---------|-------|
@@ -82,7 +85,9 @@ Empty path inputs skip that tool.
 | `ruff_paths` | `""` | Space-separated / glob; empty → skip ruff |
 | `yaml_files` | `""` | Space-separated paths passed to `validate-yaml.py` |
 | `yaml_globs` | `""` | Space-separated patterns passed as `--glob` (Python expands them) |
-| `run_link_lint` | `false` | Run `scripts/lint-doc-links.py` when that file exists |
+| `run_link_lint` | `false` | Run `lint-doc-links.py` from `scripts_dir`, then `scripts/` |
+| `scripts_dir` | `""` | Directory of the caller's YAML and link scripts |
+| `python_requirements` | `""` | Hash-locked requirements used for ruff and YAML parse |
 
 Doc repos still need `COMMONDEVOPS_READ_TOKEN` to fetch this private reusable
 and its `scripts/`. Ship the workflow first; wire callers after the token exists.
