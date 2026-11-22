@@ -2048,7 +2048,7 @@ milestones:
             guardrail_refs:
               - CI-034
 
-      - id: CMN-DOC-003
+      - id: CMN-DOC-004
         status: done
         title: Let doc verify use the caller script directory and lock
         decision: >-
@@ -2064,7 +2064,7 @@ milestones:
           - CI-035
           - CI-039
         tasks:
-          - id: CMN-DOC-003-T1
+          - id: CMN-DOC-004-T1
             status: done
             title: Add the two inputs
             instructions:
