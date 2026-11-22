@@ -53,6 +53,20 @@ on:
         required: false
         type: boolean
         default: false
+      scripts_dir:
+        description: >-
+          Caller directory that holds validate-yaml.py and lint-doc-links.py.
+          Empty keeps the scripts/ then .github/scaffold/scripts/ search.
+        required: false
+        type: string
+        default: ""
+      python_requirements:
+        description: >-
+          Caller requirements file installed with --require-hashes before ruff
+          and YAML parse. Empty keeps the commondevops ruff pin.
+        required: false
+        type: string
+        default: ""
       scripts_ref:
         description: "Commit/tag/branch of commondevops to checkout for scripts (must match uses: pin)"
         required: false
@@ -100,6 +114,12 @@ on:
       run_lychee:
         type: boolean
         default: false
+      scripts_dir:
+        type: string
+        default: ""
+      python_requirements:
+        type: string
+        default: ""
       scripts_ref:
         type: string
         default: ""
@@ -211,9 +231,16 @@ jobs:
 
       - name: Install ruff
         if: inputs.ruff_paths != ''
+        env:
+          PYTHON_REQUIREMENTS: ${{ inputs.python_requirements }}
         run: |
           python3 -m venv .ci-venv
-          .ci-venv/bin/pip install -q --require-hashes -r _commondevops/scripts/requirements.txt
+          req=_commondevops/scripts/requirements.txt
+          if [ -n "${PYTHON_REQUIREMENTS}" ]; then
+            req="${PYTHON_REQUIREMENTS}"
+          fi
+          test -f "${req}"
+          .ci-venv/bin/pip install -q --require-hashes -r "${req}"
 
       - name: ruff
         id: ruff
@@ -233,19 +260,32 @@ jobs:
         env:
           YAML_FILES: ${{ inputs.yaml_files }}
           YAML_GLOBS: ${{ inputs.yaml_globs }}
+          SCRIPTS_DIR: ${{ inputs.scripts_dir }}
+          PYTHON_REQUIREMENTS: ${{ inputs.python_requirements }}
         run: |
-          yaml_py=scripts/validate-yaml.py
+          yaml_py=""
+          if [ -n "${SCRIPTS_DIR}" ] && [ -f "${SCRIPTS_DIR}/validate-yaml.py" ]; then
+            yaml_py="${SCRIPTS_DIR}/validate-yaml.py"
+          fi
+          if [ -z "${yaml_py}" ]; then
+            yaml_py=scripts/validate-yaml.py
+          fi
           if [ ! -f "${yaml_py}" ]; then
             yaml_py=.github/scaffold/scripts/validate-yaml.py
           fi
           if [ ! -f "${yaml_py}" ]; then
-            echo "error: validate-yaml.py not in scripts/ or .github/scaffold/scripts/ (CI-035)" >&2
+            echo "error: validate-yaml.py not in scripts_dir, scripts/, or .github/scaffold/scripts/ (CI-035)" >&2
             exit 1
           fi
           if [ ! -x .ci-venv/bin/python ]; then
             python3 -m venv .ci-venv
           fi
-          .ci-venv/bin/pip install -q --require-hashes -r _commondevops/scripts/requirements.txt
+          req=_commondevops/scripts/requirements.txt
+          if [ -n "${PYTHON_REQUIREMENTS}" ]; then
+            req="${PYTHON_REQUIREMENTS}"
+          fi
+          test -f "${req}"
+          .ci-venv/bin/pip install -q --require-hashes -r "${req}"
           # Preserve glob metacharacters for validate-yaml.py --glob (Python expands them).
           set -f
           set --
@@ -262,13 +302,21 @@ jobs:
         id: links
         if: inputs.run_link_lint
         continue-on-error: true
+        env:
+          SCRIPTS_DIR: ${{ inputs.scripts_dir }}
         run: |
-          links_py=scripts/lint-doc-links.py
+          links_py=""
+          if [ -n "${SCRIPTS_DIR}" ] && [ -f "${SCRIPTS_DIR}/lint-doc-links.py" ]; then
+            links_py="${SCRIPTS_DIR}/lint-doc-links.py"
+          fi
+          if [ -z "${links_py}" ]; then
+            links_py=scripts/lint-doc-links.py
+          fi
           if [ ! -f "${links_py}" ]; then
             links_py=.github/scaffold/scripts/lint-doc-links.py
           fi
           if [ ! -f "${links_py}" ]; then
-            echo "error: lint-doc-links.py not in scripts/ or .github/scaffold/scripts/ (CI-035)" >&2
+            echo "error: lint-doc-links.py not in scripts_dir, scripts/, or .github/scaffold/scripts/ (CI-035)" >&2
             exit 1
           fi
           python3 "${links_py}"

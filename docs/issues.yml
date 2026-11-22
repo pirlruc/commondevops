@@ -2047,3 +2047,82 @@ milestones:
               - actionlint .github/workflows/common-secrets-sast.yml .github/workflows/common-ansible-verify.yml
             guardrail_refs:
               - CI-034
+
+      - id: CMN-DOC-002
+        status: done
+        title: Let doc verify use the caller script directory and lock
+        decision: >-
+          In the context of a documentation repository, facing scripts outside
+          scripts/ and a ruff pin that is not the caller's, we decided
+          scripts_dir and python_requirements inputs, to achieve one reusable
+          job, accepting that an empty input keeps the previous search.
+        acceptance_criteria:
+          - common-doc-verify accepts scripts_dir and python_requirements
+          - An empty value keeps the scripts/ search and the commondevops ruff pin
+        guardrail_refs:
+          - CI-034
+          - CI-035
+          - CI-039
+        tasks:
+          - id: CMN-DOC-002-T1
+            status: done
+            title: Add the two inputs
+            instructions:
+              files:
+                - .github/workflows/common-doc-verify.yml
+                - docs/workflows.md
+            verification:
+              - actionlint .github/workflows/common-doc-verify.yml
+            guardrail_refs:
+              - CI-039
+
+      - id: CMN-PERM-001
+        status: open
+        title: Keep write permissions out of reusable check workflows
+        decision: >-
+          In the context of a reusable check, facing a job that can publish,
+          we decided to audit every common-* check workflow for a write scope,
+          to achieve callers that grant read only, accepting a separate
+          workflow for release and package publish.
+        acceptance_criteria:
+          - Each reusable check workflow documents that it requests no write scope
+          - A workflow that publishes stays a separate file
+        guardrail_refs:
+          - CI-025
+          - CI-042
+        tasks:
+          - id: CMN-PERM-001-T1
+            status: open
+            title: Audit reusable check workflows for write permissions
+            instructions:
+              files:
+                - .github/workflows/
+            verification:
+              - rg -n "permissions:" .github/workflows/common-doc-verify.yml .github/workflows/common-infra-lint.yml
+            guardrail_refs:
+              - CI-025
+
+      - id: CMN-RUN-001
+        status: open
+        title: Confirm runs_on on every reusable a documentation caller uses
+        decision: >-
+          In the context of an ephemeral private runner, facing a reusable
+          workflow with a hardcoded runner, we decided every workflow a
+          documentation caller uses accepts runs_on, to achieve one default
+          hosted label, accepting that publish workflows are out of this pass.
+        acceptance_criteria:
+          - common-doc-verify, common-infra-lint, common-secrets-sast, common-pins-verify, and common-token-audit accept runs_on
+        guardrail_refs:
+          - CI-040
+          - CI-043
+        tasks:
+          - id: CMN-RUN-001-T1
+            status: open
+            title: Record which reusables already accept runs_on
+            instructions:
+              files:
+                - .github/workflows/
+            verification:
+              - rg -n "runs_on:" .github/workflows/common-doc-verify.yml .github/workflows/common-secrets-sast.yml
+            guardrail_refs:
+              - CI-040

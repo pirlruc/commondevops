@@ -3,7 +3,11 @@
 All notable changes to this repository are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased]
+## [6.6.0] - 2026-11-22
+
+### Added
+
+- `common-doc-verify` accepts `scripts_dir` and `python_requirements`. A caller can point YAML and link lint at `common/scripts/` and install ruff from its own hash-locked requirements (GR-LINTCFG-001, CI-039).
 
 ### Fixed
 
