@@ -53,6 +53,26 @@ on:
         required: false
         type: boolean
         default: false
+      run_hygiene:
+        description: Fail on machine-local paths and links outside the allowlist
+        required: false
+        type: boolean
+        default: false
+      hygiene_owners:
+        description: Comma-separated GitHub owners whose links are policed
+        required: false
+        type: string
+        default: ""
+      hygiene_allowed_repos:
+        description: Comma-separated owner/repo globs that may still be linked
+        required: false
+        type: string
+        default: ""
+      hygiene_exclude:
+        description: Comma-separated paths to skip. A /** suffix skips a tree.
+        required: false
+        type: string
+        default: "CHANGELOG.md,docs/issues.yml,docs/ai-agent-handoff.md,docs/guardrails/**"
       scripts_dir:
         description: >-
           Caller directory that holds validate-yaml.py and lint-doc-links.py.
@@ -114,6 +134,18 @@ on:
       run_lychee:
         type: boolean
         default: false
+      run_hygiene:
+        type: boolean
+        default: false
+      hygiene_owners:
+        type: string
+        default: ""
+      hygiene_allowed_repos:
+        type: string
+        default: ""
+      hygiene_exclude:
+        type: string
+        default: "CHANGELOG.md,docs/issues.yml,docs/ai-agent-handoff.md,docs/guardrails/**"
       scripts_dir:
         type: string
         default: ""
@@ -334,6 +366,21 @@ jobs:
           _commondevops/scripts/markdownlint/node_modules/.bin/markdownlint-cli2 \
             "**/*.md" "#**/node_modules" "#**/.github/scaffold" "#**/_commondevops" "#**/.ci-venv"
 
+      - name: Doc hygiene
+        id: hygiene
+        if: inputs.run_hygiene
+        continue-on-error: true
+        env:
+          HYGIENE_OWNERS: ${{ inputs.hygiene_owners }}
+          HYGIENE_ALLOWED: ${{ inputs.hygiene_allowed_repos }}
+          HYGIENE_EXCLUDE: ${{ inputs.hygiene_exclude }}
+        run: |
+          python3 _commondevops/scripts/check_doc_hygiene.py \
+            --root . \
+            --owners "${HYGIENE_OWNERS}" \
+            --allowed "${HYGIENE_ALLOWED}" \
+            --exclude "${HYGIENE_EXCLUDE}"
+
       - name: lychee
         id: lychee
         if: inputs.run_lychee
@@ -356,6 +403,7 @@ jobs:
           YAML: ${{ steps.yaml.outcome }}
           LINKS: ${{ steps.links.outcome }}
           MDLINT: ${{ steps.markdownlint.outcome }}
+          HYGIENE: ${{ steps.hygiene.outcome }}
           LYCHEE: ${{ steps.lychee.outcome }}
         run: |
           set --
@@ -365,5 +413,6 @@ jobs:
           if [ "${YAML}" != "skipped" ] && [ -n "${YAML}" ]; then set -- "$@" "yaml=${YAML}"; fi
           if [ "${LINKS}" != "skipped" ] && [ -n "${LINKS}" ]; then set -- "$@" "links=${LINKS}"; fi
           if [ "${MDLINT}" != "skipped" ] && [ -n "${MDLINT}" ]; then set -- "$@" "markdownlint=${MDLINT}"; fi
+          if [ "${HYGIENE}" != "skipped" ] && [ -n "${HYGIENE}" ]; then set -- "$@" "hygiene=${HYGIENE}"; fi
           if [ "${LYCHEE}" != "skipped" ] && [ -n "${LYCHEE}" ]; then set -- "$@" "lychee=${LYCHEE}"; fi
           bash _commondevops/scripts/gate-aggregate.sh "$@"
