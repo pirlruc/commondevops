@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | <https://github.com/pirlruc/commondevops> (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
-| **Branch** | `main`. Published tip is **v6.7.0**. Unreleased work pins guardrails 1.17.0 and scaffold 1.14.0, recompiles the Python locks, and hash-locks pytest. semgrep still pins mcp 1.29.0, opentelemetry-api 1.37.0, and wcmatch 8.5.2. |
+| **Branch** | `main`. Published tip is **v6.8.0** (`4de58c7449029c2022301c1654d1aa2da9f7bcec`). Guardrails 1.17.0 and scaffold 1.14.0. pytest is hash-locked. semgrep still pins mcp 1.29.0, opentelemetry-api 1.37.0, and wcmatch 8.5.2. |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
