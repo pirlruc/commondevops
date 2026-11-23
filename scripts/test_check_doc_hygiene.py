@@ -48,7 +48,10 @@ def test_machine_and_link_hits() -> None:
     assert hygiene.machine_hits("no path") == []
     owners = {"pirlruc"}
     allowed = ["pirlruc/*devops"]
-    assert hygiene.link_hits(text, owners, allowed) == ["pirlruc/heimdall"]
+    text += "https://github.com/pirlruc/guardrails.git\n"
+    assert hygiene.link_hits(
+        text, owners, ["pirlruc/*devops", "pirlruc/guardrails"]
+    ) == ["pirlruc/heimdall"]
     assert hygiene.link_hits(text, set(), allowed) == []
 
 
@@ -59,7 +62,12 @@ def test_scan_skips_excluded_and_vendored(tmp_path: Path) -> None:
     _write(tmp_path, "docs/guardrails/ci/guardrails.md", "/home/ada/src\n")
     _write(tmp_path, "node_modules/pkg/README.md", "/home/ada/src\n")
     _write(tmp_path, "blob.bin", "/home/ada/src\n")
-    assert hygiene.scan(tmp_path, {"pirlruc"}, [], hygiene.parse_csv(hygiene.DEFAULT_EXCLUDES)) == []
+    assert (
+        hygiene.scan(
+            tmp_path, {"pirlruc"}, [], hygiene.parse_csv(hygiene.DEFAULT_EXCLUDES)
+        )
+        == []
+    )
 
 
 def test_scan_reports_a_living_link(tmp_path: Path) -> None:
