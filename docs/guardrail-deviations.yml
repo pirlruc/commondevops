@@ -14,4 +14,14 @@
 # only when github.event_name is release. Schedule and workflow_dispatch stay
 # on repository secrets. Those secrets are not deleted.
 
-deviations: []
+deviations:
+  - id: DOCKER-SEC-001
+    epic: CMN-MCP-001
+    why: >-
+      ci-lint installs semgrep, and semgrep 1.185.0 requires mcp==1.29.0.
+      CVE-2026-115563 is fixed in mcp 1.30.0. docker/ci-lint/.trivyignore.yaml
+      ignores that id without a path, because Trivy reports it as package
+      metadata. .grype.yaml ignores GHSA-qx49-fqc8-xw99. The fail level
+      stays high. Review when semgrep allows mcp>=1.30.0.
+    owner: pirlruc
+    review: 2027-02-23
