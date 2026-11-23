@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | <https://github.com/pirlruc/commondevops> (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
-| **Branch** | `main`. **6.4.1** (`8934d843`, no `v` prefix) splits `semgrep_config` into one `--config` per pack. **6.4.0** (`f7658926`) fixes buf on push, keeps GHCR credentials, and adds `common-swift.yml`. The ci-lint image was not rebuilt for that tag. **6.3.0** adds `common-buf.yml`. Guardrails 1.15.0 and scaffold 1.12.0. Do not move `5.4.4`–`6.4.0`, `6.5.0`, or `v6.5.0`. |
+| **Branch** | `main`. Published tip is **v6.7.0**. Unreleased work pins guardrails 1.17.0 and scaffold 1.14.0, recompiles the Python locks, and hash-locks pytest. semgrep still pins mcp 1.29.0, opentelemetry-api 1.37.0, and wcmatch 8.5.2. |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
@@ -66,7 +66,7 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | guardrails submodule | tag **1.15.0** → `2d4bb70e95449f6922781716857adeb22badf676` |
 | github-scaffold submodule | tag **1.12.0** → `9c443ea978851768f451b1df2020dd86dfb1a967` |
 | methodologies (links only; not a submodule) | tag **1.9.1** |
-| containerdevops (image callers + security rescan) | tag **6.5.0** → `b8c0746603eefdc89571b17c62d1e965b28ff31f` |
+| containerdevops (image callers + security rescan) | tag **6.7.0** → `f0f9077ced9f79097e7597de1a2e00f8eb42e216` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 | `ghcr.io/pirlruc/ci-lint` (debian, unsuffixed) | `5.6.1` index `sha256:8f1c48449167ba92fd2f922a249e65fcc9e58fc81582430cf7ce2d0c49aa24fa`. Actions amd64 `sha256:f9001c4c8726f72107545094237d4fc0592baca023cfa299a532634666d88111`. |
 | `ghcr.io/pirlruc/ci-lint` (alpine) | `5.6.1-alpine` index `sha256:a9aac8fa6dd5c9d8c2ab6c0b4f50a58fe42d0b50c13ebf284ef226462dbb79ab`. Actions amd64 `sha256:207ab77b5ced7d067cb03f7ad6a135a30cf60dfc4a0ed417f61589a7f3d48fc0`. |

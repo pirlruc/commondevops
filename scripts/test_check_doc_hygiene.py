@@ -35,14 +35,14 @@ def test_repo_allowed() -> None:
     allowed = ["pirlruc/*devops", "pirlruc/guardrails"]
     assert hygiene.repo_allowed("pirlruc", "commondevops", allowed)
     assert hygiene.repo_allowed("pirlruc", "guardrails", allowed)
-    assert not hygiene.repo_allowed("pirlruc", "heimdall", allowed)
-    assert not hygiene.repo_allowed("pirlruc", "heimdall", [])
+    assert not hygiene.repo_allowed("pirlruc", "example-app", allowed)
+    assert not hygiene.repo_allowed("pirlruc", "example-app", [])
 
 
 def test_machine_and_link_hits() -> None:
     """Machine paths and policed links are reported. Other owners are not."""
     text = "see /home/ada/src and /Users/ada/src and ~/Developer\n"
-    text += "https://github.com/other/app https://github.com/pirlruc/heimdall\n"
+    text += "https://github.com/other/app https://github.com/pirlruc/example-app\n"
     text += "https://github.com/pirlruc/commondevops\n"
     assert hygiene.machine_hits(text) == ["/home/ada/", "/Users/ada/", "~/Developer"]
     assert hygiene.machine_hits("no path") == []
@@ -51,7 +51,7 @@ def test_machine_and_link_hits() -> None:
     text += "https://github.com/pirlruc/guardrails.git\n"
     assert hygiene.link_hits(
         text, owners, ["pirlruc/*devops", "pirlruc/guardrails"]
-    ) == ["pirlruc/heimdall"]
+    ) == ["pirlruc/example-app"]
     assert hygiene.link_hits(text, set(), allowed) == []
 
 
@@ -72,9 +72,9 @@ def test_scan_skips_excluded_and_vendored(tmp_path: Path) -> None:
 
 def test_scan_reports_a_living_link(tmp_path: Path) -> None:
     """A living markdown link to a policed repository fails."""
-    _write(tmp_path, "docs/guide.md", "https://github.com/pirlruc/heimdall\n")
+    _write(tmp_path, "docs/guide.md", "https://github.com/pirlruc/example-app\n")
     findings = hygiene.scan(tmp_path, {"pirlruc"}, ["pirlruc/guardrails"], [])
-    assert findings == ["docs/guide.md: link outside allowlist pirlruc/heimdall"]
+    assert findings == ["docs/guide.md: link outside allowlist pirlruc/example-app"]
 
 
 def test_main_ok_and_fail(tmp_path: Path, capsys: object) -> None:

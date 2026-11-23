@@ -9,7 +9,7 @@ Scorecard, OpenTofu, and SOPS.
 |---|---|
 | **Remote** | <https://github.com/pirlruc/commondevops> |
 | **Role** | Cross-language CI infrastructure (pairs with [containerdevops](https://github.com/pirlruc/containerdevops) and [pydevops](https://github.com/pirlruc/pydevops)) |
-| **Guardrails** | Pinned at `docs/guardrails/` ([pirlruc/guardrails](https://github.com/pirlruc/guardrails) tag `1.15.0`) |
+| **Guardrails** | Pinned at `docs/guardrails/` ([pirlruc/guardrails](https://github.com/pirlruc/guardrails) tag `1.17.0`) |
 | **Changelog** | [CHANGELOG.md](CHANGELOG.md) |
 
 ## Reusable workflows
@@ -36,6 +36,7 @@ private `ghcr.io/pirlruc` image with `container.credentials`.
 | [`common-tofu-verify.yml`](.github/workflows/common-tofu-verify.yml) | `tofu fmt`, `tofu validate`, and tflint from `ci-iac` |
 | [`common-sops-verify.yml`](.github/workflows/common-sops-verify.yml) | SOPS ciphertext check from `ci-iac`. No Age private key |
 | [`common-pins-verify.yml`](.github/workflows/common-pins-verify.yml) | Caller submodule gitlink assert |
+| [`common-dependency-review.yml`](.github/workflows/common-dependency-review.yml) | Pull-request dependency review |
 | [`common-buf.yml`](.github/workflows/common-buf.yml) | `buf lint` and `buf breaking` |
 | [`common-swift.yml`](.github/workflows/common-swift.yml) | `swift test` in `swift:6.1`. macOS is opt-in |
 | [`common-threshold-drift.yml`](.github/workflows/common-threshold-drift.yml) | Vendored threshold keys against the guardrails pin |

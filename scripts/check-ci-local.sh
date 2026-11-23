@@ -64,8 +64,10 @@ run_or_queue zizmor
 run_or_queue yamllint
 
 echo "==> doc hygiene tests"
-PYTHONPATH=scripts uv run --with pytest --with pytest-cov \
-	pytest scripts/test_check_doc_hygiene.py \
+uv venv --allow-existing "${ROOT}/.venv"
+uv pip install --python "${ROOT}/.venv/bin/python" --require-hashes \
+	-r scripts/requirements-test.txt
+PYTHONPATH=scripts "${ROOT}/.venv/bin/pytest" scripts/test_check_doc_hygiene.py \
 	--cov=check_doc_hygiene --cov-branch --cov-fail-under=95
 
 echo "==> license_gate dry-run (no SBOM → skip with exit 0)"
