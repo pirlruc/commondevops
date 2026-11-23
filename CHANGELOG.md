@@ -5,16 +5,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
-### Changed
-
-- Image and Hub workflows pin containerdevops 6.7.0 (`f0f9077ced9f79097e7597de1a2e00f8eb42e216`). The Hub reusable no longer overwrites `pirlruc/ci-container` from a caller's push.
-
 ### Fixed
 
 - Hub description and release-digest workflows declare concurrency (CI-002).
 
 ### Changed
 
+- Image and Hub workflows pin containerdevops 6.7.0 (`f0f9077ced9f79097e7597de1a2e00f8eb42e216`). The Hub reusable no longer overwrites `pirlruc/ci-container` from a caller's push.
 - `docs/guardrails` is 1.17.0 and `.github/scaffold` is 1.14.0.
 - Python locks are recompiled for ruff 0.17.5, zizmor 1.32.0, semgrep 1.185.0, and ansible-lint 26.11.0. mcp 1.29.0, opentelemetry-api 1.37.0, and wcmatch 8.5.2 stay, because semgrep pins them.
 - Doc-hygiene tests install pytest from `scripts/requirements-test.txt` with `--require-hashes` (CI-039).
