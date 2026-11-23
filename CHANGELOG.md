@@ -5,9 +5,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [6.8.0] - 2026-11-23
+
 ### Fixed
 
 - Hub description and release-digest workflows declare concurrency (CI-002).
+- ci-supply-chain rebuilds containerd at 2.4.2, including the tracing package that 2.4.2 imports. grant allows klauspost/compress 1.20.0, which that module requires.
+- ci-lint records CVE-2026-115563 until semgrep stops requiring mcp 1.29.0.
 
 ### Changed
 

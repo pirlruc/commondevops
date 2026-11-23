@@ -181,6 +181,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
+- 2026-11-23: **v6.8.0** pins guardrails 1.17.0, scaffold 1.14.0, and containerdevops 6.7.0. ci-supply-chain builds containerd 2.4.2. pytest is hash-locked. semgrep still requires mcp 1.29.0.
 - 2026-11-15: reusable workflows the homelab callers use accept `runs_on` (JSON, default `"ubuntu-24.04"`). Signing moved to `common-release-sign.yml` so `common-release.yml` requests `contents: write` only. Still not tagged. The 2026-11-14 tofu, sops, and ansible inputs are in the same unreleased 6.5.0.
 - 2026-11-14: common-tofu-verify and common-sops-verify accept container_username and container_token. common-sops-verify host_mode runs the ciphertext check without an image pull. Ciphertext must be AES256_GCM and must not contain a private key block. common-secrets-sast uploads redacted JSON. common-ansible-verify accepts playbooks and public_submodules. common-tofu-verify accepts test_directory. Not tagged yet.
 - 2026-11-07: **6.0.1** runs the missing-pack check from the `scripts_ref` checkout. **6.0.0** turns doc-verify shfmt and markdownlint on by default. Guardrails 1.15.0, scaffold 1.12.0. semgrep stays on mcp 1.29.0. Image workflows still call containerdevops 6.3.5.
@@ -276,6 +277,8 @@ python3 .github/scaffold/scripts/issues-sync.py \
 - 2026-08-12: CMN-012 — re-pin containerdevops, image metadata, Hub/GHCR docs;
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
+
+*Last updated: 2026-11-23 — v6.8.0. Guardrails 1.17.0. Scaffold 1.14.0. containerdevops 6.7.0. containerd 2.4.2.*
 
 *Last updated: 2026-11-23 — 6.7.0 adds the doc hygiene check. CMN-PERM-001 and CMN-RUN-001 are recorded.*
 *Last updated: 2026-11-20 — digest job checks out commondevops at scripts_ref and strips a leading v from image tags.*
