@@ -12,6 +12,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 ### Fixed
 
 - Caller docs: `common-infra-lint` and `common-secrets-sast` need `packages: read`. The secrets job uploads JSON, not SARIF. A missing YAML or link script fails closed. Scorecard is pinned at v2.5.0. Check workflows that do not upload SARIF request no write scope (CMN-PERM-001). The documentation callers accept `runs_on` (CMN-RUN-001).
+- A submodule URL ending in `.git` is the same repository as the name without that suffix.
 
 ## [6.6.0] - 2026-11-22
 

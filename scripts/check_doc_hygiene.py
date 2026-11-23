@@ -66,6 +66,7 @@ def link_hits(text: str, owners: set[str], allowed: list[str]) -> list[str]:
     """Return policed links that are outside the allowlist."""
     bad: list[str] = []
     for owner, repo in LINK_RE.findall(text):
+        repo = repo.removesuffix(".git")
         if owner not in owners:
             continue
         if repo_allowed(owner, repo, allowed):
@@ -89,18 +90,23 @@ def iter_files(root: Path, excludes: list[str]) -> list[Path]:
     return found
 
 
-def scan_file(path: Path, root: Path, owners: set[str], allowed: list[str]) -> list[str]:
+def scan_file(
+    path: Path, root: Path, owners: set[str], allowed: list[str]
+) -> list[str]:
     """Return findings for one file."""
     text = path.read_text(encoding="utf-8", errors="replace")
     rel = path.relative_to(root).as_posix()
     findings = [f"{rel}: machine-local path {hit}" for hit in machine_hits(text)]
     findings.extend(
-        f"{rel}: link outside allowlist {hit}" for hit in link_hits(text, owners, allowed)
+        f"{rel}: link outside allowlist {hit}"
+        for hit in link_hits(text, owners, allowed)
     )
     return findings
 
 
-def scan(root: Path, owners: set[str], allowed: list[str], excludes: list[str]) -> list[str]:
+def scan(
+    root: Path, owners: set[str], allowed: list[str], excludes: list[str]
+) -> list[str]:
     """Return every finding under ``root``."""
     findings: list[str] = []
     for path in iter_files(root, excludes):
