@@ -278,6 +278,8 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
+*Last updated: 2026-11-23 — v6.8.0. Guardrails 1.17.0. Scaffold 1.14.0. DOCKER-SEC-001 records CVE-2026-115563 until semgrep allows mcp 1.30.0. Review 2027-02-23.*
+
 *Last updated: 2026-11-23 — v6.8.0. Guardrails 1.17.0. Scaffold 1.14.0. containerdevops 6.7.0. containerd 2.4.2.*
 
 *Last updated: 2026-11-23 — 6.7.0 adds the doc hygiene check. CMN-PERM-001 and CMN-RUN-001 are recorded.*

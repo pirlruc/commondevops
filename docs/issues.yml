@@ -2155,3 +2155,30 @@ milestones:
               - PYTHONPATH=scripts pytest scripts/test_check_doc_hygiene.py --cov=check_doc_hygiene --cov-branch --cov-fail-under=95
             guardrail_refs:
               - PY-TEST-002
+
+      - id: CMN-MCP-001
+        status: open
+        title: Accept the semgrep mcp pin until a release allows 1.30.0
+        decision: >-
+          In the context of the ci-lint image, facing semgrep 1.185.0
+          requiring mcp 1.29.0, we decided to keep that pin and record
+          CVE-2026-115563, to achieve a scan that still fails on other
+          highs, accepting an unscoped ignore because Trivy reports the
+          package as metadata.
+        acceptance_criteria:
+          - docs/guardrail-deviations.yml records DOCKER-SEC-001 with a review date
+          - The ci-lint ignore names CVE-2026-115563 and expires on that date
+        guardrail_refs:
+          - DOCKER-SEC-001
+        tasks:
+          - id: CMN-MCP-001-T1
+            status: done
+            title: Record the semgrep mcp ignore
+            instructions:
+              files:
+                - docs/guardrail-deviations.yml
+                - docker/ci-lint/.trivyignore.yaml
+            verification:
+              - The deviation id is DOCKER-SEC-001 and the review date is 2027-02-23
+            guardrail_refs:
+              - DOCKER-SEC-001
