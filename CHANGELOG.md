@@ -5,6 +5,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+
+- Image and Hub workflows pin containerdevops 6.7.0 (`f0f9077ced9f79097e7597de1a2e00f8eb42e216`). The Hub reusable no longer overwrites `pirlruc/ci-container` from a caller's push.
+
 ### Fixed
 
 - Hub description and release-digest workflows declare concurrency (CI-002).

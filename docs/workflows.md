@@ -250,7 +250,7 @@ reusables against this repository (`scripts_ref: ${{ github.sha }}`).
 Weekly secrets/SAST, supply-chain, Scorecard, and registry rescans of the
 published linux/amd64 images through containerdevops
 `container-published-rescan.yml` at 6.5.0
-(`b8c0746603eefdc89571b17c62d1e965b28ff31f`). The rescan targets move
+(`f0f9077ced9f79097e7597de1a2e00f8eb42e216`). The rescan targets move
 with each image release. Image CI calls `container-scan.yml` at that
 same commit.
 
@@ -282,7 +282,7 @@ The same SHA is the sparse-checkout ref for this runner.
 ## Published-image rescan caller (CMN-RESCAN-001)
 
 Copy-ready job. Pin containerdevops **6.3.0**
-(`b8c0746603eefdc89571b17c62d1e965b28ff31f`, tag 6.5.0) for both `uses:` and `scripts_ref`.
+(`f0f9077ced9f79097e7597de1a2e00f8eb42e216`, tag 6.7.0) for both `uses:` and `scripts_ref`.
 Digest-pin the image (CI-026); do not float on `:latest`.
 
 ```yaml
@@ -292,10 +292,10 @@ Digest-pin the image (CI-026); do not float on `:latest`.
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@b8c0746603eefdc89571b17c62d1e965b28ff31f
+    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@f0f9077ced9f79097e7597de1a2e00f8eb42e216
     with:
       image: ghcr.io/pirlruc/<image>@sha256:<digest>
-      scripts_ref: b8c0746603eefdc89571b17c62d1e965b28ff31f
+      scripts_ref: f0f9077ced9f79097e7597de1a2e00f8eb42e216
       pkg_types: library
       ignorefile: docker/<image>/.trivyignore.yaml
       results_artifact: published-<image>-scan
