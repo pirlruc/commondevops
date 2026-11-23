@@ -25,10 +25,10 @@ or the reusable job fails at startup with no useful callee message.
 
 | Workflow | Caller job `permissions:` |
 |----------|---------------------------|
-| `common-infra-lint.yml` | `contents: read` |
+| `common-infra-lint.yml` | `contents: read`, `packages: read` |
 | `common-doc-verify.yml` | `contents: read` |
 | `common-scaffold-verify.yml` | `contents: read`, `issues: read` |
-| `common-secrets-sast.yml` | `contents: read` |
+| `common-secrets-sast.yml` | `contents: read`, `packages: read` |
 | `common-ansible-verify.yml` | `contents: read` |
 | `common-token-audit.yml` | none (the job sets no token scopes) |
 | `common-tofu-verify.yml` | `contents: read`, `packages: read` |
@@ -70,8 +70,8 @@ Needs `contents: read`. Cross-repo callers pass `checkout_token` and matching
 `scripts_ref` (same contract as `common-infra-lint.yml`).
 
 YAML parse and link lint use **caller-vendored** scripts
-(`scripts/validate-yaml.py`, `scripts/lint-doc-links.py`). Missing scripts are
-skipped with a note — this workflow does not clone sibling repos.
+(`scripts/validate-yaml.py`, `scripts/lint-doc-links.py`). A missing script
+fails the job (CI-035). This workflow does not clone sibling repos.
 
 Ruff is installed in a job-local venv from `python_requirements` when that input
 is set, otherwise from this repo's hash-locked `scripts/requirements.txt`.
@@ -86,6 +86,10 @@ then `.github/scaffold/scripts/` search.
 | `yaml_files` | `""` | Space-separated paths passed to `validate-yaml.py` |
 | `yaml_globs` | `""` | Space-separated patterns passed as `--glob` (Python expands them) |
 | `run_link_lint` | `false` | Run `lint-doc-links.py` from `scripts_dir`, then `scripts/` |
+| `run_hygiene` | `false` | Machine-local paths and links outside the allowlist |
+| `hygiene_owners` | `""` | Comma-separated GitHub owners whose links are policed |
+| `hygiene_allowed_repos` | `""` | Comma-separated `owner/repo` globs that may be linked |
+| `hygiene_exclude` | changelog, issues, handoff, `docs/guardrails/**` | Paths the hygiene check skips |
 | `scripts_dir` | `""` | Directory of the caller's YAML and link scripts |
 | `python_requirements` | `""` | Hash-locked requirements used for ruff and YAML parse |
 
@@ -120,8 +124,9 @@ Pin `uses:` and `scripts_ref` to the same commit (CI-018).
 | Secrets | gitleaks (`--config .gitleaks.toml` when present) |
 | SAST | semgrep `1.178.0` (`--config auto`, plus `.semgrep.yml` when present) |
 
-Needs `contents: read` + `security-events: write`. Full history checkout for
-gitleaks ranges. Prefer `ghcr.io/pirlruc/ci-lint` for the same toolset.
+Needs `contents: read` and `packages: read`. It uploads redacted JSON, not
+SARIF, so it does not need `security-events: write`. Full history checkout
+for gitleaks ranges. Prefer `ghcr.io/pirlruc/ci-lint` for the same toolset.
 
 ---
 
@@ -150,7 +155,7 @@ Prefer `ghcr.io/pirlruc/ci-supply-chain` for the scanner binaries.
 
 ## `common-scorecard.yml`
 
-OpenSSF Scorecard (`ossf/scorecard-action@v2.4.4`). Skips forks and Dependabot.
+OpenSSF Scorecard (`ossf/scorecard-action` v2.5.0, SHA `fa7117db`). Skips forks and Dependabot.
 Permissions: `security-events: write`, `id-token: write`.
 
 | Input | Default |
@@ -335,6 +340,23 @@ playbook. `public_submodules` inits those paths before the lint. `results_retent
 `common-supply-chain` defaults to 1. `common-secrets-sast` uploads redacted
 gitleaks and semgrep JSON when `upload_results` is true, kept for
 `results_retention_days` (default 7).
+
+## Check permissions and runners
+
+`common-doc-verify`, `common-infra-lint`, `common-secrets-sast`,
+`common-pins-verify`, `common-scaffold-verify`, `common-token-audit`,
+`common-ansible-verify`, `common-tofu-verify`, `common-sops-verify`,
+`common-threshold-drift`, `common-buf`, `common-swift`, and
+`common-dependency-review` request no write scope (CMN-PERM-001).
+`common-infra-lint` and `common-secrets-sast` also request `packages: read`
+so the job can pull `ci-lint`. `common-supply-chain` and `common-scorecard`
+request `security-events: write` because they upload SARIF. Publish stays on
+`common-release.yml`, `common-release-sign.yml`, `common-release-digests.yml`,
+and the image workflows.
+
+`common-doc-verify`, `common-infra-lint`, `common-secrets-sast`,
+`common-pins-verify`, and `common-token-audit` accept `runs_on`
+(CMN-RUN-001). The default is the hosted `ubuntu-24.04` label.
 
 ## `common-tofu-verify.yml`
 

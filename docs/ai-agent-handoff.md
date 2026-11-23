@@ -55,6 +55,9 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | CMN-BUF-002 — push compares against a SHA | Done (`6.4.0`) |
 | CMN-CRED-001 — keep GHCR credentials | Done (`6.4.0`) |
 | CMN-SWIFT-001 — Swift package CI | Done (`6.4.0`) |
+| CMN-PERM-001 — no write scope on check workflows | Done (this wave; SARIF upload stays on supply-chain and scorecard) |
+| CMN-RUN-001 — `runs_on` on documentation callers | Done (already on the five workflows; recorded in `docs/workflows.md`) |
+| CMN-HYG-001 — doc hygiene check | Done (this wave; tag with 6.7.0) |
 
 ## Pins
 
@@ -274,6 +277,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
+*Last updated: 2026-11-23 — doc hygiene inputs on common-doc-verify. CMN-PERM-001 and CMN-RUN-001 recorded. Not tagged.*
 *Last updated: 2026-11-20 — digest job checks out commondevops at scripts_ref and strips a leading v from image tags.*
 *Last updated: 2026-11-15 — `runs_on` on the homelab-facing reusables. `common-release-sign.yml` holds id-token and attestations. Not tagged.*
 *Last updated: 2026-11-18 — 6.4.0 is `f7658926` and 6.4.1 is `8934d843`. 6.4.1 only splits the semgrep config list. The ci-lint image was not rebuilt. Do not move `5.4.4` through `6.5.0` or `v6.5.0`.*

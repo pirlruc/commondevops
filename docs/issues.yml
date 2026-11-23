@@ -2077,7 +2077,7 @@ milestones:
               - CI-039
 
       - id: CMN-PERM-001
-        status: open
+        status: done
         title: Keep write permissions out of reusable check workflows
         decision: >-
           In the context of a reusable check, facing a job that can publish,
@@ -2092,18 +2092,19 @@ milestones:
           - CI-042
         tasks:
           - id: CMN-PERM-001-T1
-            status: open
+            status: done
             title: Audit reusable check workflows for write permissions
             instructions:
               files:
                 - .github/workflows/
+                - docs/workflows.md
             verification:
-              - rg -n "permissions:" .github/workflows/common-doc-verify.yml .github/workflows/common-infra-lint.yml
+              - rg -n "CMN-PERM-001" docs/workflows.md
             guardrail_refs:
               - CI-025
 
       - id: CMN-RUN-001
-        status: open
+        status: done
         title: Confirm runs_on on every reusable a documentation caller uses
         decision: >-
           In the context of an ephemeral private runner, facing a reusable
@@ -2117,12 +2118,40 @@ milestones:
           - CI-043
         tasks:
           - id: CMN-RUN-001-T1
-            status: open
+            status: done
             title: Record which reusables already accept runs_on
             instructions:
               files:
-                - .github/workflows/
+                - docs/workflows.md
             verification:
-              - rg -n "runs_on:" .github/workflows/common-doc-verify.yml .github/workflows/common-secrets-sast.yml
+              - rg -n "CMN-RUN-001" docs/workflows.md
             guardrail_refs:
               - CI-040
+
+      - id: CMN-HYG-001
+        status: done
+        title: Check documentation repos for machine paths and product links
+        decision: >-
+          In the context of a documentation repository, facing a link to a
+          product repository or a path on one machine, we decided a generic
+          hygiene check on common-doc-verify, to achieve one allowlist owned
+          by the caller, accepting that historical files stay excluded.
+        acceptance_criteria:
+          - common-doc-verify accepts run_hygiene, hygiene_owners, hygiene_allowed_repos, and hygiene_exclude
+          - The check fails on /home/<user>/, /Users/<user>/, and ~/Developer
+          - The check fails on a policed owner/repo that is outside the allowlist
+        guardrail_refs:
+          - CI-035
+          - DOC-PUB-001
+        tasks:
+          - id: CMN-HYG-001-T1
+            status: done
+            title: Add the hygiene script and the workflow inputs
+            instructions:
+              files:
+                - scripts/check_doc_hygiene.py
+                - .github/workflows/common-doc-verify.yml
+            verification:
+              - PYTHONPATH=scripts pytest scripts/test_check_doc_hygiene.py --cov=check_doc_hygiene --cov-branch --cov-fail-under=95
+            guardrail_refs:
+              - PY-TEST-002
