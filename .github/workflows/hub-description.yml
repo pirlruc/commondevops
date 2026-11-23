@@ -15,6 +15,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: hub-description-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ci-lint:
     permissions:

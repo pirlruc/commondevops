@@ -282,7 +282,7 @@ The same SHA is the sparse-checkout ref for this runner.
 ## Published-image rescan caller (CMN-RESCAN-001)
 
 Copy-ready job. Pin containerdevops **6.3.0**
-(`dd884203c9ffe30e4d4da838cc9e88a888a484a1`) for both `uses:` and `scripts_ref`.
+(`b8c0746603eefdc89571b17c62d1e965b28ff31f`, tag 6.5.0) for both `uses:` and `scripts_ref`.
 Digest-pin the image (CI-026); do not float on `:latest`.
 
 ```yaml
@@ -292,10 +292,10 @@ Digest-pin the image (CI-026); do not float on `:latest`.
       contents: read
       security-events: write
       packages: read
-    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@dd884203c9ffe30e4d4da838cc9e88a888a484a1
+    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@b8c0746603eefdc89571b17c62d1e965b28ff31f
     with:
       image: ghcr.io/pirlruc/<image>@sha256:<digest>
-      scripts_ref: dd884203c9ffe30e4d4da838cc9e88a888a484a1
+      scripts_ref: b8c0746603eefdc89571b17c62d1e965b28ff31f
       pkg_types: library
       ignorefile: docker/<image>/.trivyignore.yaml
       results_artifact: published-<image>-scan

@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | <https://github.com/pirlruc/commondevops> (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
-| **Branch** | `main`. **6.4.1** (`8934d843`, no `v` prefix) splits `semgrep_config` into one `--config` per pack. **6.4.0** (`f7658926`) fixes buf on push, keeps GHCR credentials, and adds `common-swift.yml`. The ci-lint image was not rebuilt for that tag. **6.3.0** adds `common-buf.yml`. Guardrails 1.15.0 and scaffold 1.12.0. Do not move `5.4.4`–`6.4.0`, `6.5.0`, or `v6.5.0`. |
+| **Branch** | `main`. Published tip is **v6.7.0**. Unreleased work pins guardrails 1.17.0 and scaffold 1.14.0, recompiles the Python locks, and hash-locks pytest. semgrep still pins mcp 1.29.0, opentelemetry-api 1.37.0, and wcmatch 8.5.2. |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
