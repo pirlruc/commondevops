@@ -2261,3 +2261,46 @@ milestones:
         - The workflow is workflow_call and documents its secrets
         guardrail_refs:
         - CI-031
+    - id: CMN-IMG-004
+      status: open
+      title: Republish ci-supply-chain and ci-iac when upstream clears the pinned tools
+      decision: >-
+        In the context of the published 6.8.0 images, facing library
+        alerts that name the trivy and OpenTofu commits already in the
+        Dockerfiles, we decided to republish only after those tools move
+        to a release a local os,library scan clears, to achieve images
+        whose alerts can close, accepting that 6.8.0 stays current until
+        that scan is clean.
+      overview:
+        problem: >-
+          ci-supply-chain rebuilds trivy 0.76.2 at
+          3f6334d223b52188324af3b9923b4249cd206652. ci-iac rebuilds
+          OpenTofu at 765062032c46cacab116b36d714db098b806dede. Those
+          commits are the versions the current alerts name. v6.10.0 did
+          not republish the images.
+        goal: >-
+          A later release publishes ci-supply-chain and ci-iac from
+          commits a local os,library scan does not flag as fixable.
+      acceptance_criteria:
+      - The Dockerfiles pin a newer trivy and OpenTofu than the commits above
+      - A local os,library scan of both images is clean for those findings
+      - The release publishes the images and the rescan pins move to the new digests
+      guardrail_refs:
+      - DOCKER-SEC-001
+      - CI-047
+      tasks:
+      - id: CMN-IMG-004-T1
+        status: open
+        title: Bump the tool commits and republish
+        instructions:
+          files:
+          - docker/ci-supply-chain/Dockerfile
+          - docker/ci-supply-chain/Dockerfile.alpine
+          - docker/ci-iac/Dockerfile
+          - .github/workflows/devops-security.yml
+        verification:
+        - docker build of the three Dockerfiles
+        - Trivy os,library on the built images
+        guardrail_refs:
+        - DOCKER-SEC-001
+        - CI-047

@@ -76,10 +76,13 @@ ENV PATH="/usr/local/bin:${PATH}" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
+# gzip is required: actions/checkout runs tar, and tar execs gzip.
 # Drop build-only headers/dev packages and the DHI status.d stubs that apt-get
 # purge leaves behind (Trivy otherwise reports phantom linux-libc-dev CVEs).
 USER root
 RUN set -eu; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends gzip=1.13-1+deb13u1+dhi1; \
     for p in linux-libc-dev libc6-dev libexpat1-dev libpython-3.13-dev \
              python-3.13-dev zlib1g-dev rpcsvc-proto; do \
       if dpkg-query -W "$p" >/dev/null 2>&1; then \

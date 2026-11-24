@@ -80,9 +80,11 @@ ENV PATH="/usr/local/bin:${PATH}" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
+# gzip is required: actions/checkout runs tar, and tar execs gzip.
 # Drop build-only headers/dev packages when present (apk equivalent of the debian purge).
 USER root
 RUN set -eu; \
+    apk add --no-cache gzip=1.14-r3; \
     for p in python3-dev musl-dev linux-headers zlib-dev expat-dev; do \
       if apk info -e "$p" >/dev/null 2>&1; then apk del --purge "$p"; fi; \
     done; \
