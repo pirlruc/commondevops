@@ -2362,3 +2362,58 @@ milestones:
         - actionlint .github/workflows/common-dependabot-metadata.yml
         guardrail_refs:
         - CI-052
+    - id: CMN-CODEQL-001
+      status: done
+      title: Share a CodeQL workflow that takes the language from the caller
+      decision: >-
+        In the context of a repository that needs CodeQL, facing one
+        workflow per language, we decided one reusable workflow whose
+        caller names the languages, to achieve one pin and a hosted
+        default, accepting that a private repository without code
+        scanning sets run_codeql false.
+      overview:
+        problem: Each language copies the CodeQL init and analyze steps.
+        goal: One reusable job with a languages input and a runs_on input.
+      acceptance_criteria:
+      - common-codeql.yml is workflow_call and defaults runs_on to ubuntu-24.04
+      - The job requests contents read, actions read, and security-events write
+      guardrail_refs:
+      - CI-053
+      - CI-043
+      tasks:
+      - id: CMN-CODEQL-001-T1
+        status: done
+        title: Add the CodeQL reusable
+        instructions:
+          files:
+          - .github/workflows/common-codeql.yml
+        verification:
+        - actionlint .github/workflows/common-codeql.yml
+        guardrail_refs:
+        - CI-053
+    - id: CMN-AGG-001
+      status: open
+      title: Share the always-on required-jobs aggregate
+      decision: >-
+        In the context of a caller that lists every blocking job in one
+        final job, facing that same shell copied into each repository,
+        we decided one reusable aggregate, to achieve one success rule,
+        accepting that each caller still names its own job list.
+      overview:
+        problem: Callers copy a final job that fails unless every needed job succeeded or was skipped.
+        goal: One reusable job that takes the needed results and applies that rule.
+      acceptance_criteria:
+      - A reusable workflow accepts the job results and fails when one is not success or skipped
+      guardrail_refs:
+      - CI-031
+      tasks:
+      - id: CMN-AGG-001-T1
+        status: open
+        title: Add the required-jobs aggregate
+        instructions:
+          files:
+          - .github/workflows/
+        verification:
+        - actionlint on the new workflow
+        guardrail_refs:
+        - CI-031

@@ -5,6 +5,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+
+- `common-codeql.yml` runs CodeQL for the languages the caller names. `runs_on` defaults to `ubuntu-24.04`. A private repository without code scanning sets `run_codeql` false.
+
 ## [6.11.0] - 2026-11-24
 
 ### Added

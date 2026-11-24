@@ -38,6 +38,7 @@ or the reusable job fails at startup with no useful callee message.
 | `common-buf.yml` | `contents: read` |
 | `common-swift.yml` | `contents: read` |
 | `common-dco.yml` | `contents: read` |
+| `common-codeql.yml` | `contents: read`, `actions: read`, `security-events: write` |
 | `common-dependabot-metadata.yml` | `contents: read`, `pull-requests: read` |
 | `common-threshold-drift.yml` | `contents: read` |
 | `common-supply-chain.yml` | `contents: read`, `actions: read`, `security-events: write` |
@@ -152,6 +153,22 @@ Thresholds are **vendored** at `scripts/supply-chain.profile.thresholds.yml`
 
 Guardrail IDs: SC-SBOM-*, SC-LIC-*, language-local SEC for Trivy/Grype as applicable.
 Prefer `ghcr.io/pirlruc/ci-supply-chain` for the scanner binaries.
+
+---
+
+## `common-codeql.yml`
+
+CodeQL for the languages the caller names. `runs_on` defaults to `ubuntu-24.04`.
+Set `run_codeql` false when the repository has no code scanning.
+
+| Input | Default |
+|-------|---------|
+| `languages` | required, for example `actions` |
+| `queries` | `security-extended` |
+| `run_codeql` | `true` |
+| `runs_on` | `"ubuntu-24.04"` |
+
+Caller permissions: `contents: read`, `actions: read`, `security-events: write`.
 
 ---
 
