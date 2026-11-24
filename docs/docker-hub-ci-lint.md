@@ -16,8 +16,10 @@ and semgrep. Not a product runtime — no `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `6.8.0` / `6.8.0-debian` / `latest` / `latest-debian` | Debian index `sha256:7cc290f88b68cd9ed902019b3ad4ca24334fddd5e65007c1724f4d4d5af81a0b`, linux/amd64 `sha256:3ed6d8dcbb08abf82e563630f2c1218cf0e8f33bb883ed46770e147113af48b0` |
-| `6.8.0-alpine` / `latest-alpine` | Alpine index `sha256:c55ed2f274e1329e0feffe1a5055bdf5859e5c16fc033bde7b61d59e173582e9`, linux/amd64 `sha256:adaa142df825e1532a799f57004d969fb2899a41d6c2b768ed06c6ded1099007` |
+| `6.10.1` / `6.10.1-debian` / `latest` / `latest-debian` | Debian index `sha256:fe8451208cea28fc7cd2953d289a39620379e9e762ca8e50563de2c53a0ec9b5`, linux/amd64 `sha256:9e3fa55713747600a8088912d9fd92366eeaf63e01902c9de3d550a0edde58a6` |
+| `6.10.1-alpine` / `latest-alpine` | Alpine index `sha256:a308e264ec008c21018fc4e37434dd50f6ebcc0f744eabfae2051763ab8ed1be`, linux/amd64 `sha256:583bc61a4b9a02d9ab55f4c33f3f8d8c4e22f36426c738d15d2e2d249f96659c` |
+| `6.8.0` / `6.8.0-debian` | Previous Debian index `sha256:7cc290f88b68cd9ed902019b3ad4ca24334fddd5e65007c1724f4d4d5af81a0b`, linux/amd64 `sha256:3ed6d8dcbb08abf82e563630f2c1218cf0e8f33bb883ed46770e147113af48b0` |
+| `6.8.0-alpine` | Previous Alpine index `sha256:c55ed2f274e1329e0feffe1a5055bdf5859e5c16fc033bde7b61d59e173582e9`, linux/amd64 `sha256:adaa142df825e1532a799f57004d969fb2899a41d6c2b768ed06c6ded1099007` |
 | `5.6.1` / `5.6.1-debian` | Previous Debian index `sha256:8f1c48449167ba92fd2f922a249e65fcc9e58fc81582430cf7ce2d0c49aa24fa` |
 | `5.6.1-alpine` | Previous Alpine index `sha256:a9aac8fa6dd5c9d8c2ab6c0b4f50a58fe42d0b50c13ebf284ef226462dbb79ab` |
 | `5.5.0` / `5.5.0-debian` | Debian index `sha256:5551873fd68cc807611f3feddfdca79c5f73dc8cab87031c8e548cae29e6661a` |
@@ -43,17 +45,17 @@ in production. A monthly rebuild may move `latest` off the SemVer tag — pin
 the digest, not `latest`.
 
 ```bash
-docker pull pirlruc/ci-lint:6.8.0
+docker pull pirlruc/ci-lint:6.10.1
 # or
-docker pull pirlruc/ci-lint:6.8.0-alpine
-docker pull pirlruc/ci-lint@sha256:8f1c48449167ba92fd2f922a249e65fcc9e58fc81582430cf7ce2d0c49aa24fa
+docker pull pirlruc/ci-lint:6.10.1-alpine
+docker pull pirlruc/ci-lint@sha256:fe8451208cea28fc7cd2953d289a39620379e9e762ca8e50563de2c53a0ec9b5
 ```
 
 ## Quick start
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-lint:6.8.0 \
+  pirlruc/ci-lint:6.10.1 \
   actionlint .github/workflows/*.yml
 ```
 
@@ -66,7 +68,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-lint:6.8.0 \
+  pirlruc/ci-lint:6.10.1 \
   semgrep scan --config auto --error .
 ```
 

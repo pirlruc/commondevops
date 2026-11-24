@@ -16,8 +16,10 @@ runtime — no `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `5.6.1` / `5.6.1-alpine` / `latest` / `latest-alpine` | Alpine index `sha256:e922f8f384919c8c242a6e71bd81b16cfa2b0debdff759b312cb774b4bc4121a` |
-| `5.6.1-debian` / `latest-debian` | Debian index `sha256:c08f61772815421d43c050de0591f85919a701f97269e33a6d2dcb22a493bf90` |
+| `6.10.1` / `6.10.1-alpine` / `latest` / `latest-alpine` | Alpine index `sha256:5c828d2345c1d81d884edc060c7e67859793b0767a3cb20bbd47889c4fbad7ff`, linux/amd64 `sha256:3cd91af0e57827678edbe04d967eb515dde12f9dc532f990829b320f5db07261` |
+| `6.10.1-debian` / `latest-debian` | Debian index `sha256:6e88a5697e8a9663910e22a63d873279947f388b0d968307570362e476bafe7e`, linux/amd64 `sha256:4201515dd229bba26a4b275370f47f4c6ae7df52778408b0277336ee38c810ef` |
+| `5.6.1` / `5.6.1-alpine` | Previous Alpine index `sha256:e922f8f384919c8c242a6e71bd81b16cfa2b0debdff759b312cb774b4bc4121a` |
+| `5.6.1-debian` | Previous Debian index `sha256:c08f61772815421d43c050de0591f85919a701f97269e33a6d2dcb22a493bf90` |
 | `5.5.0` / `5.5.0-alpine` | Alpine index `sha256:5e5485a8634cbfb0f7cc48eae61145b871f2a897439d4199c9229887a86f414e` |
 | `5.5.0-debian` | Debian index `sha256:690fc19c4b533022e24ecbbb553e3ad52e027ad419523b1e904234313d8baaeb` |
 | `5.3.3` / `5.3.3-alpine` | Previous Alpine `sha256:eaa177b7c527ebe54449bb77b39dfd3eb9e7f403c799044a1b6647677a0aba74` |
@@ -41,8 +43,8 @@ libc matters; prefer a digest in production.
 move `latest` off the SemVer tag — pin the digest, not `latest`.
 
 ```bash
-docker pull pirlruc/ci-supply-chain:5.6.1
-docker pull pirlruc/ci-supply-chain:5.6.1-debian
+docker pull pirlruc/ci-supply-chain:6.10.1
+docker pull pirlruc/ci-supply-chain:6.10.1-debian
 docker pull pirlruc/ci-supply-chain@sha256:e922f8f384919c8c242a6e71bd81b16cfa2b0debdff759b312cb774b4bc4121a
 ```
 
@@ -50,7 +52,7 @@ docker pull pirlruc/ci-supply-chain@sha256:e922f8f384919c8c242a6e71bd81b16cfa2b0
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-supply-chain:5.6.1 \
+  pirlruc/ci-supply-chain:6.10.1 \
   syft . -o spdx-json
 ```
 
@@ -63,7 +65,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-supply-chain:5.6.1 \
+  pirlruc/ci-supply-chain:6.10.1 \
   trivy fs --scanners vuln --severity HIGH,CRITICAL .
 ```
 

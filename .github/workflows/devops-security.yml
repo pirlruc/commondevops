@@ -75,7 +75,7 @@ jobs:
       packages: read
     uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@ae9dbee9e4537bd3a0b533de3bad011cb44b201e
     with:
-      image: ghcr.io/pirlruc/ci-lint:6.8.0@sha256:3ed6d8dcbb08abf82e563630f2c1218cf0e8f33bb883ed46770e147113af48b0
+      image: ghcr.io/pirlruc/ci-lint:6.10.1@sha256:9e3fa55713747600a8088912d9fd92366eeaf63e01902c9de3d550a0edde58a6
       scripts_ref: ae9dbee9e4537bd3a0b533de3bad011cb44b201e
       pkg_types: library
       ignorefile: docker/ci-lint/.trivyignore.yaml
@@ -94,7 +94,7 @@ jobs:
       packages: read
     uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@ae9dbee9e4537bd3a0b533de3bad011cb44b201e # 6.8.0
     with:
-      image: ghcr.io/pirlruc/ci-lint:6.8.0-alpine@sha256:adaa142df825e1532a799f57004d969fb2899a41d6c2b768ed06c6ded1099007
+      image: ghcr.io/pirlruc/ci-lint:6.10.1-alpine@sha256:583bc61a4b9a02d9ab55f4c33f3f8d8c4e22f36426c738d15d2e2d249f96659c
       scripts_ref: ae9dbee9e4537bd3a0b533de3bad011cb44b201e
       pkg_types: library
       ignorefile: docker/ci-lint/.trivyignore.yaml
@@ -113,7 +113,7 @@ jobs:
       packages: read
     uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@ae9dbee9e4537bd3a0b533de3bad011cb44b201e
     with:
-      image: ghcr.io/pirlruc/ci-supply-chain:6.8.0@sha256:07518afbf12aa3e2aeeb1e220e2dcb3a633e2d8c1583a60612f30855970a1008
+      image: ghcr.io/pirlruc/ci-supply-chain:6.10.1@sha256:3cd91af0e57827678edbe04d967eb515dde12f9dc532f990829b320f5db07261
       scripts_ref: ae9dbee9e4537bd3a0b533de3bad011cb44b201e
       pkg_types: library
       ignorefile: docker/ci-supply-chain/.trivyignore.yaml
@@ -132,7 +132,7 @@ jobs:
       packages: read
     uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@ae9dbee9e4537bd3a0b533de3bad011cb44b201e # 6.8.0
     with:
-      image: ghcr.io/pirlruc/ci-supply-chain:6.8.0-debian@sha256:cceea28e7719138294d11396fa3b9ebdb078d5997de6b4454b9e3f14e33d5133
+      image: ghcr.io/pirlruc/ci-supply-chain:6.10.1-debian@sha256:4201515dd229bba26a4b275370f47f4c6ae7df52778408b0277336ee38c810ef
       scripts_ref: ae9dbee9e4537bd3a0b533de3bad011cb44b201e
       pkg_types: library
       ignorefile: docker/ci-supply-chain/.trivyignore.yaml
@@ -151,7 +151,7 @@ jobs:
       packages: read
     uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@ae9dbee9e4537bd3a0b533de3bad011cb44b201e
     with:
-      image: ghcr.io/pirlruc/ci-iac:6.8.0@sha256:2587b50fbec0c68bf19ae56cf4f7ea07b2af49a3db3472c885678f927c1ba2b6
+      image: ghcr.io/pirlruc/ci-iac:6.10.1@sha256:828cbe098f1f90347a2702ad08dc21aa7d47e60e31084dcc290ece80e660f636
       scripts_ref: ae9dbee9e4537bd3a0b533de3bad011cb44b201e
       pkg_types: library
       ignorefile: docker/ci-iac/.trivyignore.yaml
@@ -172,7 +172,7 @@ jobs:
       packages: read
     uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@ae9dbee9e4537bd3a0b533de3bad011cb44b201e # 6.8.0
     with:
-      image: ghcr.io/pirlruc/ci-lint:6.8.0@sha256:3ed6d8dcbb08abf82e563630f2c1218cf0e8f33bb883ed46770e147113af48b0
+      image: ghcr.io/pirlruc/ci-lint:6.10.1@sha256:9e3fa55713747600a8088912d9fd92366eeaf63e01902c9de3d550a0edde58a6
       scripts_ref: ae9dbee9e4537bd3a0b533de3bad011cb44b201e
       pkg_types: os,library
       ignorefile: none
@@ -191,7 +191,7 @@ jobs:
       packages: read
     uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@ae9dbee9e4537bd3a0b533de3bad011cb44b201e # 6.8.0
     with:
-      image: ghcr.io/pirlruc/ci-lint:6.8.0-alpine@sha256:adaa142df825e1532a799f57004d969fb2899a41d6c2b768ed06c6ded1099007
+      image: ghcr.io/pirlruc/ci-lint:6.10.1-alpine@sha256:583bc61a4b9a02d9ab55f4c33f3f8d8c4e22f36426c738d15d2e2d249f96659c
       scripts_ref: ae9dbee9e4537bd3a0b533de3bad011cb44b201e
       pkg_types: os,library
       ignorefile: none
@@ -210,7 +210,7 @@ jobs:
       packages: read
     uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@ae9dbee9e4537bd3a0b533de3bad011cb44b201e # 6.8.0
     with:
-      image: ghcr.io/pirlruc/ci-supply-chain:6.8.0@sha256:07518afbf12aa3e2aeeb1e220e2dcb3a633e2d8c1583a60612f30855970a1008
+      image: ghcr.io/pirlruc/ci-supply-chain:6.10.1@sha256:3cd91af0e57827678edbe04d967eb515dde12f9dc532f990829b320f5db07261
       scripts_ref: ae9dbee9e4537bd3a0b533de3bad011cb44b201e
       pkg_types: os,library
       ignorefile: none
@@ -229,7 +229,7 @@ jobs:
       packages: read
     uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@ae9dbee9e4537bd3a0b533de3bad011cb44b201e # 6.8.0
     with:
-      image: ghcr.io/pirlruc/ci-supply-chain:6.8.0-debian@sha256:cceea28e7719138294d11396fa3b9ebdb078d5997de6b4454b9e3f14e33d5133
+      image: ghcr.io/pirlruc/ci-supply-chain:6.10.1-debian@sha256:4201515dd229bba26a4b275370f47f4c6ae7df52778408b0277336ee38c810ef
       scripts_ref: ae9dbee9e4537bd3a0b533de3bad011cb44b201e
       pkg_types: os,library
       ignorefile: none
@@ -248,7 +248,7 @@ jobs:
       packages: read
     uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@ae9dbee9e4537bd3a0b533de3bad011cb44b201e # 6.8.0
     with:
-      image: ghcr.io/pirlruc/ci-iac:6.8.0@sha256:2587b50fbec0c68bf19ae56cf4f7ea07b2af49a3db3472c885678f927c1ba2b6
+      image: ghcr.io/pirlruc/ci-iac:6.10.1@sha256:828cbe098f1f90347a2702ad08dc21aa7d47e60e31084dcc290ece80e660f636
       scripts_ref: ae9dbee9e4537bd3a0b533de3bad011cb44b201e
       pkg_types: os,library
       ignorefile: none

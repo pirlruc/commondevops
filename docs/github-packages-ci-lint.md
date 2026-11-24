@@ -16,8 +16,10 @@ and semgrep. Not a product runtime — no `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `5.6.1` / `5.6.1-debian` / `latest` / `latest-debian` | Debian index `sha256:8f1c48449167ba92fd2f922a249e65fcc9e58fc81582430cf7ce2d0c49aa24fa` |
-| `5.6.1-alpine` / `latest-alpine` | Alpine index `sha256:a9aac8fa6dd5c9d8c2ab6c0b4f50a58fe42d0b50c13ebf284ef226462dbb79ab` |
+| `6.10.1` / `6.10.1-debian` / `latest` / `latest-debian` | Debian index `sha256:fe8451208cea28fc7cd2953d289a39620379e9e762ca8e50563de2c53a0ec9b5`, linux/amd64 `sha256:9e3fa55713747600a8088912d9fd92366eeaf63e01902c9de3d550a0edde58a6` |
+| `6.10.1-alpine` / `latest-alpine` | Alpine index `sha256:a308e264ec008c21018fc4e37434dd50f6ebcc0f744eabfae2051763ab8ed1be`, linux/amd64 `sha256:583bc61a4b9a02d9ab55f4c33f3f8d8c4e22f36426c738d15d2e2d249f96659c` |
+| `5.6.1` / `5.6.1-debian` | Previous Debian index `sha256:8f1c48449167ba92fd2f922a249e65fcc9e58fc81582430cf7ce2d0c49aa24fa` |
+| `5.6.1-alpine` | Previous Alpine index `sha256:a9aac8fa6dd5c9d8c2ab6c0b4f50a58fe42d0b50c13ebf284ef226462dbb79ab` |
 | `5.5.0` / `5.5.0-debian` | Debian index `sha256:5551873fd68cc807611f3feddfdca79c5f73dc8cab87031c8e548cae29e6661a` |
 | `5.5.0-alpine` | Alpine index `sha256:8234f7bf2f905dec59e7a63625a8ad58d8105e2b33e09d704757d2a1ef0af842` |
 | `5.3.3` / `5.3.3-debian` | Previous Debian `sha256:86283d1f23d30452dfef2a6032917668db7a42040a33156834ae4b75d9909a3b` |
@@ -45,14 +47,14 @@ the digest, not `latest`.
 If the package is public, anonymous pulls work:
 
 ```bash
-docker pull ghcr.io/pirlruc/ci-lint:5.6.1
+docker pull ghcr.io/pirlruc/ci-lint:6.10.1
 ```
 
 If the package is private, authenticate with a PAT that has `read:packages`:
 
 ```bash
 echo "$CR_PAT" | docker login ghcr.io -u USERNAME --password-stdin
-docker pull ghcr.io/pirlruc/ci-lint:5.6.1
+docker pull ghcr.io/pirlruc/ci-lint:6.10.1
 # or
 docker pull ghcr.io/pirlruc/ci-lint@sha256:8f1c48449167ba92fd2f922a249e65fcc9e58fc81582430cf7ce2d0c49aa24fa
 ```
@@ -80,7 +82,7 @@ Grant the package **Actions** Read access for the calling repository when using
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  ghcr.io/pirlruc/ci-lint:5.6.1 \
+  ghcr.io/pirlruc/ci-lint:6.10.1 \
   actionlint .github/workflows/*.yml
 ```
 
@@ -93,7 +95,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  ghcr.io/pirlruc/ci-lint:5.6.1 \
+  ghcr.io/pirlruc/ci-lint:6.10.1 \
   semgrep scan --config auto --error .
 ```
 

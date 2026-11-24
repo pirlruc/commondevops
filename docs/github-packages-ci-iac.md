@@ -8,7 +8,7 @@ age, and ansible-lint. The same digest is published to Docker Hub as
 Pull with a token that has `read:packages` on this private package:
 
 ```bash
-docker pull ghcr.io/pirlruc/ci-iac:5.6.1
+docker pull ghcr.io/pirlruc/ci-iac:6.10.1
 ```
 
 Pin the digest. `latest` moves on the monthly rebuild.

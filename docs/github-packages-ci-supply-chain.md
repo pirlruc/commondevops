@@ -16,8 +16,10 @@ runtime — no `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `6.8.0` / `6.8.0-alpine` / `latest` / `latest-alpine` | Alpine index `sha256:dde94df82c06621a1f4616fbee584f93ad2fd178a3ab90e1ae241fe65e61d7cc`, linux/amd64 `sha256:07518afbf12aa3e2aeeb1e220e2dcb3a633e2d8c1583a60612f30855970a1008` |
-| `6.8.0-debian` / `latest-debian` | Debian index `sha256:7e735970b8f048101e6ff7a02bf507ca930f87b69786a7178d2ec6820f9fb01f`, linux/amd64 `sha256:cceea28e7719138294d11396fa3b9ebdb078d5997de6b4454b9e3f14e33d5133` |
+| `6.10.1` / `6.10.1-alpine` / `latest` / `latest-alpine` | Alpine index `sha256:5c828d2345c1d81d884edc060c7e67859793b0767a3cb20bbd47889c4fbad7ff`, linux/amd64 `sha256:3cd91af0e57827678edbe04d967eb515dde12f9dc532f990829b320f5db07261` |
+| `6.10.1-debian` / `latest-debian` | Debian index `sha256:6e88a5697e8a9663910e22a63d873279947f388b0d968307570362e476bafe7e`, linux/amd64 `sha256:4201515dd229bba26a4b275370f47f4c6ae7df52778408b0277336ee38c810ef` |
+| `6.8.0` / `6.8.0-alpine` | Previous Alpine index `sha256:dde94df82c06621a1f4616fbee584f93ad2fd178a3ab90e1ae241fe65e61d7cc`, linux/amd64 `sha256:07518afbf12aa3e2aeeb1e220e2dcb3a633e2d8c1583a60612f30855970a1008` |
+| `6.8.0-debian` | Previous Debian index `sha256:7e735970b8f048101e6ff7a02bf507ca930f87b69786a7178d2ec6820f9fb01f`, linux/amd64 `sha256:cceea28e7719138294d11396fa3b9ebdb078d5997de6b4454b9e3f14e33d5133` |
 | `5.6.1` / `5.6.1-alpine` | Previous Alpine index `sha256:e922f8f384919c8c242a6e71bd81b16cfa2b0debdff759b312cb774b4bc4121a` |
 | `5.6.1-debian` | Previous Debian index `sha256:c08f61772815421d43c050de0591f85919a701f97269e33a6d2dcb22a493bf90` |
 | `5.5.0` / `5.5.0-alpine` | Alpine index `sha256:5e5485a8634cbfb0f7cc48eae61145b871f2a897439d4199c9229887a86f414e` |
@@ -47,14 +49,14 @@ move `latest` off the SemVer tag — pin the digest, not `latest`.
 If the package is public, anonymous pulls work:
 
 ```bash
-docker pull ghcr.io/pirlruc/ci-supply-chain:6.8.0
+docker pull ghcr.io/pirlruc/ci-supply-chain:6.10.1
 ```
 
 If the package is private, authenticate with a PAT that has `read:packages`:
 
 ```bash
 echo "$CR_PAT" | docker login ghcr.io -u USERNAME --password-stdin
-docker pull ghcr.io/pirlruc/ci-supply-chain:6.8.0
+docker pull ghcr.io/pirlruc/ci-supply-chain:6.10.1
 # or
 docker pull ghcr.io/pirlruc/ci-supply-chain@sha256:e922f8f384919c8c242a6e71bd81b16cfa2b0debdff759b312cb774b4bc4121a
 ```
@@ -82,7 +84,7 @@ Grant the package **Actions** Read access for the calling repository when using
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  ghcr.io/pirlruc/ci-supply-chain:6.8.0 \
+  ghcr.io/pirlruc/ci-supply-chain:6.10.1 \
   syft . -o spdx-json
 ```
 
@@ -95,7 +97,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  ghcr.io/pirlruc/ci-supply-chain:6.8.0 \
+  ghcr.io/pirlruc/ci-supply-chain:6.10.1 \
   trivy fs --scanners vuln --severity HIGH,CRITICAL .
 ```
 

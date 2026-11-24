@@ -263,7 +263,7 @@ Consumers should not copy `check-ci-docker.sh`. Pin this repo, sparse-checkout
 
 ```sh
 # After checking out pirlruc/commondevops@<sha> into _commondevops/scripts
-COMMONDEVOPS_CI_IMAGE="${MY_CI_IMAGE:-ghcr.io/pirlruc/ci-lint:6.8.0@sha256:3ed6d8dcbb08abf82e563630f2c1218cf0e8f33bb883ed46770e147113af48b0}"
+COMMONDEVOPS_CI_IMAGE="${MY_CI_IMAGE:-ghcr.io/pirlruc/ci-lint:6.10.1@sha256:9e3fa55713747600a8088912d9fd92366eeaf63e01902c9de3d550a0edde58a6}"
 COMMONDEVOPS_DOCKER_STEPS="actionlint shellcheck hadolint zizmor yamllint"
 export COMMONDEVOPS_CI_IMAGE COMMONDEVOPS_DOCKER_STEPS
 sh _commondevops/scripts/check-ci-docker.sh
