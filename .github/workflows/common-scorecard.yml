@@ -63,7 +63,8 @@ jobs:
           results_file: results.sarif
           results_format: sarif
           publish_results: ${{ inputs.publish_results }}
-          repo_token: ${{ secrets.repo_token }}
+          # An empty caller secret must not replace the action's github.token default.
+          repo_token: ${{ secrets.repo_token || github.token }}
 
       - name: Gate — scorecard
         if: always()
@@ -72,6 +73,10 @@ jobs:
           SCORECARD: ${{ steps.scorecard.outcome }}
         run: |
           set -euo pipefail
+          if [[ ! -s results.sarif ]]; then
+            echo "::error::Scorecard produced no SARIF. An empty repo_token overrides the action default."
+            exit 1
+          fi
           if [[ "${SCORECARD}" == "skipped" || "${SCORECARD}" == "cancelled" || "${SCORECARD}" == "success" ]]; then
             echo "All collected gates passed."
             exit 0

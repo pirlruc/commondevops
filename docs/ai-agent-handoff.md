@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | <https://github.com/pirlruc/commondevops> (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
-| **Branch** | `main`. Published tip is **v6.8.0** (`4de58c7449029c2022301c1654d1aa2da9f7bcec`). Guardrails 1.17.0 and scaffold 1.14.0. pytest is hash-locked. semgrep still pins mcp 1.29.0, opentelemetry-api 1.37.0, and wcmatch 8.5.2. |
+| **Branch** | `main`. Published tip is **v6.9.0**. Images stay **6.8.0**. Guardrails 1.17.0 and scaffold 1.14.0. pytest is hash-locked. semgrep still pins mcp 1.29.0, opentelemetry-api 1.37.0, and wcmatch 8.5.2 (CMN-MCP-001). |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
@@ -19,9 +19,8 @@ matching `scripts_ref` + `checkout_token`. `common-doc-verify.yml` /
 `common-scaffold-verify.yml` ship in 4.1.0; older pins do not have them.
 
 Companion: [containerdevops](https://github.com/pirlruc/containerdevops)
-`dd884203c9ffe30e4d4da838cc9e88a888a484a1` (compose GHCR refs from
-`handoff_package` + `digest`; `flavor: latest=false`). Do not pin 5.0.0
-(`f5a3a632…`) — job outputs from the handoff `always()` step were empty.
+**6.7.0** (`f0f9077ced9f79097e7597de1a2e00f8eb42e216`). Callers compose GHCR
+refs from `handoff_package` + `digest`.
 `common-doc-verify.yml` / `common-scaffold-verify.yml` shipped in **4.1.0**
 (`dcd9ca1c4eb8faedba170fef5dbecc61d7b284b3`) and remain. Callers must re-pin
 after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
@@ -63,18 +62,18 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 
 | Component | Ref |
 |-----------|-----|
-| guardrails submodule | tag **1.15.0** → `2d4bb70e95449f6922781716857adeb22badf676` |
-| github-scaffold submodule | tag **1.12.0** → `9c443ea978851768f451b1df2020dd86dfb1a967` |
-| methodologies (links only; not a submodule) | tag **1.9.1** |
+| guardrails submodule | tag **1.17.0** → `9a17ebb269a5ab02899570dd3e40fb72e50ad762` |
+| github-scaffold submodule | tag **1.14.0** → `da8942edf17a0d2736d297c90338fd78b7ec31fb` |
+| methodologies (links only; not a submodule) | tag **1.12.2** |
 | containerdevops (image callers + security rescan) | tag **6.7.0** → `f0f9077ced9f79097e7597de1a2e00f8eb42e216` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
-| `ghcr.io/pirlruc/ci-lint` (debian, unsuffixed) | `5.6.1` index `sha256:8f1c48449167ba92fd2f922a249e65fcc9e58fc81582430cf7ce2d0c49aa24fa`. Actions amd64 `sha256:f9001c4c8726f72107545094237d4fc0592baca023cfa299a532634666d88111`. |
-| `ghcr.io/pirlruc/ci-lint` (alpine) | `5.6.1-alpine` index `sha256:a9aac8fa6dd5c9d8c2ab6c0b4f50a58fe42d0b50c13ebf284ef226462dbb79ab`. Actions amd64 `sha256:207ab77b5ced7d067cb03f7ad6a135a30cf60dfc4a0ed417f61589a7f3d48fc0`. |
-| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `5.6.1` index `sha256:e922f8f384919c8c242a6e71bd81b16cfa2b0debdff759b312cb774b4bc4121a`. Actions amd64 `sha256:7bbd542d5971594f6192da0ed0c49e29fc0c58328333d0920ab3143a2a0e04d3`. |
-| `ghcr.io/pirlruc/ci-supply-chain` (debian) | `5.6.1-debian` index `sha256:c08f61772815421d43c050de0591f85919a701f97269e33a6d2dcb22a493bf90`. Actions amd64 `sha256:dc83deb4465d5989a03b14ccabef46c3f3426231048b962c69b8e434a7200d48`. |
-| `ghcr.io/pirlruc/ci-iac` | `5.6.1` index `sha256:a34500c4c4d873e77763e6a90ca255beca504018c323366b6b2047c47a42a5a4`. Actions amd64 `sha256:a42f9816c45cea97a5164835306abe5b4b535d2164cb177e32889d5175b09930`. |
-| Release (reusables) | **5.4.1** is `d03953476f3d5fa1081a0834d9882007ff26dd91`. **5.4.0** is `76b416c74415d27453836ea50fa037990496686b` |
-| Release (images) | **5.6.1** published the three images. **5.6.2** records those digests and does not republish. **5.6.0** published nothing. |
+| `ghcr.io/pirlruc/ci-lint` (debian, unsuffixed) | `6.8.0` index `sha256:7cc290f88b68cd9ed902019b3ad4ca24334fddd5e65007c1724f4d4d5af81a0b`. Actions amd64 `sha256:3ed6d8dcbb08abf82e563630f2c1218cf0e8f33bb883ed46770e147113af48b0`. |
+| `ghcr.io/pirlruc/ci-lint` (alpine) | `6.8.0-alpine` index `sha256:c55ed2f274e1329e0feffe1a5055bdf5859e5c16fc033bde7b61d59e173582e9`. Actions amd64 `sha256:adaa142df825e1532a799f57004d969fb2899a41d6c2b768ed06c6ded1099007`. |
+| `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `6.8.0` index `sha256:dde94df82c06621a1f4616fbee584f93ad2fd178a3ab90e1ae241fe65e61d7cc`. Actions amd64 `sha256:07518afbf12aa3e2aeeb1e220e2dcb3a633e2d8c1583a60612f30855970a1008`. |
+| `ghcr.io/pirlruc/ci-supply-chain` (debian) | `6.8.0-debian` index `sha256:7e735970b8f048101e6ff7a02bf507ca930f87b69786a7178d2ec6820f9fb01f`. Actions amd64 `sha256:cceea28e7719138294d11396fa3b9ebdb078d5997de6b4454b9e3f14e33d5133`. |
+| `ghcr.io/pirlruc/ci-iac` | `6.8.0` index `sha256:f1cce203fd64702f9528e45e457db1fec4dfd89ae2413a2dae0ea08a96ec586f`. Actions amd64 `sha256:2587b50fbec0c68bf19ae56cf4f7ea07b2af49a3db3472c885678f927c1ba2b6`. |
+| Release (reusables) | **v6.9.0** is this wave. **v6.8.0** is `4de58c7449029c2022301c1654d1aa2da9f7bcec`. |
+| Release (images) | **6.8.0** published the three images. v6.9.0 does not republish. |
 
 ## Local image sizes / posture (2026-08-12, `du -sxm /`)
 
@@ -176,8 +175,9 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Suggested next work
 
-1. Do not tag `5.4.9` for the PATH fix. pixeldive pins `0932c7bf`, which is past **5.4.8**. Job containers that use a public image set `mount_runner_git: false` and `shell: bash`. Tools copied to `~/.local/bin` are appended to `GITHUB_PATH`. `pip install --user` sets `PIP_BREAK_SYSTEM_PACKAGES`. Hub pages still show the 5.3.3 digests on purpose. The 5.4.4 digests live in the GitHub Release.
-2. Hub Overviews update on a push to `main` when `docs/docker-hub*.md` changes, and on `workflow_dispatch`. That calls [container-hub-description](https://github.com/pirlruc/containerdevops/blob/6.3.0/.github/workflows/container-hub-description.yml) and does not republish images. `DOCKERHUB_DESCRIPTION_TOKEN` stays out of image workflows.
+1. CMN-MCP-001 stays open until semgrep allows mcp 1.30.0. Do not recompile the ci-lint lock past that pin.
+2. CMN-OPS-CI-001 is a reusable for the self-CI stack that nodedevops and rustdevops copy. It is not built yet.
+3. Hub Overviews update on a push to `main` when `docs/docker-hub*.md` changes, and on `workflow_dispatch`. That calls containerdevops `container-hub-description` and does not republish images.
 
 ## Recent history
 
@@ -277,6 +277,8 @@ python3 .github/scaffold/scripts/issues-sync.py \
 - 2026-08-12: CMN-012 — re-pin containerdevops, image metadata, Hub/GHCR docs;
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
+
+*Last updated: 2026-11-24 — v6.9.0. Scorecard falls back to github.token. Rescans pin the 6.8.0 images. Posture categories refresh on the default branch.*
 
 *Last updated: 2026-11-23 — v6.8.0. Guardrails 1.17.0. Scaffold 1.14.0. DOCKER-SEC-001 records CVE-2026-115563 until semgrep allows mcp 1.30.0. Review 2027-02-23.*
 
