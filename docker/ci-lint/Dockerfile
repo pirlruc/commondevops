@@ -55,6 +55,7 @@ USER root
 RUN apt-get update \
  && apt-get install -y --no-install-recommends gzip=1.13-1+deb13u1+dhi1 \
  && rm -rf /var/lib/apt/lists/*
+USER 1000
 
 # ---------------------------------------------------------------------------
 # Final image
