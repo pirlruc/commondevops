@@ -31,6 +31,10 @@ commandTests:
     command: "yamllint"
     args: ["--version"]
     exitCode: 0
+  - name: gzip
+    command: "gzip"
+    args: ["--version"]
+    exitCode: 0
   - name: "no setuid or setgid files"
     command: "sh"
     args:

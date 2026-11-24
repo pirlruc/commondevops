@@ -48,6 +48,15 @@ COPY requirements.txt /tmp/requirements.txt
 RUN uv pip install --system --no-cache --require-hashes -r /tmp/requirements.txt \
  && rm -f /tmp/requirements.txt
 
+# gzip donor. The install stays out of the final image so dive does not count
+# the apt indexes. actions/checkout runs tar, and tar execs this binary.
+FROM dhi.io/python:3.13-debian13-dev@sha256:754859ea021c41e7eca2e40401879e1cd4c6bcd90a9446e499585fc79f5b7d34 AS gzip-donor
+USER root
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends gzip=1.13-1+deb13u1+dhi1 \
+ && rm -rf /var/lib/apt/lists/*
+USER 1000
+
 # ---------------------------------------------------------------------------
 # Final image
 # ---------------------------------------------------------------------------
@@ -67,6 +76,7 @@ COPY --from=gitleaks-build /out/gitleaks /usr/local/bin/gitleaks
 COPY --from=hadolint/hadolint:v2.15.1-alpine@sha256:a1d49ae1a4e83c1dbad26b8c1ad7588c8bd1e04f4866b34ad3cac50335198552 \
   /bin/hadolint /usr/local/bin/hadolint
 COPY --from=actionlint-build /out/actionlint /usr/local/bin/actionlint
+COPY --from=gzip-donor /usr/bin/gzip /usr/bin/gzip
 
 # Python packages + console scripts from pybuild (no uv binary in final).
 COPY --from=pybuild /usr/lib/python3.13/site-packages /usr/lib/python3.13/site-packages

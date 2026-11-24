@@ -5,6 +5,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [6.10.1] - 2026-11-24
+
+### Fixed
+
+- ci-lint installs gzip. actions/checkout runs tar, and tar cannot unpack a repository when the job container has no gzip.
+
 ## [6.10.0] - 2026-11-24
 
 ### Added
