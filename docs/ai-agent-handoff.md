@@ -279,7 +279,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-11-24 — v6.11.0 adds common-dco and common-dependabot-metadata. Published tip before that tag is v6.10.2. CMN-IMG-004 stays open.*
+*Last updated: 2026-11-24 — common-codeql.yml takes the languages from the caller. CMN-AGG-001 stays open. Published tip is v6.11.0.*
 
 *Last updated: 2026-11-24 — v6.9.0. Scorecard falls back to github.token. Rescans pin the 6.8.0 images. Posture categories refresh on the default branch.*
 
