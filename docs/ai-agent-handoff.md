@@ -67,7 +67,7 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | methodologies (links only; not a submodule) | tag **1.12.2** |
 | containerdevops (image callers + security rescan) | tag **6.8.0** → `ae9dbee9e4537bd3a0b533de3bad011cb44b201e` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
-| `ghcr.io/pirlruc/ci-lint` (debian, unsuffixed) | `6.8.0` index `sha256:7cc290f88b68cd9ed902019b3ad4ca24334fddd5e65007c1724f4d4d5af81a0b`. Actions amd64 `sha256:3ed6d8dcbb08abf82e563630f2c1218cf0e8f33bb883ed46770e147113af48b0`. |
+| `ghcr.io/pirlruc/ci-lint` (debian, unsuffixed) | `6.10.1` index `sha256:fe8451208cea28fc7cd2953d289a39620379e9e762ca8e50563de2c53a0ec9b5`. Actions amd64 `sha256:9e3fa55713747600a8088912d9fd92366eeaf63e01902c9de3d550a0edde58a6`. |
 | `ghcr.io/pirlruc/ci-lint` (alpine) | `6.8.0-alpine` index `sha256:c55ed2f274e1329e0feffe1a5055bdf5859e5c16fc033bde7b61d59e173582e9`. Actions amd64 `sha256:adaa142df825e1532a799f57004d969fb2899a41d6c2b768ed06c6ded1099007`. |
 | `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `6.8.0` index `sha256:dde94df82c06621a1f4616fbee584f93ad2fd178a3ab90e1ae241fe65e61d7cc`. Actions amd64 `sha256:07518afbf12aa3e2aeeb1e220e2dcb3a633e2d8c1583a60612f30855970a1008`. |
 | `ghcr.io/pirlruc/ci-supply-chain` (debian) | `6.8.0-debian` index `sha256:7e735970b8f048101e6ff7a02bf507ca930f87b69786a7178d2ec6820f9fb01f`. Actions amd64 `sha256:cceea28e7719138294d11396fa3b9ebdb078d5997de6b4454b9e3f14e33d5133`. |
@@ -279,7 +279,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
 
-*Last updated: 2026-11-24 — v6.10.1. ci-lint installs gzip so actions/checkout can unpack. The ops-repo-ci default stays on the 6.8.0 digest until the published digest is written back. CMN-IMG-004 tracks the ci-supply-chain and ci-iac republish.*
+*Last updated: 2026-11-24 — v6.10.2. The job-container default is ci-lint 6.10.1 linux/amd64 `9e3fa557`, which has gzip and bash. CMN-IMG-004 stays open.*
 
 *Last updated: 2026-11-24 — v6.9.0. Scorecard falls back to github.token. Rescans pin the 6.8.0 images. Posture categories refresh on the default branch.*
 

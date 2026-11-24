@@ -5,6 +5,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [6.10.2] - 2026-11-24
+
+### Fixed
+
+- The infra-lint, secrets, and ops-repo-ci job-container defaults are the 6.10.1 Debian digest. That image has gzip, so `actions/checkout` can unpack.
+
 ## [6.10.1] - 2026-11-24
 
 ### Fixed

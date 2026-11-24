@@ -33,7 +33,7 @@ on:
         description: Job container for infra lint and secrets. Debian, because those jobs run bash.
         required: false
         type: string
-        default: ghcr.io/pirlruc/ci-lint@sha256:3ed6d8dcbb08abf82e563630f2c1218cf0e8f33bb883ed46770e147113af48b0
+        default: ghcr.io/pirlruc/ci-lint@sha256:9e3fa55713747600a8088912d9fd92366eeaf63e01902c9de3d550a0edde58a6 # 6.10.1
       mount_runner_git:
         description: Bind-mount the runner git into the job container
         required: false
