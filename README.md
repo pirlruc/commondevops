@@ -53,7 +53,7 @@ to print the UI steps for a package.
 ```yaml
 jobs:
   infra:
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     uses: pirlruc/commondevops/.github/workflows/common-infra-lint.yml@<sha>
     with:
       blocking: true

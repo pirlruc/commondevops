@@ -5,6 +5,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [6.9.0] - 2026-11-24
+
+### Fixed
+
+- Scorecard uses `github.token` when the caller secret is empty. An empty `repo_token` was replacing the action default, and the scan logged that no token was set. A missing SARIF file fails the job.
+- The scheduled rescan reads the published 6.8.0 digests. The 5.6.1 digests still had fixable library CVEs, so the supply-chain and iac rescans failed.
+- Weekly posture jobs upload the image-workflow category names on the default branch.
+
+### Changed
+
+- The README Dependabot example compares `github.event.pull_request.user.login` (CI-024).
+
 ## [6.8.0] - 2026-11-23
 
 ### Fixed

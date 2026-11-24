@@ -2182,3 +2182,82 @@ milestones:
               - The deviation id is DOCKER-SEC-001 and the review date is 2027-02-23
             guardrail_refs:
               - DOCKER-SEC-001
+
+  - name: Published scan refresh
+    status: open
+    epics:
+    - id: CMN-SCORE-001
+      status: open
+      title: Keep Scorecard on a token when the caller secret is empty
+      decision: >-
+        In the context of a public repository, facing an optional
+        repo_token that replaces the action default with an empty
+        string, we decided to fall back to github.token and fail when
+        no SARIF is written, to achieve a scan that authenticates,
+        accepting that a private repository still passes its own PAT.
+      acceptance_criteria:
+      - common-scorecard.yml uses secrets.repo_token or github.token
+      - A missing results.sarif fails the job
+      guardrail_refs:
+      - CI-039
+      tasks:
+      - id: CMN-SCORE-001-T1
+        status: done
+        title: Fall back to github.token and require SARIF
+        instructions:
+          files:
+          - .github/workflows/common-scorecard.yml
+        verification:
+        - rg "github.token" .github/workflows/common-scorecard.yml
+        guardrail_refs:
+        - CI-039
+    - id: CMN-POSTURE-001
+      status: open
+      title: Rescan published images on the categories the default branch already has
+      decision: >-
+        In the context of code scanning on the default branch, facing
+        posture alerts that a tag upload cannot close, we decided a
+        weekly non-blocking rescan of the published 6.8.0 digests with
+        the original category names, to achieve alerts that match the
+        current images, accepting that unfixed base CVEs stay visible.
+      acceptance_criteria:
+      - devops-security.yml pins the 6.8.0 linux/amd64 manifests
+      - Posture jobs use the category names from the image workflows
+      guardrail_refs:
+      - CI-047
+      - DOCKER-SEC-001
+      tasks:
+      - id: CMN-POSTURE-001-T1
+        status: done
+        title: Pin the rescans and add the posture jobs
+        instructions:
+          files:
+          - .github/workflows/devops-security.yml
+        verification:
+        - rg trivy-posture-ci-iac .github/workflows/devops-security.yml
+        guardrail_refs:
+        - CI-047
+    - id: CMN-OPS-CI-001
+      status: open
+      title: One reusable for the self-CI stack copied by language workflow repos
+      decision: >-
+        In the context of a language workflow repository, facing the
+        same infra, pins, docs, secrets, and Scorecard jobs copied into
+        each ci.yml, we decided one reusable workflow, to achieve one
+        pin for that stack, accepting that a caller still passes its
+        own tokens.
+      acceptance_criteria:
+      - A reusable workflow runs infra lint, pin verify, doc verify, secrets, and Scorecard
+      guardrail_refs:
+      - CI-031
+      tasks:
+      - id: CMN-OPS-CI-001-T1
+        status: open
+        title: Add the ops-repo CI reusable
+        instructions:
+          files:
+          - .github/workflows/
+        verification:
+        - The workflow is workflow_call and documents its secrets
+        guardrail_refs:
+        - CI-031
