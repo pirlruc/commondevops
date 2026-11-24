@@ -1,6 +1,6 @@
 #!/bin/sh
 # Local CI parity for commondevops (CI-008).
-# POSIX sh — the default ci-lint image is Alpine and has no bash.
+# POSIX sh. The default ci-lint image is Debian 6.8.0, which has bash.
 #
 # Host PATH tools preferred; missing tools deferred to check-ci-docker.sh.
 # Step bodies live in ci-steps.sh (shared with the Docker path).

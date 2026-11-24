@@ -5,6 +5,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [6.10.0] - 2026-11-24
+
+### Added
+
+- `ops-repo-ci` runs infra lint, pin verify, doc verify, secrets, and Scorecard for a language workflow repository (CMN-OPS-CI-001).
+- `scripts/check-release-digests.py` fails when a workflow pins an older tag than the newest release that published images.
+
+### Fixed
+
+- Blocking rescans use `trivy-ci-lint-debian`, `trivy-ci-lint-alpine`, `trivy-ci-supply-chain-debian`, and `trivy-ci-supply-chain-alpine`, the same categories the image workflows upload (CMN-POSTURE-001).
+- Reusable `container_image` defaults are the published 6.8.0 Debian digests. The 5.6.1 defaults had no bash on the Alpine supply-chain tag and still carried fixable library CVEs (CI-026).
+- `common-release-digests` concurrency is the workflow and the ref (CI-002).
+
+### Changed
+
+- Hub and Packages docs show 6.8.0.
+- `docs/guardrails` is 1.17.1 and `.github/scaffold` is 1.14.2.
+
 ## [6.9.1] - 2026-11-24
 
 ### Changed

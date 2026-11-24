@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | <https://github.com/pirlruc/commondevops> (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
-| **Branch** | `main`. Published tip is **v6.9.1**. Images stay **6.8.0**. Guardrails 1.17.0 and scaffold 1.14.0. pytest is hash-locked. semgrep still pins mcp 1.29.0, opentelemetry-api 1.37.0, and wcmatch 8.5.2 (CMN-MCP-001). |
+| **Branch** | `main`. Published tip is **v6.10.0** after this release. Images stay **6.8.0**. Guardrails 1.17.1 and scaffold 1.14.2. pytest is hash-locked. semgrep still pins mcp 1.29.0, opentelemetry-api 1.37.0, and wcmatch 8.5.2 (CMN-MCP-001). |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
@@ -278,6 +278,8 @@ python3 .github/scaffold/scripts/issues-sync.py \
 - 2026-08-12: CMN-012 — re-pin containerdevops, image metadata, Hub/GHCR docs;
   releases `2.0.2` (prefer over `2.0.1`).
 - 2026-08-11: split ci-base → ci-lint + ci-supply-chain; release `2.0.0`.
+
+*Last updated: 2026-11-24 — v6.10.0. ops-repo-ci is the shared self-CI reusable. Blocking rescans use the image-workflow categories. Reusable defaults are ci-lint and ci-supply-chain 6.8.0 Debian. Guardrails 1.17.1. Scaffold 1.14.2.*
 
 *Last updated: 2026-11-24 — v6.9.0. Scorecard falls back to github.token. Rescans pin the 6.8.0 images. Posture categories refresh on the default branch.*
 
