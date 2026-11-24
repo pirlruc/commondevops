@@ -45,17 +45,17 @@ in production. A monthly rebuild may move `latest` off the SemVer tag — pin
 the digest, not `latest`.
 
 ```bash
-docker pull pirlruc/ci-lint:6.8.0
+docker pull pirlruc/ci-lint:6.10.1
 # or
-docker pull pirlruc/ci-lint:6.8.0-alpine
-docker pull pirlruc/ci-lint@sha256:8f1c48449167ba92fd2f922a249e65fcc9e58fc81582430cf7ce2d0c49aa24fa
+docker pull pirlruc/ci-lint:6.10.1-alpine
+docker pull pirlruc/ci-lint@sha256:fe8451208cea28fc7cd2953d289a39620379e9e762ca8e50563de2c53a0ec9b5
 ```
 
 ## Quick start
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-lint:6.8.0 \
+  pirlruc/ci-lint:6.10.1 \
   actionlint .github/workflows/*.yml
 ```
 
@@ -68,7 +68,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  pirlruc/ci-lint:6.8.0 \
+  pirlruc/ci-lint:6.10.1 \
   semgrep scan --config auto --error .
 ```
 

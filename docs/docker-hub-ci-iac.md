@@ -17,7 +17,8 @@ secrets scanning stay on `ci-lint`.
 
 | Tag | Meaning |
 |-----|---------|
-| `5.6.1` / `latest` | Debian index `sha256:a34500c4c4d873e77763e6a90ca255beca504018c323366b6b2047c47a42a5a4` |
+| `6.10.1` / `latest` | Debian index `sha256:5f5bbed1cd03e6b8e219fe79d16f3571aebf3959157faefba46c6c0d4199535e`, linux/amd64 `sha256:828cbe098f1f90347a2702ad08dc21aa7d47e60e31084dcc290ece80e660f636` |
+| `5.6.1` | Previous Debian index `sha256:a34500c4c4d873e77763e6a90ca255beca504018c323366b6b2047c47a42a5a4` |
 | `5.5.0` | Debian index `sha256:b4ca9d6c75c4e7c0b6905f0125dd69910d2a92996f27dd2442dd815e4feaac5f` |
 | `5.4.1` | Previous Debian `sha256:3a25e6c307ebe0e06466e3026b7ed91b1c5a7b24d45382eb986c578fa4cd0a03` |
 | `5.4.0` | Previous Debian `sha256:c3a4d978d820027737a388357a778d99075625667a838b20567747012f6205c0` |
@@ -26,7 +27,7 @@ secrets scanning stay on `ci-lint`.
 Pin the digest. A monthly rebuild can move `latest`.
 
 ```bash
-docker pull pirlruc/ci-iac@sha256:a34500c4c4d873e77763e6a90ca255beca504018c323366b6b2047c47a42a5a4
+docker pull pirlruc/ci-iac@sha256:5f5bbed1cd03e6b8e219fe79d16f3571aebf3959157faefba46c6c0d4199535e
 ```
 
 ## Tools
