@@ -20,7 +20,7 @@ on:
 permissions: {}
 
 concurrency:
-  group: release-digests-${{ github.run_id }}
+  group: release-digests-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:

@@ -1,0 +1,153 @@
+name: Ops Repo CI (reusable)
+
+# CMN-OPS-CI-001. One caller for the self-CI stack a language workflow
+# repository otherwise copies: infra lint, pin verify, doc verify,
+# secrets/SAST, and Scorecard. Actionlint runs inside infra lint.
+#
+# Secrets:
+#   repo_token — optional Scorecard token. Empty falls back to github.token.
+
+on:
+  workflow_call:
+    inputs:
+      scripts_ref:
+        description: Must equal the caller's uses pin (CI-034)
+        required: true
+        type: string
+      blocking:
+        description: Fail infra, docs, and secrets jobs on gate errors
+        required: false
+        type: boolean
+        default: true
+      shell_scripts:
+        description: Shell scripts for infra lint and doc verify
+        required: false
+        type: string
+        default: scripts/*.sh
+      run_shfmt:
+        description: Run shfmt from infra lint
+        required: false
+        type: boolean
+        default: true
+      container_image:
+        description: Job container for infra lint and secrets. Debian, because those jobs run bash.
+        required: false
+        type: string
+        default: ghcr.io/pirlruc/ci-lint@sha256:3ed6d8dcbb08abf82e563630f2c1218cf0e8f33bb883ed46770e147113af48b0
+      mount_runner_git:
+        description: Bind-mount the runner git into the job container
+        required: false
+        type: boolean
+        default: false
+      install_runner_packages:
+        description: Install runner packages before secrets/SAST
+        required: false
+        type: boolean
+        default: false
+      run_scorecard:
+        description: Run Scorecard
+        required: false
+        type: boolean
+        default: true
+      scorecard_blocking:
+        description: Fail the Scorecard job on findings
+        required: false
+        type: boolean
+        default: false
+      run_secrets:
+        description: Run secrets and SAST
+        required: false
+        type: boolean
+        default: true
+      check_published_digests:
+        description: Fail when a workflow pins an older tag than the newest release that published images
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      repo_token:
+        required: false
+
+permissions: {}
+
+# github.workflow is the caller name, so this cancels an older run of the
+# same caller on the same ref (CI-002). It does not use the run id.
+concurrency:
+  group: ops-repo-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  infra-lint:
+    permissions:
+      contents: read
+      packages: read
+    uses: ./.github/workflows/common-infra-lint.yml
+    with:
+      blocking: ${{ inputs.blocking }}
+      run_shfmt: ${{ inputs.run_shfmt }}
+      shell_scripts: ${{ inputs.shell_scripts }}
+      scripts_ref: ${{ inputs.scripts_ref }}
+      container_image: ${{ inputs.container_image }}
+      mount_runner_git: ${{ inputs.mount_runner_git }}
+
+  pins:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/common-pins-verify.yml
+    with:
+      scripts_ref: ${{ inputs.scripts_ref }}
+
+  docs:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/common-doc-verify.yml
+    with:
+      blocking: ${{ inputs.blocking }}
+      shell_scripts: ${{ inputs.shell_scripts }}
+      run_link_lint: true
+      run_hygiene: true
+      scripts_ref: ${{ inputs.scripts_ref }}
+
+  secrets-sast:
+    if: inputs.run_secrets && github.event.pull_request.user.login != 'dependabot[bot]'
+    permissions:
+      contents: read
+      packages: read
+    uses: ./.github/workflows/common-secrets-sast.yml
+    with:
+      blocking: ${{ inputs.blocking }}
+      working_directory: .
+      scripts_ref: ${{ inputs.scripts_ref }}
+      container_image: ${{ inputs.container_image }}
+      install_runner_packages: ${{ inputs.install_runner_packages }}
+      mount_runner_git: ${{ inputs.mount_runner_git }}
+
+  scorecard:
+    if: >-
+      inputs.run_scorecard &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      github.event.repository.fork == false
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+      id-token: write
+    uses: ./.github/workflows/common-scorecard.yml
+    with:
+      blocking: ${{ inputs.scorecard_blocking }}
+      publish_results: false
+    secrets:
+      repo_token: ${{ secrets.repo_token }}
+
+  published-digests:
+    if: inputs.check_published_digests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Compare workflow pins to the newest published image tags
+        run: python3 scripts/check-release-digests.py

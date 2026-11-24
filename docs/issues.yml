@@ -2187,7 +2187,7 @@ milestones:
     status: open
     epics:
     - id: CMN-SCORE-001
-      status: open
+      status: done
       title: Keep Scorecard on a token when the caller secret is empty
       decision: >-
         In the context of a public repository, facing an optional
@@ -2212,7 +2212,7 @@ milestones:
         guardrail_refs:
         - CI-039
     - id: CMN-POSTURE-001
-      status: open
+      status: done
       title: Rescan published images on the categories the default branch already has
       decision: >-
         In the context of code scanning on the default branch, facing
@@ -2222,7 +2222,7 @@ milestones:
         current images, accepting that unfixed base CVEs stay visible.
       acceptance_criteria:
       - devops-security.yml pins the 6.8.0 linux/amd64 manifests
-      - Posture jobs use the category names from the image workflows
+      - Blocking and posture jobs use the category names from the image workflows
       guardrail_refs:
       - CI-047
       - DOCKER-SEC-001
@@ -2238,7 +2238,7 @@ milestones:
         guardrail_refs:
         - CI-047
     - id: CMN-OPS-CI-001
-      status: open
+      status: done
       title: One reusable for the self-CI stack copied by language workflow repos
       decision: >-
         In the context of a language workflow repository, facing the
@@ -2252,7 +2252,7 @@ milestones:
       - CI-031
       tasks:
       - id: CMN-OPS-CI-001-T1
-        status: open
+        status: done
         title: Add the ops-repo CI reusable
         instructions:
           files:

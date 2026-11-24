@@ -16,8 +16,10 @@ runtime — no `HEALTHCHECK`.
 
 | Tag | Meaning |
 |-----|---------|
-| `5.6.1` / `5.6.1-alpine` / `latest` / `latest-alpine` | Alpine index `sha256:e922f8f384919c8c242a6e71bd81b16cfa2b0debdff759b312cb774b4bc4121a` |
-| `5.6.1-debian` / `latest-debian` | Debian index `sha256:c08f61772815421d43c050de0591f85919a701f97269e33a6d2dcb22a493bf90` |
+| `6.8.0` / `6.8.0-alpine` / `latest` / `latest-alpine` | Alpine index `sha256:dde94df82c06621a1f4616fbee584f93ad2fd178a3ab90e1ae241fe65e61d7cc`, linux/amd64 `sha256:07518afbf12aa3e2aeeb1e220e2dcb3a633e2d8c1583a60612f30855970a1008` |
+| `6.8.0-debian` / `latest-debian` | Debian index `sha256:7e735970b8f048101e6ff7a02bf507ca930f87b69786a7178d2ec6820f9fb01f`, linux/amd64 `sha256:cceea28e7719138294d11396fa3b9ebdb078d5997de6b4454b9e3f14e33d5133` |
+| `5.6.1` / `5.6.1-alpine` | Previous Alpine index `sha256:e922f8f384919c8c242a6e71bd81b16cfa2b0debdff759b312cb774b4bc4121a` |
+| `5.6.1-debian` | Previous Debian index `sha256:c08f61772815421d43c050de0591f85919a701f97269e33a6d2dcb22a493bf90` |
 | `5.5.0` / `5.5.0-alpine` | Alpine index `sha256:5e5485a8634cbfb0f7cc48eae61145b871f2a897439d4199c9229887a86f414e` |
 | `5.5.0-debian` | Debian index `sha256:690fc19c4b533022e24ecbbb553e3ad52e027ad419523b1e904234313d8baaeb` |
 | `5.3.3` / `5.3.3-alpine` | Previous Alpine `sha256:eaa177b7c527ebe54449bb77b39dfd3eb9e7f403c799044a1b6647677a0aba74` |
@@ -45,14 +47,14 @@ move `latest` off the SemVer tag — pin the digest, not `latest`.
 If the package is public, anonymous pulls work:
 
 ```bash
-docker pull ghcr.io/pirlruc/ci-supply-chain:5.6.1
+docker pull ghcr.io/pirlruc/ci-supply-chain:6.8.0
 ```
 
 If the package is private, authenticate with a PAT that has `read:packages`:
 
 ```bash
 echo "$CR_PAT" | docker login ghcr.io -u USERNAME --password-stdin
-docker pull ghcr.io/pirlruc/ci-supply-chain:5.6.1
+docker pull ghcr.io/pirlruc/ci-supply-chain:6.8.0
 # or
 docker pull ghcr.io/pirlruc/ci-supply-chain@sha256:e922f8f384919c8c242a6e71bd81b16cfa2b0debdff759b312cb774b4bc4121a
 ```
@@ -64,7 +66,7 @@ jobs:
   supply-chain:
     runs-on: ubuntu-24.04
     container:
-      image: ghcr.io/pirlruc/ci-supply-chain@sha256:dc83deb4465d5989a03b14ccabef46c3f3426231048b962c69b8e434a7200d48
+      image: ghcr.io/pirlruc/ci-supply-chain@sha256:cceea28e7719138294d11396fa3b9ebdb078d5997de6b4454b9e3f14e33d5133
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -80,7 +82,7 @@ Grant the package **Actions** Read access for the calling repository when using
 
 ```bash
 docker run --rm -v "$PWD:/workspace:ro" -w /workspace \
-  ghcr.io/pirlruc/ci-supply-chain:5.6.1 \
+  ghcr.io/pirlruc/ci-supply-chain:6.8.0 \
   syft . -o spdx-json
 ```
 
@@ -93,7 +95,7 @@ docker run --rm \
   --security-opt no-new-privileges \
   --tmpfs /tmp:rw,noexec,nosuid,size=256m \
   -v "$PWD:/workspace:ro" -w /workspace \
-  ghcr.io/pirlruc/ci-supply-chain:5.6.1 \
+  ghcr.io/pirlruc/ci-supply-chain:6.8.0 \
   trivy fs --scanners vuln --severity HIGH,CRITICAL .
 ```
 

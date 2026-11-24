@@ -80,7 +80,26 @@ jobs:
       pkg_types: library
       ignorefile: docker/ci-lint/.trivyignore.yaml
       results_artifact: published-ci-lint-scan
-      sarif_category: trivy-ci-lint
+      sarif_category: trivy-ci-lint-debian
+      blocking: true
+    secrets:
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  published-ci-lint-rescan-alpine:
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+      packages: read
+    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@ae9dbee9e4537bd3a0b533de3bad011cb44b201e # 6.8.0
+    with:
+      image: ghcr.io/pirlruc/ci-lint:6.8.0-alpine@sha256:adaa142df825e1532a799f57004d969fb2899a41d6c2b768ed06c6ded1099007
+      scripts_ref: ae9dbee9e4537bd3a0b533de3bad011cb44b201e
+      pkg_types: library
+      ignorefile: docker/ci-lint/.trivyignore.yaml
+      results_artifact: published-ci-lint-scan-alpine
+      sarif_category: trivy-ci-lint-alpine
       blocking: true
     secrets:
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
@@ -99,7 +118,26 @@ jobs:
       pkg_types: library
       ignorefile: docker/ci-supply-chain/.trivyignore.yaml
       results_artifact: published-ci-supply-chain-scan
-      sarif_category: trivy-ci-supply-chain
+      sarif_category: trivy-ci-supply-chain-alpine
+      blocking: true
+    secrets:
+      scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
+
+  published-ci-supply-chain-rescan-debian:
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+      packages: read
+    uses: pirlruc/containerdevops/.github/workflows/container-published-rescan.yml@ae9dbee9e4537bd3a0b533de3bad011cb44b201e # 6.8.0
+    with:
+      image: ghcr.io/pirlruc/ci-supply-chain:6.8.0-debian@sha256:cceea28e7719138294d11396fa3b9ebdb078d5997de6b4454b9e3f14e33d5133
+      scripts_ref: ae9dbee9e4537bd3a0b533de3bad011cb44b201e
+      pkg_types: library
+      ignorefile: docker/ci-supply-chain/.trivyignore.yaml
+      results_artifact: published-ci-supply-chain-scan-debian
+      sarif_category: trivy-ci-supply-chain-debian
       blocking: true
     secrets:
       scripts_token: ${{ secrets.CONTAINERDEVOPS_READ_TOKEN }}
