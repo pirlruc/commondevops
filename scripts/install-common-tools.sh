@@ -9,6 +9,8 @@
 #
 # Tool versions are NOT Dependabot-managed. Bump manually with matching *_SHA256.
 set -euo pipefail
+# shellcheck disable=SC1091
+source "$(dirname "$0")/fetch-verified.sh"
 DEST="${HOME}/.local/bin"
 mkdir -p "${DEST}"
 export PATH="${DEST}:${PATH}"
@@ -43,44 +45,6 @@ SHFMT_SHA256="${SHFMT_SHA256:-1904ec6bac715c1d05cd7f6612eec8f67a625c3749cb327e5b
 # https://github.com/lycheeverse/lychee/releases
 LYCHEE_VERSION="${LYCHEE_VERSION:-0.18.1}"
 LYCHEE_SHA256="${LYCHEE_SHA256:-0d48569e2dc11c1917fa98321dfd7aa675fba03b79f41e8e74afa3223e30d379}"
-
-verify_sha256() {
-	local file="$1"
-	local expected="$2"
-	local actual
-	actual="$(sha256sum "${file}" | awk '{print $1}')"
-	if [[ "${actual}" != "${expected}" ]]; then
-		echo "error: SHA256 mismatch for ${file}" >&2
-		echo "  expected: ${expected}" >&2
-		echo "  actual:   ${actual}" >&2
-		return 1
-	fi
-}
-export -f verify_sha256
-
-# A transport failure is retried. A checksum mismatch is not: the bytes are wrong.
-fetch_verified() {
-	local url="$1"
-	local dest="$2"
-	local expected="$3"
-	local attempt
-	for attempt in 1 2 3; do
-		if curl --retry 2 --retry-delay 2 --retry-all-errors --fail --silent --show-error --location --output "${dest}" "${url}"; then
-			if verify_sha256 "${dest}" "${expected}"; then
-				return 0
-			fi
-			echo "error: checksum mismatch is not a transport failure; not retrying ${url}" >&2
-			rm -f "${dest}"
-			return 1
-		fi
-		echo "error: download failed (attempt ${attempt}) for ${url}" >&2
-		rm -f "${dest}"
-		sleep $((attempt * 2))
-	done
-	echo "error: download failed after 3 attempts: ${url}" >&2
-	return 1
-}
-export -f fetch_verified
 
 should_install() {
 	local name="$1"

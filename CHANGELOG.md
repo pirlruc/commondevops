@@ -5,6 +5,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [6.9.1] - 2026-11-24
+
+### Changed
+
+- Image workflows and the scheduled rescan pin containerdevops 6.8.0.
+- `scripts/fetch-verified.sh` is the shared download helper. `install-common-tools.sh` sources it (CI-054).
+
 ## [6.9.0] - 2026-11-24
 
 ### Fixed

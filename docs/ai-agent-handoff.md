@@ -6,7 +6,7 @@
 |-------|-------|
 | **Folder** | `ops/commondevops/` |
 | **Remote** | <https://github.com/pirlruc/commondevops> (public). Image publishes are finished. The owner can set the repo private. Do not change visibility from an agent session. |
-| **Branch** | `main`. Published tip is **v6.9.0**. Images stay **6.8.0**. Guardrails 1.17.0 and scaffold 1.14.0. pytest is hash-locked. semgrep still pins mcp 1.29.0, opentelemetry-api 1.37.0, and wcmatch 8.5.2 (CMN-MCP-001). |
+| **Branch** | `main`. Published tip is **v6.9.1**. Images stay **6.8.0**. Guardrails 1.17.0 and scaffold 1.14.0. pytest is hash-locked. semgrep still pins mcp 1.29.0, opentelemetry-api 1.37.0, and wcmatch 8.5.2 (CMN-MCP-001). |
 | **Role** | Reusable GitHub Actions for infra lint, secrets/SAST, supply-chain, Scorecard, OpenTofu, SOPS, release + `ci-lint` / `ci-supply-chain` / `ci-iac` images |
 | **Type** | CI infrastructure |
 
@@ -19,7 +19,7 @@ matching `scripts_ref` + `checkout_token`. `common-doc-verify.yml` /
 `common-scaffold-verify.yml` ship in 4.1.0; older pins do not have them.
 
 Companion: [containerdevops](https://github.com/pirlruc/containerdevops)
-**6.7.0** (`f0f9077ced9f79097e7597de1a2e00f8eb42e216`). Callers compose GHCR
+**6.8.0** (`ae9dbee9e4537bd3a0b533de3bad011cb44b201e`). Callers compose GHCR
 refs from `handoff_package` + `digest`.
 `common-doc-verify.yml` / `common-scaffold-verify.yml` shipped in **4.1.0**
 (`dcd9ca1c4eb8faedba170fef5dbecc61d7b284b3`) and remain. Callers must re-pin
@@ -65,14 +65,14 @@ after **5.1.2**; `scripts_ref` must match. Cross-repo callers need
 | guardrails submodule | tag **1.17.0** → `9a17ebb269a5ab02899570dd3e40fb72e50ad762` |
 | github-scaffold submodule | tag **1.14.0** → `da8942edf17a0d2736d297c90338fd78b7ec31fb` |
 | methodologies (links only; not a submodule) | tag **1.12.2** |
-| containerdevops (image callers + security rescan) | tag **6.7.0** → `f0f9077ced9f79097e7597de1a2e00f8eb42e216` |
+| containerdevops (image callers + security rescan) | tag **6.8.0** → `ae9dbee9e4537bd3a0b533de3bad011cb44b201e` |
 | actions/checkout | `3d3c42e…` (v7.0.1) |
 | `ghcr.io/pirlruc/ci-lint` (debian, unsuffixed) | `6.8.0` index `sha256:7cc290f88b68cd9ed902019b3ad4ca24334fddd5e65007c1724f4d4d5af81a0b`. Actions amd64 `sha256:3ed6d8dcbb08abf82e563630f2c1218cf0e8f33bb883ed46770e147113af48b0`. |
 | `ghcr.io/pirlruc/ci-lint` (alpine) | `6.8.0-alpine` index `sha256:c55ed2f274e1329e0feffe1a5055bdf5859e5c16fc033bde7b61d59e173582e9`. Actions amd64 `sha256:adaa142df825e1532a799f57004d969fb2899a41d6c2b768ed06c6ded1099007`. |
 | `ghcr.io/pirlruc/ci-supply-chain` (alpine, unsuffixed) | `6.8.0` index `sha256:dde94df82c06621a1f4616fbee584f93ad2fd178a3ab90e1ae241fe65e61d7cc`. Actions amd64 `sha256:07518afbf12aa3e2aeeb1e220e2dcb3a633e2d8c1583a60612f30855970a1008`. |
 | `ghcr.io/pirlruc/ci-supply-chain` (debian) | `6.8.0-debian` index `sha256:7e735970b8f048101e6ff7a02bf507ca930f87b69786a7178d2ec6820f9fb01f`. Actions amd64 `sha256:cceea28e7719138294d11396fa3b9ebdb078d5997de6b4454b9e3f14e33d5133`. |
 | `ghcr.io/pirlruc/ci-iac` | `6.8.0` index `sha256:f1cce203fd64702f9528e45e457db1fec4dfd89ae2413a2dae0ea08a96ec586f`. Actions amd64 `sha256:2587b50fbec0c68bf19ae56cf4f7ea07b2af49a3db3472c885678f927c1ba2b6`. |
-| Release (reusables) | **v6.9.0** is this wave. **v6.8.0** is `4de58c7449029c2022301c1654d1aa2da9f7bcec`. |
+| Release (reusables) | **v6.9.1** moves image callers and the rescan onto containerdevops 6.8.0. **v6.9.0** is `5d8b83da2f8f0c0c1bd894ef920619fe127c033e`. **v6.8.0** is `4de58c7449029c2022301c1654d1aa2da9f7bcec`. |
 | Release (images) | **6.8.0** published the three images. v6.9.0 does not republish. |
 
 ## Local image sizes / posture (2026-08-12, `du -sxm /`)
@@ -181,6 +181,7 @@ python3 .github/scaffold/scripts/issues-sync.py \
 
 ## Recent history
 
+- 2026-11-24: **v6.9.1** points image workflows and the scheduled rescan at containerdevops 6.8.0. `scripts/fetch-verified.sh` is the download helper (CI-054).
 - 2026-11-23: **v6.8.0** pins guardrails 1.17.0, scaffold 1.14.0, and containerdevops 6.7.0. ci-supply-chain builds containerd 2.4.2. pytest is hash-locked. semgrep still requires mcp 1.29.0.
 - 2026-11-15: reusable workflows the homelab callers use accept `runs_on` (JSON, default `"ubuntu-24.04"`). Signing moved to `common-release-sign.yml` so `common-release.yml` requests `contents: write` only. Still not tagged. The 2026-11-14 tofu, sops, and ansible inputs are in the same unreleased 6.5.0.
 - 2026-11-14: common-tofu-verify and common-sops-verify accept container_username and container_token. common-sops-verify host_mode runs the ciphertext check without an image pull. Ciphertext must be AES256_GCM and must not contain a private key block. common-secrets-sast uploads redacted JSON. common-ansible-verify accepts playbooks and public_submodules. common-tofu-verify accepts test_directory. Not tagged yet.
@@ -281,6 +282,8 @@ python3 .github/scaffold/scripts/issues-sync.py \
 *Last updated: 2026-11-24 — v6.9.0. Scorecard falls back to github.token. Rescans pin the 6.8.0 images. Posture categories refresh on the default branch.*
 
 *Last updated: 2026-11-23 — v6.8.0. Guardrails 1.17.0. Scaffold 1.14.0. DOCKER-SEC-001 records CVE-2026-115563 until semgrep allows mcp 1.30.0. Review 2027-02-23.*
+
+*Last updated: 2026-11-24 — v6.9.1. Image callers and the scheduled rescan pin containerdevops 6.8.0. Download helper is `scripts/fetch-verified.sh`.*
 
 *Last updated: 2026-11-23 — v6.8.0. Guardrails 1.17.0. Scaffold 1.14.0. containerdevops 6.7.0. containerd 2.4.2.*
 
