@@ -5,6 +5,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [6.11.0] - 2026-11-24
+
+### Added
+
+- `common-dco.yml` requires a Signed-off-by trailer on pull-request commits. Merge commits and bot authors are exempt. A run that is not a pull request skips the check.
+- `common-dependabot-metadata.yml` writes a Dependabot update summary. Maintainer pull requests skip the job.
+
 ## [6.10.2] - 2026-11-24
 
 ### Fixed

@@ -2304,3 +2304,61 @@ milestones:
         guardrail_refs:
         - DOCKER-SEC-001
         - CI-047
+
+  - name: Caller checks
+    status: open
+    epics:
+    - id: CMN-DCO-001
+      status: done
+      title: Share the Developer Certificate of Origin check
+      decision: >-
+        In the context of a repository that requires Signed-off-by,
+        facing a copy of the same shell loop, we decided one reusable
+        workflow, to achieve one exemption list, accepting that a push
+        which is not a pull request skips the check.
+      overview:
+        problem: Each caller copies the Signed-off-by loop.
+        goal: One reusable check with read-only permissions.
+      acceptance_criteria:
+      - common-dco.yml is workflow_call and requests contents read
+      - Merge commits and bot authors are exempt
+      guardrail_refs:
+      - CI-052
+      tasks:
+      - id: CMN-DCO-001-T1
+        status: done
+        title: Add the DCO reusable
+        instructions:
+          files:
+          - .github/workflows/common-dco.yml
+        verification:
+        - actionlint .github/workflows/common-dco.yml
+        guardrail_refs:
+        - CI-052
+    - id: CMN-DEP-META-001
+      status: done
+      title: Share the Dependabot metadata summary
+      decision: >-
+        In the context of a Dependabot pull request, facing a copied
+        fetch-metadata job, we decided one reusable workflow, to achieve
+        one author-id check, accepting that other pull requests skip it.
+      overview:
+        problem: The Dependabot summary job is copied per repository.
+        goal: One reusable job that runs only for the Dependabot app.
+      acceptance_criteria:
+      - The job checks the Dependabot author id
+      - Permissions stay contents read and pull-requests read
+      guardrail_refs:
+      - CI-052
+      - CI-024
+      tasks:
+      - id: CMN-DEP-META-001-T1
+        status: done
+        title: Add the Dependabot metadata reusable
+        instructions:
+          files:
+          - .github/workflows/common-dependabot-metadata.yml
+        verification:
+        - actionlint .github/workflows/common-dependabot-metadata.yml
+        guardrail_refs:
+        - CI-052
