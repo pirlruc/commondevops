@@ -37,6 +37,8 @@ or the reusable job fails at startup with no useful callee message.
 | `common-pins-verify.yml` | `contents: read` |
 | `common-buf.yml` | `contents: read` |
 | `common-swift.yml` | `contents: read` |
+| `common-dco.yml` | `contents: read` |
+| `common-dependabot-metadata.yml` | `contents: read`, `pull-requests: read` |
 | `common-threshold-drift.yml` | `contents: read` |
 | `common-supply-chain.yml` | `contents: read`, `actions: read`, `security-events: write` |
 | `common-scorecard.yml` | `contents: read`, `security-events: write`, `id-token: write` |
